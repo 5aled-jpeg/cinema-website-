@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "apple-hig": {
+      "source": "justinwetch/HIGAgentSkills",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "135e541ac5c8c753c3144bc906b8370e9a2683c2ebb06d981d2f7daa46ae23cd"
+    },
+    "better-colors": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-colors/SKILL.md",
+      "computedHash": "47c25cca097d0993190ca12b416ec0be08429d8086d99adcac4621aa0e1f110f"
+    },
+    "better-typography": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-typography/SKILL.md",
+      "computedHash": "3fb90fed3aeb57a6a545be4e4f285f0d1babdaff9644ec3526857437481747a1"
+    },
+    "hyperframes-animation": {
+      "source": "heygen-com/hyperframes",
+      "sourceType": "github",
+      "skillPath": "skills/hyperframes-animation/SKILL.md",
+      "computedHash": "388c7712fc6be0ef4805215d0eb23bef2ef5395b8c02ef9d4fe17590a90588b0"
+    },
+    "vercel-react-view-transitions": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-view-transitions/SKILL.md",
+      "computedHash": "12f8e118b8ca5fa45e3f0b56c269fb2e35251b705d2320b26b0727a0f58adefc"
+    }
+  }
+}

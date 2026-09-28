@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* better-colors: OKLCH Perceptually Uniform Design System */
+  --color-bg-base: oklch(0.99 0.002 90); /* Pure optical light background #fcfcfc */
+  --color-text-primary: oklch(0.16 0.005 260); /* Deep charcoal ink #121214 (APCA Lc 98 / WCAG 16.5:1) */
+  --color-text-secondary: oklch(0.46 0.012 260); /* Editorial mid-tone #5f5f67 (WCAG 5.8:1) */
+  --color-text-tertiary: oklch(0.62 0.008 260); /* Refined quiet caption #8b8b93 (WCAG 4.6:1) */
+  --color-accent: oklch(0.68 0.15 75); /* Warm archival cinema gold #b88028 */
+  --color-border: oklch(0.92 0.004 260); /* Hairline divider #e8e8eb */
+  --color-surface-subtle: oklch(0.96 0.003 260);
+
+  --background: #fcfcfc;
+  --foreground: #121214;
+  --border: #e8e8eb;
+}
+
+.dark,
+[data-theme="dark"] {
+  /* better-colors: OKLCH Dark Theme tokens */
+  --color-bg-base: oklch(0.12 0.005 260); /* Deep midnight optical black #0b0b0e */
+  --color-text-primary: oklch(0.98 0.002 90); /* Luminous pure warm white #fafafa */
+  --color-text-secondary: oklch(0.68 0.008 260); /* Editorial neutral silver #a1a1aa */
+  --color-text-tertiary: oklch(0.48 0.01 260); /* Subtle quiet caption #71717a */
+  --color-accent: oklch(0.76 0.16 75); /* Warm luminous amber cinema gold #f5b041 */
+  --color-border: oklch(0.24 0.006 260); /* Hairline dark divider #242429 */
+  --color-surface-subtle: oklch(0.17 0.006 260); /* Elevated dark surface #16161a */
+
+  --background: #0b0b0e;
+  --foreground: #fafafa;
+  --border: #242429;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  cursor: none !important;
+}
+
+html {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color-scheme: light;
+  transition: background-color 0.4s ease-in-out, color 0.4s ease-in-out;
+}
+
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+}
+
+html.dark,
+body.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+.suppress-transitions,
+.suppress-transitions *,
+.suppress-transitions *::before,
+.suppress-transitions *::after {
+  transition: none !important;
+}
+
+::view-transition,
+::view-transition-group(*),
+::view-transition-image-pair(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  pointer-events: none !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* While view transition is active, keep hardware pointer responsive and avoid ghost cursor in snapshots */
+html.theme-transitioning,
+html.theme-transitioning body,
+html.theme-transitioning * {
+  cursor: default !important;
+}
+
+html.theme-transitioning [data-cinema-cursor="true"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Subtle Cinema Scrollbar */
+html,
+body,
+[data-scroll-container="true"] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-tertiary);
+}
+
+/* Experience Hero Styles */
+.text-outline {
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.7);
+  color: transparent;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+}
+
+@keyframes loading-slide {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(20%); }
+  100% { transform: translateX(180%); }
+}
+
+.animate-loading {
+  animation: loading-slide 2.2s infinite ease-in-out;
+}
+
+.bento-mask {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.dark .bento-mask,
+[data-theme="dark"] .bento-mask {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+}
+
+
+
+
