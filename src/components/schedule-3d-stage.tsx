@@ -64,13 +64,6 @@ export function Schedule3DStage({ children, className }: Schedule3DStageProps) {
         bgRef.current.style.setProperty("--glow-y", `${currentGlowY.current.toFixed(1)}%`)
       }
 
-      // Apply subtle 3D transform to content layer (cards & text float above)
-      if (contentRef.current) {
-        contentRef.current.style.transform = `translate3d(0, 0, 15px) rotateX(${(
-          currentX.current * 0.4
-        ).toFixed(2)}deg) rotateY(${(currentY.current * 0.4).toFixed(2)}deg)`
-      }
-
       rafIdRef.current = requestAnimationFrame(loop)
     }
 
@@ -138,22 +131,6 @@ export function Schedule3DStage({ children, className }: Schedule3DStageProps) {
       targetGlowY.current = 50 + (beta / 35) * 35
     }
 
-    // Touch event fallback if gyroscope is not yet permitted
-    const handleTouchMove = (e: TouchEvent) => {
-      isTouchRef.current = true
-      if (hasGyroRef.current || e.touches.length === 0) return
-
-      const touch = e.touches[0]
-      const { innerWidth, innerHeight } = window
-      const normX = (touch.clientX / innerWidth) * 2 - 1
-      const normY = (touch.clientY / innerHeight) * 2 - 1
-
-      targetY.current = normX * MAX_TILT
-      targetX.current = -normY * MAX_TILT
-      targetGlowX.current = (touch.clientX / innerWidth) * 100
-      targetGlowY.current = (touch.clientY / innerHeight) * 100
-    }
-
     // Request gyroscope permission on iOS 13+ on first user tap/touch
     const requestPermission = async () => {
       if (gyroPermissionRequestedRef.current) return
@@ -172,7 +149,7 @@ export function Schedule3DStage({ children, className }: Schedule3DStageProps) {
             window.addEventListener("deviceorientation", handleOrientation, { passive: true })
           }
         } catch {
-          // If denied or dismissed, touch fallback remains active
+          // If denied or dismissed, ignore
         }
       } else {
         // Standard Android / modern browsers without permission requirement
@@ -182,12 +159,10 @@ export function Schedule3DStage({ children, className }: Schedule3DStageProps) {
 
     window.addEventListener("touchstart", requestPermission, { once: true, passive: true })
     window.addEventListener("deviceorientation", handleOrientation, { passive: true })
-    window.addEventListener("touchmove", handleTouchMove, { passive: true })
 
     return () => {
       window.removeEventListener("touchstart", requestPermission)
       window.removeEventListener("deviceorientation", handleOrientation)
-      window.removeEventListener("touchmove", handleTouchMove)
     }
   }, [MAX_TILT])
 
@@ -257,11 +232,10 @@ export function Schedule3DStage({ children, className }: Schedule3DStageProps) {
         className="pointer-events-none absolute inset-0 z-10 w-full h-full bg-[url('/noise.gif')] bg-repeat opacity-[0.04] dark:opacity-[0.05]"
       />
 
-      {/* 3D FLOATING CONTENT STAGE (Floating in front with preserve-3d) */}
+      {/* Content Stage (Clean, crisp 2D cards on top of 3D background) */}
       <div
         ref={contentRef}
-        className="relative z-20 w-full will-change-transform"
-        style={{ transformStyle: "preserve-3d" }}
+        className="relative z-20 w-full"
       >
         {children}
       </div>

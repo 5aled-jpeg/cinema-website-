@@ -284,10 +284,8 @@ export function SuperHoverList({
                 {item.image ? (
                   <div
                     aria-hidden
-                    className="sh-art pointer-events-none absolute bottom-0 right-0 sm:left-1/2 z-10 sm:z-20 sm:-translate-x-1/2 rounded-xl bg-cover bg-center opacity-0 shadow-2xl ring-1 ring-white/10 transition-all duration-200 ease-out max-sm:w-[76px] max-sm:h-[104px] max-sm:opacity-90"
+                    className="sh-art pointer-events-none absolute bottom-0 right-2 sm:left-1/2 z-20 sm:-translate-x-1/2 rounded-xl bg-cover bg-center opacity-0 shadow-2xl ring-1 ring-white/10 transition-all duration-200 ease-out w-[72px] h-[98px] sm:w-[132px] sm:h-[178px]"
                     style={{
-                      width: artworkSize,
-                      height: artworkSize * 1.35, // 2:3 cinematic poster aspect ratio
                       backgroundImage: `url(${item.image})`,
                     }}
                   />

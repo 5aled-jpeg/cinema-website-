@@ -360,24 +360,24 @@ export default function SchedulePage() {
                 {groupedByFilm.map(({ film, screenings }) => (
                   <article
                     key={film.id}
-                    className="p-5 sm:p-7 md:p-8 rounded-2xl sm:rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-base)]/80 dark:bg-[var(--color-bg-base)]/60 backdrop-blur-md hover:border-amber-500/40 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col lg:flex-row gap-6 sm:gap-8 items-start lg:items-center justify-between shadow-xs [transform-style:preserve-3d]"
+                    className="p-4 sm:p-7 md:p-8 rounded-2xl sm:rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-base)]/90 dark:bg-[var(--color-bg-base)]/80 backdrop-blur-md hover:border-amber-500/40 hover:shadow-2xl transition-all duration-300 flex flex-col lg:flex-row gap-5 sm:gap-8 items-start lg:items-center justify-between shadow-xs overflow-hidden"
                   >
                     {/* Film Thumbnail & Info */}
-                    <div className="flex items-start sm:items-center gap-4 sm:gap-6 min-w-0 flex-1">
+                    <div className="flex flex-row items-center sm:items-center gap-4 sm:gap-6 min-w-0 w-full lg:w-auto flex-1">
                       {/* Cinematic Poster Image */}
-                      <div className="relative w-22 sm:w-28 md:w-32 h-32 sm:h-40 md:h-46 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 border border-black/10 dark:border-white/10 shrink-0 shadow-md group">
+                      <div className="relative w-20 sm:w-28 md:w-32 h-28 sm:h-40 md:h-46 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 border border-black/10 dark:border-white/10 shrink-0 shadow-md group">
                         <img
                           src={film.image}
                           alt={film.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
                       </div>
 
                       {/* Film Meta details */}
-                      <div className="space-y-1.5 sm:space-y-2 min-w-0">
+                      <div className="space-y-1 sm:space-y-2 min-w-0 flex-1">
                         {/* Rating, Year, Duration metadata row */}
-                        <div className="flex items-center gap-2.5 text-xs sm:text-sm font-mono text-[var(--color-text-secondary)]">
+                        <div className="flex items-center gap-2 text-xs sm:text-sm font-mono text-[var(--color-text-secondary)]">
                           <span className="text-amber-500 font-bold flex items-center gap-1">
                             ★ {film.imdbRating}
                           </span>
@@ -388,7 +388,7 @@ export default function SchedulePage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight text-[var(--color-text-primary)] leading-snug">
+                        <h3 className="text-base sm:text-2xl md:text-3xl font-bold tracking-tight text-[var(--color-text-primary)] leading-snug">
                           {film.title}
                         </h3>
 
@@ -398,7 +398,7 @@ export default function SchedulePage() {
                         </p>
 
                         {/* Curator Notes link */}
-                        <div className="pt-1">
+                        <div className="pt-0.5">
                           <button
                             type="button"
                             onClick={() => setActiveFilmForModal(film)}
