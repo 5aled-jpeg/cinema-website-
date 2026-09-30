@@ -1088,20 +1088,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             </div>
           )}
 
-          {/* Bottom-right Discover All Movies action at the end of the wheel (Desktop only) */}
-          {onDiscoverAll && (
-            <div className="absolute bottom-8 right-8 z-40 transition-opacity duration-300 pointer-events-auto hidden md:block">
-              <button
-                type="button"
-                onClick={onDiscoverAll}
-                className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-[11px] font-semibold tracking-widest uppercase transition-all duration-300 bg-neutral-900/90 text-amber-400 border border-amber-500/30 hover:border-amber-400 hover:bg-black hover:scale-105 shadow-lg shadow-black/40 backdrop-blur-md cursor-pointer"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span>Discover All Movies</span>
-                <span className="text-xs transition-transform duration-200 group-hover:translate-x-0.5">↗</span>
-              </button>
-            </div>
-          )}
+
         </div>
       </section>
     )
