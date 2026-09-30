@@ -40,6 +40,8 @@ export interface MercuryMenuItem {
   icon?: React.ReactNode
   /** Fires when the row is chosen. The menu closes either way. @default undefined */
   onSelect?: () => void
+  /** Whether this item is currently active @default false */
+  active?: boolean
 }
 
 export interface MercuryMenuProps
@@ -572,16 +574,44 @@ export function MercuryMenu({
               }}
               type="button"
               role="menuitem"
-              className="text-foreground/85 hover:text-foreground hover:bg-foreground/5 focus-visible:outline-foreground flex w-full items-center gap-2 rounded-[10px] px-2 text-left text-[13px] font-medium outline-none transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2"
+              data-cursor-interactive="true"
+              data-cursor-label={item.label}
+              className={cn(
+                "group flex w-full items-center justify-between gap-2.5 rounded-[10px] px-2.5 text-left text-[13px] font-medium outline-none transition-all cursor-pointer select-none focus-visible:outline-2 focus-visible:-outline-offset-2",
+                item.active
+                  ? "bg-amber-500/15 text-amber-500 dark:text-amber-400 font-semibold"
+                  : "text-foreground/80 hover:text-foreground hover:bg-foreground/5"
+              )}
               style={{ height: ROW }}
-              onClick={() => {
-                if (stretch.consumeClick()) return
+              onPointerDown={(e) => {
+                // Prevent bubbling to panelRef so panel never captures the pointer and swallows clicks!
+                e.stopPropagation()
+              }}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
                 item.onSelect?.()
                 runClose(false)
               }}
             >
-              {item.icon ? <span className="flex shrink-0">{item.icon}</span> : null}
-              <span className="truncate">{item.label}</span>
+              <div className="flex items-center gap-2.5 min-w-0">
+                {item.icon ? (
+                  <span
+                    className={cn(
+                      "flex shrink-0 transition-colors",
+                      item.active
+                        ? "text-amber-500 dark:text-amber-400"
+                        : "text-foreground/70 group-hover:text-foreground"
+                    )}
+                  >
+                    {item.icon}
+                  </span>
+                ) : null}
+                <span className="truncate">{item.label}</span>
+              </div>
+              {item.active && (
+                <span className="size-1.5 rounded-full bg-amber-500 shrink-0 animate-pulse" />
+              )}
             </button>
           ))}
         </div>
@@ -589,13 +619,22 @@ export function MercuryMenu({
         <button
           ref={triggerRef}
           type="button"
-          className="text-foreground/80 hover:text-foreground hover:bg-foreground/5 [[data-liquid]_&]:bg-transparent focus-visible:outline-foreground absolute inset-0 grid place-items-center rounded-full outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-1"
+          data-cursor-interactive="true"
+          data-cursor-label={isOpen ? "Close" : "Menu"}
+          className="text-foreground/80 hover:text-foreground hover:bg-foreground/5 [[data-liquid]_&]:bg-transparent focus-visible:outline-foreground absolute inset-0 grid place-items-center rounded-full outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 cursor-pointer"
           aria-expanded={isOpen}
           aria-haspopup="menu"
           aria-controls={menuId}
           aria-label={label}
-          onClick={toggle}
-          onPointerDown={(event) => stretch.beginGrab("trigger", event, { x: 0, y: 0 })}
+          onClick={(e) => {
+            e.stopPropagation()
+            toggle()
+          }}
+          onPointerDown={(event) => {
+            if (event.button === 0) {
+              stretch.beginGrab("trigger", event, { x: 0, y: 0 })
+            }
+          }}
           onPointerMove={(event) => stretch.pointerMove(event)}
           onPointerUp={() => stretch.release()}
           onPointerCancel={() => stretch.release()}

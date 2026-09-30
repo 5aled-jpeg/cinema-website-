@@ -548,51 +548,74 @@ const glyph = "size-3.5 opacity-70"
 
 export default function WorksWheelDemo() {
   const wheelRef = React.useRef<WorksWheelHandle>(null)
-  const [, setActiveTab] = React.useState<string>("films")
+  const [activeTab, setActiveTab] = React.useState<string>("home")
   const { navigate } = useCinemaTransition()
 
   const menuItems: MercuryMenuItem[] = React.useMemo(
     () => [
       {
+        id: "home",
         label: "Home Page",
         icon: <Home className={glyph} aria-hidden="true" />,
+        active: activeTab === "home",
         onSelect: () => {
           setActiveTab("home")
           wheelRef.current?.to(0)
+          if (typeof window !== "undefined") {
+            window.scrollTo({ top: 0, behavior: "smooth" })
+          }
         },
       },
       {
+        id: "featured",
         label: "Featured",
         icon: <Film className={glyph} aria-hidden="true" />,
+        active: activeTab === "films",
         onSelect: () => {
           setActiveTab("films")
           wheelRef.current?.to(1)
         },
       },
       {
+        id: "movies",
         label: "All Movies",
         icon: <Clapperboard className={glyph} aria-hidden="true" />,
+        active: false,
         onSelect: () => {
           navigate("/movies", "Complete Cinema Archive")
+          setTimeout(() => {
+            if (typeof window !== "undefined" && window.location.pathname !== "/movies") {
+              window.location.href = "/movies"
+            }
+          }, 450)
         },
       },
       {
+        id: "schedule",
         label: "Schedule",
         icon: <Calendar className={glyph} aria-hidden="true" />,
+        active: false,
         onSelect: () => {
           navigate("/schedule", "Exhibition Schedule")
+          setTimeout(() => {
+            if (typeof window !== "undefined" && window.location.pathname !== "/schedule") {
+              window.location.href = "/schedule"
+            }
+          }, 450)
         },
       },
       {
+        id: "curations",
         label: "Curations",
         icon: <Sparkles className={glyph} aria-hidden="true" />,
+        active: activeTab === "curations",
         onSelect: () => {
           setActiveTab("curations")
           wheelRef.current?.to(5)
         },
       },
     ],
-    [navigate],
+    [activeTab, navigate],
   )
 
   return (
@@ -640,6 +663,17 @@ export default function WorksWheelDemo() {
         </div>
       </header>
 
+      {/* Primary Cinema Quick Navigation Menu (Bottom-Left Corner - Fixed across Hero, Wheel, and Footer) */}
+      <div className="fixed bottom-6 left-6 sm:bottom-8 sm:left-8 z-50 pointer-events-auto">
+        <MercuryMenu
+          items={menuItems}
+          align="left"
+          panelWidth={180}
+          size={40}
+          label="Cinema Navigation Menu"
+        />
+      </div>
+
       {/* Unified Timeline: Experience Hero (t=0) -> Works Wheel (t=1..7) -> Cinema Footer (t=8) */}
       <WorksWheel
         ref={wheelRef}
@@ -648,15 +682,15 @@ export default function WorksWheelDemo() {
         action="View"
         hero={<ExperienceHero onExplore={() => wheelRef.current?.to(1)} />}
         onDiscoverAll={() => navigate("/movies", "Complete Cinema Archive")}
-        menu={
-          <MercuryMenu
-            items={menuItems}
-            align="left"
-            panelWidth={164}
-            size={36}
-            label="Cinema Navigation Menu"
-          />
-        }
+        onTurnChange={(t) => {
+          if (t < 0.6) {
+            setActiveTab("home")
+          } else if (t < 4.5) {
+            setActiveTab("films")
+          } else {
+            setActiveTab("curations")
+          }
+        }}
         footer={
           <CinemaFooter
             onNavigateHome={() => wheelRef.current?.to(0)}

@@ -115,6 +115,8 @@ export interface WorksWheelProps extends Omit<
   onItemClick?: (item: WorksWheelItem, index: number) => void
   /** Optional callback to discover all films in repository */
   onDiscoverAll?: () => void
+  /** Optional callback fired when timeline position or active card changes */
+  onTurnChange?: (turn: number, activeIndex: number) => void
 }
 
 export interface WorksWheelHandle {
@@ -174,6 +176,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
       menu,
       onItemClick,
       onDiscoverAll,
+      onTurnChange,
       className,
       ...props
     },
@@ -192,6 +195,8 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
     const indexRef = React.useRef<HTMLOListElement>(null)
     const metaRef = React.useRef<HTMLDivElement>(null)
     const menuWrapperRef = React.useRef<HTMLDivElement>(null)
+    const onTurnChangeRef = React.useRef(onTurnChange)
+    onTurnChangeRef.current = onTurnChange
 
     // Initial timeline starts at 0 (Hero section)
     const turn = React.useRef(0)
@@ -331,6 +336,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
         activeRef.current = near
         setActive(near)
       }
+      onTurnChangeRef.current?.(t, near)
 
       // 1. Hardware-Accelerated Perspective Stacking Transition between Hero and Works Wheel (t: 0 -> 1)
       if (heroRef.current && mainStageRef.current) {
@@ -393,10 +399,6 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
       if (indexRef.current) {
         indexRef.current.style.opacity = sideFade
         indexRef.current.style.pointerEvents = (footerProgress > 0.5 || t < 0.5) ? "none" : "auto"
-      }
-      if (menuWrapperRef.current) {
-        menuWrapperRef.current.style.opacity = sideFade
-        menuWrapperRef.current.style.pointerEvents = (footerProgress > 0.5 || t < 0.5) ? "none" : "auto"
       }
     }, [count, last, reduced, hasHero])
 

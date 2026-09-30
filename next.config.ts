@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "i.ytimg.com" },
     ],
   },
+  devIndicators: false,
 };
 
 export default nextConfig;
