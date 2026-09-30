@@ -202,45 +202,42 @@ export default function SchedulePage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 space-y-10">
-        {/* Page Hero Editorial Title */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
-            <Sparkles className="size-3.5" />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-7 space-y-4 sm:space-y-6 pb-20">
+        {/* Page Hero Editorial Title - Simplified without verbose text */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
+            <Sparkles className="size-3" />
             <span>Curated Screenings</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase">
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight uppercase">
             The Exhibition Schedule
           </h1>
-          <p className="text-sm sm:text-base text-[var(--color-text-secondary)] font-serif max-w-2xl leading-relaxed">
-            Master prints projected in genuine 70mm, 4K reference laser, and intimate VIP salon presentations. Seating is open admission upon door opening.
-          </p>
         </div>
 
-        {/* DATE SELECTION RIBBON (THE DATE PICKER) */}
-        <section className="space-y-4">
+        {/* DATE SELECTION RIBBON (COMPACT DATE PICKER) */}
+        <section className="space-y-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] font-semibold">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] font-semibold">
                 Select Date
               </span>
-              <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--color-text-secondary)]">
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--color-text-secondary)]">
                 {selectedDateInfo.fullFormatted}
               </span>
             </div>
 
             {/* Prev / Next Chevrons */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={handlePrevDate}
                 disabled={!canGoPrev}
                 data-cursor-interactive="true"
                 data-cursor-label="Prev"
-                className="p-2 rounded-xl border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                className="p-1 sm:p-1.5 rounded-lg border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
                 title="Previous Day"
               >
-                <ChevronLeft className="size-4" />
+                <ChevronLeft className="size-3.5" />
               </button>
               <button
                 type="button"
@@ -248,16 +245,16 @@ export default function SchedulePage() {
                 disabled={!canGoNext}
                 data-cursor-interactive="true"
                 data-cursor-label="Next"
-                className="p-2 rounded-xl border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                className="p-1 sm:p-1.5 rounded-lg border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
                 title="Next Day"
               >
-                <ChevronRight className="size-4" />
+                <ChevronRight className="size-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Horizontal Scrolling Ribbon */}
-          <div className="flex items-center gap-3 overflow-x-auto pb-3 pt-1 no-scrollbar scroll-smooth">
+          {/* Horizontal Scrolling Ribbon - Compact Sizing */}
+          <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto pb-2 pt-0.5 no-scrollbar scroll-smooth">
             {availableDates.map((dateStr) => {
               const { dayName, dayNum, monthName } = formatDayParts(dateStr)
               const isSelected = dateStr === selectedDate
@@ -271,35 +268,27 @@ export default function SchedulePage() {
                   onClick={() => setSelectedDate(dateStr)}
                   data-cursor-interactive="true"
                   data-cursor-label={dayName}
-                  className={`relative shrink-0 flex flex-col items-center justify-between w-20 sm:w-28 h-24 sm:h-28 p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer select-none ${
+                  className={`relative shrink-0 flex flex-col items-center justify-between w-16 sm:w-20 h-16 sm:h-20 p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer select-none ${
                     isSelected
-                      ? "border-amber-500 bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-lg scale-[1.02]"
+                      ? "border-amber-500 bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-md scale-[1.02]"
                       : "border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.025] hover:border-black/30 dark:hover:border-white/30 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                   }`}
                 >
-                  {/* Top Badge: Today or Screenings Count */}
-                  <div className="w-full flex items-center justify-between text-[10px] font-mono">
+                  {/* Top: Day Name & Today dot */}
+                  <div className="w-full flex items-center justify-between text-[10px] font-mono leading-none">
                     <span className="font-semibold">{dayName}</span>
                     {isToday && (
-                      <span
-                        className={`px-1 sm:px-1.5 py-0.5 rounded-full uppercase tracking-widest text-[8px] sm:text-[9px] font-bold ${
-                          isSelected
-                            ? "bg-amber-500 text-neutral-950"
-                            : "bg-amber-500/20 text-amber-500"
-                        }`}
-                      >
-                        Today
-                      </span>
+                      <span className="size-1.5 rounded-full bg-amber-500" title="Today" />
                     )}
                   </div>
 
                   {/* Big Date Number */}
-                  <span className="text-xl sm:text-3xl font-bold font-mono tracking-tight my-0.5">
+                  <span className="text-lg sm:text-2xl font-bold font-mono tracking-tight leading-none my-0.5">
                     {dayNum}
                   </span>
 
                   {/* Bottom: Month & Count */}
-                  <div className="w-full flex items-center justify-between text-[10px] font-mono opacity-80">
+                  <div className="w-full flex items-center justify-between text-[9px] font-mono opacity-70 leading-none">
                     <span>{monthName}</span>
                     <span className="tabular-nums">{count} shows</span>
                   </div>
@@ -308,7 +297,7 @@ export default function SchedulePage() {
                   {isSelected && (
                     <motion.div
                       layoutId="active-date-border"
-                      className="absolute inset-0 rounded-2xl ring-2 ring-amber-500/40 pointer-events-none"
+                      className="absolute inset-0 rounded-xl ring-2 ring-amber-500/40 pointer-events-none"
                       transition={{ type: "spring", stiffness: 450, damping: 35 }}
                     />
                   )}
@@ -420,75 +409,67 @@ export default function SchedulePage() {
                 {groupedByFilm.map(({ film, screenings }) => (
                   <article
                     key={film.id}
-                    className="p-5 sm:p-7 rounded-3xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] hover:border-black/20 dark:hover:border-white/20 transition-all flex flex-col lg:flex-row gap-6 lg:gap-8 items-start"
+                    className="p-3 sm:p-4 rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] hover:border-black/20 dark:hover:border-white/20 transition-all flex flex-col md:flex-row gap-3.5 sm:gap-5 items-start"
                   >
-                    {/* Film Thumbnail & Quick Overview */}
-                    <div className="w-full lg:w-72 shrink-0 space-y-3">
-                      <div className="relative aspect-[16/10] sm:aspect-[16/9] lg:aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-900 group">
+                    {/* Film Thumbnail & Quick Info */}
+                    <div className="w-full md:w-52 lg:w-60 shrink-0 flex flex-row md:flex-col gap-3 items-start">
+                      {/* Compact Poster */}
+                      <div className="relative w-16 sm:w-20 md:w-full h-24 sm:h-28 md:h-36 rounded-xl overflow-hidden bg-neutral-900 shrink-0 group">
                         <img
                           src={film.image}
                           alt={film.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
-                        {/* Top Badges */}
-                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-black/60 text-white backdrop-blur-md border border-white/10">
+                        {/* Badges on Poster */}
+                        <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between text-[10px] font-mono">
+                          <span className="px-1.5 py-0.5 rounded font-bold bg-black/70 text-amber-400 backdrop-blur-md">
                             ★ {film.imdbRating}
                           </span>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-mono bg-black/60 text-neutral-300 backdrop-blur-md border border-white/10">
+                          <span className="px-1.5 py-0.5 rounded bg-black/70 text-neutral-300 backdrop-blur-md">
                             {film.year}
                           </span>
-                        </div>
-
-                        {/* Bottom Tagline on Image */}
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <p className="text-xs text-white/90 font-serif italic truncate">
-                            &ldquo;{film.tagline}&rdquo;
-                          </p>
                         </div>
                       </div>
 
                       {/* Film Meta details */}
-                      <div className="space-y-1">
-                        <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <h3 className="text-sm sm:text-base font-bold tracking-tight leading-snug line-clamp-2 md:truncate">
                           {film.title}
                         </h3>
-                        <p className="text-xs text-[var(--color-text-secondary)] font-mono">
+                        <p className="text-[11px] text-[var(--color-text-secondary)] font-mono truncate">
                           Dir. {film.director} · {film.duration}
                         </p>
-                        <p className="text-xs text-[var(--color-text-tertiary)]">
+                        <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
                           {film.category}
                         </p>
-                      </div>
 
-                      {/* View Film Details Button */}
-                      <button
-                        type="button"
-                        onClick={() => setActiveFilmForModal(film)}
-                        data-cursor-interactive="true"
-                        data-cursor-label="Details"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
-                      >
-                        <Info className="size-3.5" />
-                        <span>Curator Notes & Specs</span>
-                      </button>
+                        {/* View Film Details Button */}
+                        <button
+                          type="button"
+                          onClick={() => setActiveFilmForModal(film)}
+                          data-cursor-interactive="true"
+                          data-cursor-label="Details"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-500 hover:text-amber-400 transition-colors cursor-pointer pt-1"
+                        >
+                          <Info className="size-3" />
+                          <span>Curator Notes &amp; Specs</span>
+                        </button>
+                      </div>
                     </div>
 
                     {/* Showtimes Grid for this Film */}
-                    <div className="flex-1 w-full space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] font-semibold">
-                          Available Screenings
+                    <div className="flex-1 w-full space-y-2">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-[var(--color-text-tertiary)] pb-1 border-b border-[var(--color-border)]/40">
+                        <span className="uppercase tracking-[0.15em] font-semibold">
+                          Screenings ({screenings.length})
                         </span>
-                        <span className="text-xs font-mono text-[var(--color-text-secondary)]">
-                          Doors open 20 mins prior
-                        </span>
+                        <span>Doors open 20 mins prior</span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-2.5">
                         {screenings.map((screening) => {
                           const hall = CINEMA_HALLS.find((h) => h.id === screening.hallId)
                           const isVip = screening.tag === "VIP Salle"
@@ -499,25 +480,27 @@ export default function SchedulePage() {
                           return (
                             <div
                               key={screening.id}
-                              className={`p-4 rounded-2xl border transition-all flex flex-col justify-between gap-3 ${
+                              className={`p-2.5 rounded-xl border transition-all flex flex-col justify-between gap-1.5 ${
                                 isVip
                                   ? "border-amber-500/40 bg-amber-500/[0.04] dark:bg-amber-500/[0.06]"
                                   : isKids
                                   ? "border-sky-500/40 bg-sky-500/[0.04] dark:bg-sky-500/[0.06]"
                                   : is70mm
                                   ? "border-rose-500/40 bg-rose-500/[0.04] dark:bg-rose-500/[0.06]"
+                                  : isMidnight
+                                  ? "border-purple-500/40 bg-purple-500/[0.04] dark:bg-purple-500/[0.06]"
                                   : "border-[var(--color-border)] bg-black/[0.02] dark:bg-white/[0.03]"
                               }`}
                             >
-                              <div className="space-y-2">
+                              <div className="space-y-1">
                                 {/* Time & Tag Header */}
-                                <div className="flex items-center justify-between gap-2">
-                                  <span className="text-2xl font-bold font-mono tracking-tight text-[var(--color-text-primary)]">
+                                <div className="flex items-center justify-between gap-1.5">
+                                  <span className="text-base sm:text-lg font-bold font-mono tracking-tight text-[var(--color-text-primary)]">
                                     {screening.time}
                                   </span>
 
                                   <span
-                                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
+                                    className={`px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider ${
                                       isVip
                                         ? "bg-amber-500/20 text-amber-500 border border-amber-500/30"
                                         : isKids
@@ -533,26 +516,18 @@ export default function SchedulePage() {
                                   </span>
                                 </div>
 
-                                {/* Room / Hall */}
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
-                                    <MapPin className="size-3 text-amber-500 shrink-0" />
-                                    <span>{hall?.shortName || screening.hallId}</span>
-                                  </div>
-                                  <p className="text-[11px] font-mono text-[var(--color-text-tertiary)]">
-                                    {screening.format}
-                                  </p>
+                                {/* Room / Hall and Format */}
+                                <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-primary)] font-medium">
+                                  <MapPin className="size-3 text-amber-500 shrink-0" />
+                                  <span className="truncate">{hall?.shortName || screening.hallId}</span>
                                 </div>
-
-                                {screening.notes && (
-                                  <p className="text-[11px] text-[var(--color-text-secondary)] italic font-serif pt-1 border-t border-[var(--color-border)] line-clamp-2">
-                                    {screening.notes}
-                                  </p>
-                                )}
+                                <p className="text-[10px] font-mono text-[var(--color-text-tertiary)] truncate">
+                                  {screening.format}
+                                </p>
                               </div>
 
-                              {/* Status and Open Admission Notice (Zero Book Button!) */}
-                              <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-[11px] font-mono">
+                              {/* Status and Open Admission Notice */}
+                              <div className="pt-1.5 border-t border-[var(--color-border)]/50 flex items-center justify-between text-[10px] font-mono">
                                 <span
                                   className={
                                     screening.availability === "Few Seats Left"
@@ -565,7 +540,7 @@ export default function SchedulePage() {
                                   {screening.availability}
                                 </span>
                                 <span className="text-[var(--color-text-tertiary)]">
-                                  Box Office Admission
+                                  Box Office
                                 </span>
                               </div>
                             </div>
