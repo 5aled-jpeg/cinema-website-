@@ -640,8 +640,8 @@ export const INITIAL_SCREENINGS: Screening[] = [
 ];
 
 // Helper functions for reading/syncing cinema data
-const STORAGE_FILMS_KEY = 'murdjadjo_films_v1';
-const STORAGE_SCREENINGS_KEY = 'murdjadjo_screenings_v1';
+const STORAGE_FILMS_KEY = 'cenima_films_v1';
+const STORAGE_SCREENINGS_KEY = 'cenima_screenings_v1';
 
 export function getFilms(): CinemaFilm[] {
   if (typeof window === 'undefined') return INITIAL_FILMS;
@@ -659,7 +659,7 @@ export function saveFilms(films: CinemaFilm[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_FILMS_KEY, JSON.stringify(films));
-    window.dispatchEvent(new Event('murdjadjo_data_updated'));
+    window.dispatchEvent(new Event('cenima_data_updated'));
   } catch (err) {
     console.error('Failed to save films:', err);
   }
@@ -681,7 +681,7 @@ export function saveScreenings(screenings: Screening[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_SCREENINGS_KEY, JSON.stringify(screenings));
-    window.dispatchEvent(new Event('murdjadjo_data_updated'));
+    window.dispatchEvent(new Event('cenima_data_updated'));
   } catch (err) {
     console.error('Failed to save screenings:', err);
   }

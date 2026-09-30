@@ -17,6 +17,7 @@ import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle"
 import { CinemaFooter } from "@/components/cinema-footer"
 import { Component as ExperienceHero } from "@/components/ui/experience-hero"
 import { useCinemaTransition } from "@/components/cinema-page-curtains"
+import { CinemaLogo } from "@/components/cinema-logo"
 
 const WORKS: WorksWheelItem[] = [
   {
@@ -609,10 +610,9 @@ export default function WorksWheelDemo() {
         <button
           type="button"
           onClick={() => wheelRef.current?.to(0)}
-          className="flex items-center gap-1.5 text-sm font-semibold tracking-tight text-[var(--color-text-primary)] cursor-pointer"
+          className="flex items-center gap-1.5 cursor-pointer py-1"
         >
-          <span className="font-serif italic font-normal text-amber-500 text-base">M</span>
-          <span className="font-sans font-bold tracking-tight">Murdjadjo</span>
+          <CinemaLogo size="sm" />
         </button>
 
         <div className="flex items-center gap-2">

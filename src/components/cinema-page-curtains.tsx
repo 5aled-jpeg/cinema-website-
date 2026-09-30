@@ -4,6 +4,7 @@ import * as React from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "motion/react"
 import { Sparkles } from "lucide-react"
+import { CinemaLogo } from "@/components/cinema-logo"
 
 export type TransitionStyle = "columns" | "curtain" | "doors"
 
@@ -77,7 +78,7 @@ export function CinemaPageCurtainsProvider({
 
   const [isTransitioning, setIsTransitioning] = React.useState(false)
   const [transitionState, setTransitionState] = React.useState<"idle" | "covering" | "revealing">("idle")
-  const [targetTitle, setTargetTitle] = React.useState<string>("Murdjadjo Cinema")
+  const [targetTitle, setTargetTitle] = React.useState<string>("Cenima")
   const [activeStyle, setActiveStyle] = React.useState<TransitionStyle>("columns")
 
   const targetPathRef = React.useRef<string | null>(null)
@@ -92,7 +93,7 @@ export function CinemaPageCurtainsProvider({
     if (href.includes("admin")) return "Cinema Management"
     if (href.includes("#the-godfather")) return "The Godfather"
     if (href.includes("#curations")) return "Archival Curations"
-    return "Murdjadjo Cinema"
+    return "Cenima"
   }
 
   // REVEAL LOGIC: Trigger reveal only when route has genuinely committed
@@ -288,9 +289,8 @@ export function CinemaPageCurtainsProvider({
             >
               <div className="px-8 py-6 rounded-3xl border border-amber-500/20 bg-black/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.8)] text-center space-y-3 max-w-md w-full">
                 {/* Top Eyebrow */}
-                <div className="flex items-center justify-center gap-2 text-[10px] font-mono uppercase tracking-[0.3em] text-amber-500 font-bold">
-                  <Sparkles className="size-3 text-amber-400" />
-                  <span>Murdjadjo Cinema</span>
+                <div className="flex items-center justify-center gap-2">
+                  <CinemaLogo size="sm" />
                 </div>
 
                 {/* Dynamic Destination Title */}

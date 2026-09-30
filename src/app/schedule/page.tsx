@@ -37,6 +37,7 @@ import { CinemaCursor } from "@/components/cinema-cursor"
 import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle"
 import { CinemaFooter } from "@/components/cinema-footer"
 import { useCinemaTransition } from "@/components/cinema-page-curtains"
+import { CinemaLogo } from "@/components/cinema-logo"
 import CenterUnderline from "@/components/fancy/text/underline-center"
 import ComesInGoesOutUnderline from "@/components/fancy/text/underline-comes-in-goes-out"
 import {
@@ -86,8 +87,8 @@ export default function SchedulePage() {
       setScreenings(getScreenings())
     }
     loadData()
-    window.addEventListener("murdjadjo_data_updated", loadData)
-    return () => window.removeEventListener("murdjadjo_data_updated", loadData)
+    window.addEventListener("cenima_data_updated", loadData)
+    return () => window.removeEventListener("cenima_data_updated", loadData)
   }, [])
 
   // Calculate distinct available dates sorted
@@ -163,10 +164,10 @@ export default function SchedulePage() {
             onClick={() => navigate("/", "Works '26 · Index")}
             data-cursor-interactive="true"
             data-cursor-label="Home"
-            className="flex items-center gap-2 text-sm font-semibold tracking-tight text-[var(--color-text-primary)] group cursor-pointer bg-transparent border-none p-0"
+            className="flex items-center gap-2.5 text-sm font-semibold tracking-tight text-[var(--color-text-primary)] group cursor-pointer bg-transparent border-none p-0"
           >
             <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-            <span>Murdjadjo Cinema</span>
+            <CinemaLogo size="md" />
           </button>
 
           <span className="hidden md:inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-text-tertiary)] pl-4 border-l border-[var(--color-border)]">

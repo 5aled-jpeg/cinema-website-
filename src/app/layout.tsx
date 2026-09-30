@@ -3,7 +3,7 @@ import "./globals.css";
 import { CinemaPageCurtainsProvider } from "@/components/cinema-page-curtains";
 
 export const metadata: Metadata = {
-  title: "Murdjadjo Cinema — Works '26",
+  title: "Cenima — Works '26",
   description: "Boutique Cinema Index & 3D Wheel Showcase",
 };
 

@@ -22,6 +22,7 @@ import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle"
 import { CinemaFooter } from "@/components/cinema-footer"
 import { useCinemaTransition } from "@/components/cinema-page-curtains"
 import { FilmModalView } from "@/components/film-modal-view"
+import { CinemaLogo } from "@/components/cinema-logo"
 
 export default function MoviesArchivePage() {
   const { navigate } = useCinemaTransition()
@@ -80,10 +81,10 @@ export default function MoviesArchivePage() {
             onClick={() => navigate("/", "Works '26 · Index")}
             data-cursor-interactive="true"
             data-cursor-label="Home"
-            className="flex items-center gap-2 text-sm font-semibold tracking-tight text-[var(--color-text-primary)] group cursor-pointer bg-transparent border-none p-0"
+            className="flex items-center gap-2.5 text-sm font-semibold tracking-tight text-[var(--color-text-primary)] group cursor-pointer bg-transparent border-none p-0"
           >
             <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-            <span>Murdjadjo Cinema</span>
+            <CinemaLogo size="md" />
           </button>
 
           <span className="hidden md:inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-text-tertiary)] pl-4 border-l border-[var(--color-border)]">

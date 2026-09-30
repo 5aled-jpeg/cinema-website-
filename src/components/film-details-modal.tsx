@@ -22,6 +22,7 @@ import {
   Share2,
 } from 'lucide-react';
 import type { WorksWheelItem } from '@/registry/crafterui/ui/works-wheel';
+import { CinemaLogo } from '@/components/cinema-logo';
 
 export interface FilmDetailsModalProps {
   film: WorksWheelItem | null;
@@ -473,7 +474,8 @@ export function FilmDetailsModal({
             <div className="p-6 border-t border-[var(--color-border)] bg-black/[0.02] dark:bg-white/[0.02] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[var(--color-text-secondary)]">
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Murdjadjo Cinema Curations · Feature Exhibition Series</span>
+                <CinemaLogo size="xs" />
+                <span>Curations · Feature Exhibition Series</span>
               </div>
               <div className="flex items-center gap-3">
                 <span>Sound Mix: Uncompressed 24-bit 96kHz</span>
