@@ -61,6 +61,7 @@ export function DialogProvider({
         onOpenChange?.(open);
       } else {
         setUncontrolledOpen(open);
+        onOpenChange?.(open);
       }
     },
     [isControlled, onOpenChange]
@@ -212,7 +213,10 @@ export function DialogContent({
     <motion.div
       ref={containerRef}
       layoutId={`dialog-${uniqueId}`}
-      className={cn('overflow-hidden', className)}
+      className={cn(
+        !className?.includes('overflow-') && 'overflow-hidden',
+        className
+      )}
       style={style}
       role="dialog"
       aria-modal="true"
@@ -252,11 +256,14 @@ export function DialogContainer({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.setAttribute('data-dialog-open', 'true');
     } else {
       document.body.style.overflow = '';
+      document.body.removeAttribute('data-dialog-open');
     }
     return () => {
       document.body.style.overflow = '';
+      document.body.removeAttribute('data-dialog-open');
     };
   }, [isOpen]);
 
@@ -286,6 +293,7 @@ export function DialogContainer({
 
           {/* Modal Container */}
           <div
+            data-dialog-container="true"
             className={cn(
               'relative z-10 w-full max-h-[90vh] flex flex-col justify-center items-center',
               className

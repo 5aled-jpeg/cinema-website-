@@ -456,10 +456,41 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
     const drag = React.useRef<{ x: number; y: number } | null>(null)
     const pointerStartRef = React.useRef<{ x: number; y: number; id: number } | null>(null)
     const isDraggingRef = React.useRef(false)
+    const isModalOpenRef = React.useRef(false)
 
     // Wheel event listener across the entire window
     React.useEffect(() => {
       const onWheel = (event: WheelEvent) => {
+        const targetEl = event.target as HTMLElement | null
+
+        // 1. Check if the mouse wheel event occurred inside any open modal drawer or dialog
+        const isOverModal = Boolean(
+          targetEl?.closest('[role="dialog"]') ||
+          targetEl?.closest('.dialog-scroll-container') ||
+          targetEl?.closest('[data-dialog-scroll="true"]') ||
+          targetEl?.closest('[data-dialog-container]')
+        )
+
+        // 2. Check if any dialog is currently active in the page
+        const isModalActive =
+          isModalOpenRef.current ||
+          document.body.getAttribute('data-dialog-open') === 'true' ||
+          Boolean(document.querySelector('[role="dialog"]')) ||
+          document.body.style.overflow === "hidden"
+
+        // If hovering over the modal drawer, DO NOT call event.preventDefault() and DO NOT rotate the wheel!
+        // This allows the modal drawer content to scroll natively, smoothly, and responsively!
+        if (isOverModal) {
+          return
+        }
+
+        // If a modal is open but user is scrolling outside (e.g. over backdrop),
+        // prevent page scrolling but do NOT turn the background 3D wheel.
+        if (isModalActive) {
+          event.preventDefault()
+          return
+        }
+
         event.preventDefault()
         const next = target.current + event.deltaY / WHEEL_UNITS
         to(next)
@@ -486,6 +517,17 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
         ) {
           return
         }
+
+        const isModalActive =
+          isModalOpenRef.current ||
+          document.body.getAttribute('data-dialog-open') === 'true' ||
+          Boolean(document.querySelector('[role="dialog"]')) ||
+          document.body.style.overflow === "hidden"
+
+        if (isModalActive) {
+          return
+        }
+
         if (event.key === "ArrowDown" || event.key === "PageDown") {
           event.preventDefault()
           to(Math.round(target.current) + 1)
@@ -664,6 +706,9 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                         bounce: 0.05,
                         duration: 0.5,
                       }}
+                      onOpenChange={(open) => {
+                        isModalOpenRef.current = open
+                      }}
                     >
                       <MouseTiltCard
                         tiltIntensity={12}
@@ -756,69 +801,82 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                           style={{
                             borderRadius: "24px",
                           }}
-                          className="relative flex h-full max-h-[88vh] mx-auto flex-col overflow-y-auto border border-black/10 dark:border-white/10 bg-[var(--color-bg-base)] text-[var(--color-text-primary)] shadow-2xl lg:w-[920px] w-[90%]"
+                          className="relative flex flex-col w-[92%] sm:w-[90%] lg:w-[920px] max-h-[88vh] mx-auto overflow-hidden rounded-[24px] border border-black/10 dark:border-white/10 bg-[var(--color-bg-base)] text-[var(--color-text-primary)] shadow-2xl"
                         >
-                          {/* Modal Image Reveal */}
-                          <div className="relative w-full h-72 sm:h-80 md:h-96 shrink-0 overflow-hidden bg-neutral-900">
-                            <DialogImage
-                              src={item.image}
-                              alt={item.title}
-                              className="w-full h-full object-cover object-center"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-transparent to-transparent" />
-                            <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg-base)]/50 via-transparent to-transparent" />
-
-                            {/* Badges in top-left */}
-                            <div className="absolute top-5 left-5 z-10 flex flex-wrap items-center gap-2">
-                              {item.category && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-black/50 dark:bg-white/10 backdrop-blur-md text-white border border-white/20">
-                                  <Film className="size-3 text-amber-400" />
-                                  {item.category.split("·")[0].trim()}
-                                </span>
-                              )}
-                              {item.imdbRating && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 backdrop-blur-md text-amber-400 border border-amber-500/30">
-                                  <Star className="size-3 fill-amber-400" />
-                                  IMDb {item.imdbRating}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Bottom Title & Tagline in Hero Banner */}
-                            <div className="absolute bottom-5 left-6 right-6 z-10">
-                              <DialogTitle className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[var(--color-text-primary)]">
-                                {item.title}
-                              </DialogTitle>
-                              {item.tagline && (
-                                <p className="mt-1.5 text-sm sm:text-base italic text-neutral-600 dark:text-neutral-400 font-serif">
-                                  &ldquo;{item.tagline}&rdquo;
-                                </p>
-                              )}
-                              <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono text-[var(--color-text-secondary)]">
-                                {item.director && (
-                                  <span>
-                                    Directed by <strong className="text-[var(--color-text-primary)] font-semibold">{item.director}</strong>
-                                  </span>
-                                )}
-                                {item.year && <span>· {item.year}</span>}
-                                {item.duration && <span>· {item.duration}</span>}
-                              </div>
-                            </div>
+                          {/* Top Close Button with Esc Hint - Always accessible */}
+                          <div className="absolute right-5 top-5 z-30 flex items-center gap-2">
+                            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[11px] font-medium border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400">
+                              ESC
+                            </span>
+                            <DialogClose className="static size-8.5 rounded-full border border-black/10 dark:border-white/15 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl text-neutral-800 dark:text-neutral-200 hover:scale-105 active:scale-95 transition-all" />
                           </div>
 
-                          {/* Framer Motion Description Transition with Elegant Reveal */}
-                          <DialogDescription
-                            disableLayoutAnimation
-                            variants={{
-                              initial: { opacity: 0, scale: 0.8, y: -40 },
-                              animate: { opacity: 1, scale: 1, y: 0 },
-                              exit: { opacity: 0, scale: 0.8, y: -50 },
-                            }}
+                          {/* Scrollable Container with native smooth scrolling & overscroll containment */}
+                          <div
+                            data-dialog-scroll="true"
+                            className="dialog-scroll-container overflow-y-auto overflow-x-hidden w-full h-full overscroll-contain focus:outline-none"
+                            tabIndex={0}
                           >
-                            <FilmModalView film={item} />
-                          </DialogDescription>
+                            {/* Modal Image Reveal */}
+                            <div className="relative w-full h-72 sm:h-80 md:h-96 shrink-0 overflow-hidden bg-neutral-900">
+                              <DialogImage
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-full object-cover object-center"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-transparent to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg-base)]/50 via-transparent to-transparent" />
 
-                          <DialogClose className="text-zinc-900 dark:text-zinc-50 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 p-2.5 rounded-full" />
+                              {/* Badges in top-left */}
+                              <div className="absolute top-5 left-5 z-10 flex flex-wrap items-center gap-2">
+                                {item.category && (
+                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-black/50 dark:bg-white/10 backdrop-blur-md text-white border border-white/20">
+                                    <Film className="size-3 text-amber-400" />
+                                    {item.category.split("·")[0].trim()}
+                                  </span>
+                                )}
+                                {item.imdbRating && (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 backdrop-blur-md text-amber-400 border border-amber-500/30">
+                                    <Star className="size-3 fill-amber-400" />
+                                    IMDb {item.imdbRating}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Bottom Title & Tagline in Hero Banner */}
+                              <div className="absolute bottom-5 left-6 right-6 z-10">
+                                <DialogTitle className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[var(--color-text-primary)]">
+                                  {item.title}
+                                </DialogTitle>
+                                {item.tagline && (
+                                  <p className="mt-1.5 text-sm sm:text-base italic text-neutral-600 dark:text-neutral-400 font-serif">
+                                    &ldquo;{item.tagline}&rdquo;
+                                  </p>
+                                )}
+                                <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono text-[var(--color-text-secondary)]">
+                                  {item.director && (
+                                    <span>
+                                      Directed by <strong className="text-[var(--color-text-primary)] font-semibold">{item.director}</strong>
+                                    </span>
+                                  )}
+                                  {item.year && <span>· {item.year}</span>}
+                                  {item.duration && <span>· {item.duration}</span>}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Framer Motion Description Transition with Elegant Reveal */}
+                            <DialogDescription
+                              disableLayoutAnimation
+                              variants={{
+                                initial: { opacity: 0, scale: 0.8, y: -40 },
+                                animate: { opacity: 1, scale: 1, y: 0 },
+                                exit: { opacity: 0, scale: 0.8, y: -50 },
+                              }}
+                            >
+                              <FilmModalView film={item} />
+                            </DialogDescription>
+                          </div>
                         </DialogContent>
                       </DialogContainer>
                     </Dialog>
