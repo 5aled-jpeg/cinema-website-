@@ -115,6 +115,65 @@ export function SuperHoverList({
     return () => root.removeEventListener("mouseover", onOver)
   }, [mode, placeArtwork])
 
+  const scrollTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  const setAutoActive = React.useCallback(
+    (row: HTMLElement | null) => {
+      if (autoActiveRef.current === row) return
+      autoActiveRef.current?.removeAttribute("data-autoplay-active")
+      autoActiveRef.current = row
+      if (row) {
+        row.setAttribute("data-autoplay-active", "")
+        placeArtwork(row)
+      }
+    },
+    [placeArtwork]
+  )
+
+  // Find the row closest to the viewport anchor and activate its artwork
+  const updateActiveRowOnScroll = React.useCallback(() => {
+    const root = rootRef.current
+    if (!root) return
+    const box = root.getBoundingClientRect()
+    const anchor = box.top + box.height * AUTOPLAY_ANCHOR
+    let best: HTMLElement | null = null
+    let bestDist = Infinity
+    for (const row of rowRefs.current) {
+      if (!row) continue
+      const rect = row.getBoundingClientRect()
+      if (rect.bottom < box.top || rect.top > box.bottom) continue
+      const dist = Math.abs(rect.top + rect.height / 2 - anchor)
+      if (dist < bestDist) {
+        bestDist = dist
+        best = row
+      }
+    }
+    setAutoActive(best)
+  }, [setAutoActive])
+
+  // Handle user scroll / touch movement:
+  // "once the user start scrooling then show these backgrounds icon"
+  const handleScroll = React.useCallback(() => {
+    updateActiveRowOnScroll()
+
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current)
+    }
+
+    // Once user stops scrolling, fade out after 850ms so all titles are 100% visible and unobstructed
+    scrollTimeoutRef.current = setTimeout(() => {
+      setAutoActive(null)
+    }, 850)
+  }, [updateActiveRowOnScroll, setAutoActive])
+
+  React.useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+    }
+  }, [])
+
   // Autoplay: scroll the list and keep the row nearest the playhead active.
   React.useEffect(() => {
     const root = rootRef.current
@@ -126,16 +185,6 @@ export function SuperHoverList({
     if (prefersReduced) return
 
     let raf = 0
-    const setAutoActive = (row: HTMLElement | null) => {
-      if (autoActiveRef.current === row) return
-      autoActiveRef.current?.removeAttribute("data-autoplay-active")
-      autoActiveRef.current = row
-      if (row) {
-        row.setAttribute("data-autoplay-active", "")
-        placeArtwork(row)
-      }
-    }
-
     const frame = () => {
       if (!hoveringRef.current) {
         // Wrap by the height of ONE copy (top of the first duplicated row minus
@@ -170,7 +219,7 @@ export function SuperHoverList({
       cancelAnimationFrame(raf)
       setAutoActive(null)
     }
-  }, [autoplay, speed, placeArtwork, items.length])
+  }, [autoplay, speed, setAutoActive, items.length])
 
   const revealSelector =
     mode === "super"
@@ -186,6 +235,8 @@ export function SuperHoverList({
     >
       <div
         ref={rootRef}
+        onScroll={handleScroll}
+        onTouchMove={handleScroll}
         onPointerEnter={() => {
           hoveringRef.current = true
           autoActiveRef.current?.removeAttribute("data-autoplay-active")
@@ -193,6 +244,9 @@ export function SuperHoverList({
         }}
         onPointerLeave={() => {
           hoveringRef.current = false
+          if (!scrollTimeoutRef.current) {
+            setAutoActive(null)
+          }
         }}
         className="h-full cursor-pointer [scrollbar-width:none] overflow-x-hidden overflow-y-auto overscroll-contain [mask-image:linear-gradient(to_bottom,transparent,#000_10%,#000_90%,transparent)] px-4 py-8 sm:px-8 [&::-webkit-scrollbar]:hidden"
       >
@@ -217,16 +271,20 @@ export function SuperHoverList({
                 revealSelector
               )}
             >
-              <div className="tabular-nums opacity-60">
+              <div className="tabular-nums opacity-60 relative z-20">
                 {String((i % items.length) + 1).padStart(3, "0")}
               </div>
-              <div className="min-w-0 truncate font-semibold">{item.title}</div>
-              <div className="min-w-0 truncate opacity-70 font-sans normal-case hidden sm:block">{item.subtitle}</div>
-              <div className="relative h-full min-w-0">
+              <div className="min-w-0 truncate font-semibold relative z-20 text-[var(--color-text-primary)]">
+                {item.title}
+              </div>
+              <div className="min-w-0 truncate opacity-70 font-sans normal-case hidden sm:block relative z-20">
+                {item.subtitle}
+              </div>
+              <div className="relative h-full min-w-0 flex items-center justify-center">
                 {item.image ? (
                   <div
                     aria-hidden
-                    className="sh-art pointer-events-none absolute bottom-0 left-1/2 z-20 -translate-x-1/2 rounded-xl bg-cover bg-center opacity-0 shadow-2xl ring-1 ring-white/10 transition-opacity duration-200 ease-out"
+                    className="sh-art pointer-events-none absolute bottom-0 right-0 sm:left-1/2 z-10 sm:z-20 sm:-translate-x-1/2 rounded-xl bg-cover bg-center opacity-0 shadow-2xl ring-1 ring-white/10 transition-all duration-200 ease-out max-sm:w-[76px] max-sm:h-[104px] max-sm:opacity-90"
                     style={{
                       width: artworkSize,
                       height: artworkSize * 1.35, // 2:3 cinematic poster aspect ratio
@@ -235,7 +293,7 @@ export function SuperHoverList({
                   />
                 ) : null}
               </div>
-              <div className="text-right tabular-nums opacity-60">
+              <div className="text-right tabular-nums opacity-60 relative z-20">
                 {item.meta ?? "—"}
               </div>
             </div>

@@ -26,7 +26,7 @@ import { FilmModalView } from "@/components/film-modal-view"
 export default function MoviesArchivePage() {
   const { navigate } = useCinemaTransition()
   const mode: "super" | "native" = "native"
-  const autoplay = true
+  const autoplay = false
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all")
   const [activeFilmForModal, setActiveFilmForModal] = React.useState<ArchiveFilmItem | null>(null)
 
