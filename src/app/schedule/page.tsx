@@ -31,6 +31,8 @@ import {
   type CinemaHall,
   type Screening,
 } from "@/lib/cinema-data"
+import { cn } from "@/lib/utils"
+import { TextReveal } from "@/components/velora/text-reveal"
 import { CinemaCursor } from "@/components/cinema-cursor"
 import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle"
 import { CinemaFooter } from "@/components/cinema-footer"
@@ -203,15 +205,19 @@ export default function SchedulePage() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-7 space-y-4 sm:space-y-6 pb-20">
-        {/* Page Hero Editorial Title - Simplified without verbose text */}
+        {/* Page Hero Editorial Title */}
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
+          <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
             <Sparkles className="size-3" />
             <span>Curated Screenings</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight uppercase">
-            The Exhibition Schedule
-          </h1>
+          <TextReveal
+            text="The Exhibition Schedule"
+            as="h1"
+            animateOnMount
+            stagger={0.06}
+            className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight uppercase"
+          />
         </div>
 
         {/* DATE SELECTION RIBBON (COMPACT DATE PICKER) */}
@@ -254,12 +260,11 @@ export default function SchedulePage() {
           </div>
 
           {/* Horizontal Scrolling Ribbon - Compact Sizing */}
-          <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto pb-2 pt-0.5 no-scrollbar scroll-smooth">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar scroll-smooth">
             {availableDates.map((dateStr) => {
               const { dayName, dayNum, monthName } = formatDayParts(dateStr)
               const isSelected = dateStr === selectedDate
               const isToday = dateStr === "2026-09-28"
-              const count = screenings.filter((s) => s.date === dateStr).length
 
               return (
                 <button
@@ -268,7 +273,7 @@ export default function SchedulePage() {
                   onClick={() => setSelectedDate(dateStr)}
                   data-cursor-interactive="true"
                   data-cursor-label={dayName}
-                  className={`relative shrink-0 flex flex-col items-center justify-between w-16 sm:w-20 h-16 sm:h-20 p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer select-none ${
+                  className={`relative shrink-0 flex flex-col items-center justify-between w-14 sm:w-16 h-14 sm:h-16 p-1.5 rounded-xl border transition-all cursor-pointer select-none ${
                     isSelected
                       ? "border-amber-500 bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-md scale-[1.02]"
                       : "border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.025] hover:border-black/30 dark:hover:border-white/30 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
@@ -282,15 +287,14 @@ export default function SchedulePage() {
                     )}
                   </div>
 
-                  {/* Big Date Number */}
-                  <span className="text-lg sm:text-2xl font-bold font-mono tracking-tight leading-none my-0.5">
+                  {/* Date Number */}
+                  <span className="text-base sm:text-xl font-bold font-mono tracking-tight leading-none">
                     {dayNum}
                   </span>
 
-                  {/* Bottom: Month & Count */}
-                  <div className="w-full flex items-center justify-between text-[9px] font-mono opacity-70 leading-none">
+                  {/* Bottom: Month */}
+                  <div className="w-full flex items-center justify-center text-[9px] font-mono opacity-70 leading-none">
                     <span>{monthName}</span>
-                    <span className="tabular-nums">{count} shows</span>
                   </div>
 
                   {/* Subtle selection glow border */}
@@ -308,11 +312,11 @@ export default function SchedulePage() {
         </section>
 
         {/* HALL & EXPERIENCE FILTER CONTROLS */}
-        <section className="p-3 sm:p-5 rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 overflow-hidden">
+        <section className="p-2.5 sm:p-3.5 rounded-xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 sm:gap-3 overflow-hidden">
           {/* Hall Filter Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
-            <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] shrink-0 flex items-center gap-1.5 mr-1">
-              <SlidersHorizontal className="size-3.5" />
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-0.5 md:pb-0">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] shrink-0 flex items-center gap-1.5 mr-1 font-medium">
+              <SlidersHorizontal className="size-3" />
               <span>Halls</span>
             </span>
 
@@ -321,7 +325,7 @@ export default function SchedulePage() {
               onClick={() => setSelectedHall("all")}
               data-cursor-interactive="true"
               data-cursor-label="Filter"
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all shrink-0 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer ${
                 selectedHall === "all"
                   ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-xs"
                   : "border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-text-secondary)]"
@@ -339,7 +343,7 @@ export default function SchedulePage() {
                   onClick={() => setSelectedHall(hall.id)}
                   data-cursor-interactive="true"
                   data-cursor-label="Filter"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all shrink-0 cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-xs"
                       : "border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-text-secondary)]"
@@ -352,8 +356,8 @@ export default function SchedulePage() {
           </div>
 
           {/* Experience / Tag Filter Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
-            <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] shrink-0 mr-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-0.5 md:pb-0">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] shrink-0 mr-1 font-medium">
               Experience
             </span>
 
@@ -371,7 +375,7 @@ export default function SchedulePage() {
                   onClick={() => setSelectedTag(tag.id)}
                   data-cursor-interactive="true"
                   data-cursor-label="Filter"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all shrink-0 cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-amber-500 text-neutral-950 font-bold shadow-xs"
                       : "border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-text-secondary)]"
@@ -385,9 +389,9 @@ export default function SchedulePage() {
         </section>
 
         {/* SCREENINGS LIST FOR SELECTED DATE */}
-        <section className="space-y-6">
+        <section className="space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border)]">
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold tracking-tight">
               Films Programmed on {selectedDateInfo.fullFormatted}
             </h2>
             <span className="text-xs font-mono text-[var(--color-text-tertiary)]">
@@ -400,59 +404,59 @@ export default function SchedulePage() {
             {groupedByFilm.length > 0 ? (
               <motion.div
                 key={`${selectedDate}-${selectedHall}-${selectedTag}`}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-6"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-3 sm:space-y-4"
               >
                 {groupedByFilm.map(({ film, screenings }) => (
                   <article
                     key={film.id}
-                    className="p-3 sm:p-4 rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] hover:border-black/20 dark:hover:border-white/20 transition-all flex flex-col md:flex-row gap-3.5 sm:gap-5 items-start"
+                    className="p-3 sm:p-4 rounded-xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] hover:border-black/20 dark:hover:border-white/20 transition-all flex flex-col lg:flex-row gap-3 sm:gap-4 items-start lg:items-center justify-between"
                   >
-                    {/* Film Thumbnail & Quick Info */}
-                    <div className="w-full md:w-52 lg:w-60 shrink-0 flex flex-row md:flex-col gap-3 items-start">
-                      {/* Compact Poster */}
-                      <div className="relative w-16 sm:w-20 md:w-full h-24 sm:h-28 md:h-36 rounded-xl overflow-hidden bg-neutral-900 shrink-0 group">
+                    {/* Film Thumbnail & Info */}
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                      {/* Clean Poster Image (No badge chips on artwork) */}
+                      <div className="relative w-16 sm:w-20 lg:w-22 h-22 sm:h-26 lg:h-28 rounded-lg overflow-hidden bg-neutral-900 border border-black/10 dark:border-white/10 shrink-0 group">
                         <img
                           src={film.image}
                           alt={film.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-
-                        {/* Badges on Poster */}
-                        <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between text-[10px] font-mono">
-                          <span className="px-1.5 py-0.5 rounded font-bold bg-black/70 text-amber-400 backdrop-blur-md">
-                            ★ {film.imdbRating}
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded bg-black/70 text-neutral-300 backdrop-blur-md">
-                            {film.year}
-                          </span>
-                        </div>
                       </div>
 
                       {/* Film Meta details */}
-                      <div className="space-y-0.5 min-w-0 flex-1">
-                        <h3 className="text-sm sm:text-base font-bold tracking-tight leading-snug line-clamp-2 md:truncate">
+                      <div className="space-y-0.5 min-w-0">
+                        {/* Rating, Year, Duration metadata row */}
+                        <div className="flex items-center gap-2 text-xs font-mono text-[var(--color-text-secondary)]">
+                          <span className="text-amber-500 font-semibold flex items-center gap-0.5">
+                            ★ {film.imdbRating}
+                          </span>
+                          <span className="text-[var(--color-text-tertiary)]">·</span>
+                          <span>{film.year}</span>
+                          <span className="text-[var(--color-text-tertiary)]">·</span>
+                          <span>{film.duration}</span>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-sm sm:text-base font-bold tracking-tight leading-snug line-clamp-1">
                           {film.title}
                         </h3>
-                        <p className="text-[11px] text-[var(--color-text-secondary)] font-mono truncate">
-                          Dir. {film.director} · {film.duration}
-                        </p>
-                        <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
-                          {film.category}
+
+                        {/* Director and Category */}
+                        <p className="text-xs text-[var(--color-text-secondary)] truncate">
+                          Dir. {film.director} · <span className="text-[var(--color-text-tertiary)]">{film.category}</span>
                         </p>
 
-                        {/* View Film Details Button */}
+                        {/* Curator Notes link */}
                         <button
                           type="button"
                           onClick={() => setActiveFilmForModal(film)}
                           data-cursor-interactive="true"
                           data-cursor-label="Details"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-500 hover:text-amber-400 transition-colors cursor-pointer pt-1"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-500 hover:text-amber-400 transition-colors cursor-pointer pt-0.5"
                         >
                           <Info className="size-3" />
                           <span>Curator Notes &amp; Specs</span>
@@ -460,90 +464,62 @@ export default function SchedulePage() {
                       </div>
                     </div>
 
-                    {/* Showtimes Grid for this Film */}
-                    <div className="flex-1 w-full space-y-2">
-                      <div className="flex items-center justify-between text-[11px] font-mono text-[var(--color-text-tertiary)] pb-1 border-b border-[var(--color-border)]/40">
-                        <span className="uppercase tracking-[0.15em] font-semibold">
-                          Screenings ({screenings.length})
-                        </span>
-                        <span>Doors open 20 mins prior</span>
+                    {/* Compact Showtime Pills */}
+                    <div className="w-full lg:w-auto lg:max-w-xl flex flex-col lg:items-end gap-1.5 pt-2.5 lg:pt-0 border-t lg:border-t-0 border-[var(--color-border)]/40 shrink-0">
+                      <div className="flex items-center justify-between lg:justify-end gap-2 text-[10px] font-mono text-[var(--color-text-tertiary)] uppercase tracking-[0.15em] w-full">
+                        <span>Showtimes ({screenings.length})</span>
+                        <span className="normal-case tracking-normal opacity-70">Open Admission</span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-2.5">
-                        {screenings.map((screening) => {
-                          const hall = CINEMA_HALLS.find((h) => h.id === screening.hallId)
-                          const isVip = screening.tag === "VIP Salle"
-                          const isKids = screening.tag === "Kids Only"
-                          const is70mm = screening.tag === "70mm Archival"
-                          const isMidnight = screening.tag === "Midnight Special"
+                      <div className="flex flex-wrap items-center lg:justify-end gap-1.5 sm:gap-2">
+                        {screenings.map((s) => {
+                          const hall = CINEMA_HALLS.find((h) => h.id === s.hallId)
+                          const isVip = s.tag === "VIP Salle"
+                          const is70mm = s.tag === "70mm Archival"
+                          const isKids = s.tag === "Kids Only"
+                          const isMidnight = s.tag === "Midnight Special"
+                          const isFewLeft = s.availability === "Few Seats Left"
+                          const isSellingFast = s.availability === "Selling Fast"
 
                           return (
-                            <div
-                              key={screening.id}
-                              className={`p-2.5 rounded-xl border transition-all flex flex-col justify-between gap-1.5 ${
+                            <button
+                              key={s.id}
+                              type="button"
+                              onClick={() => setActiveFilmForModal(film)}
+                              data-cursor-interactive="true"
+                              data-cursor-label="View Specs"
+                              className={cn(
+                                "group inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer select-none",
                                 isVip
-                                  ? "border-amber-500/40 bg-amber-500/[0.04] dark:bg-amber-500/[0.06]"
-                                  : isKids
-                                  ? "border-sky-500/40 bg-sky-500/[0.04] dark:bg-sky-500/[0.06]"
+                                  ? "border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
                                   : is70mm
-                                  ? "border-rose-500/40 bg-rose-500/[0.04] dark:bg-rose-500/[0.06]"
+                                  ? "border-rose-500/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
+                                  : isKids
+                                  ? "border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20"
                                   : isMidnight
-                                  ? "border-purple-500/40 bg-purple-500/[0.04] dark:bg-purple-500/[0.06]"
-                                  : "border-[var(--color-border)] bg-black/[0.02] dark:bg-white/[0.03]"
-                              }`}
+                                  ? "border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20"
+                                  : "border-[var(--color-border)] bg-black/[0.02] dark:bg-white/[0.04] text-[var(--color-text-primary)] hover:border-black/30 dark:hover:border-white/30 hover:bg-black/5 dark:hover:bg-white/10"
+                              )}
                             >
-                              <div className="space-y-1">
-                                {/* Time & Tag Header */}
-                                <div className="flex items-center justify-between gap-1.5">
-                                  <span className="text-base sm:text-lg font-bold font-mono tracking-tight text-[var(--color-text-primary)]">
-                                    {screening.time}
-                                  </span>
-
-                                  <span
-                                    className={`px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider ${
-                                      isVip
-                                        ? "bg-amber-500/20 text-amber-500 border border-amber-500/30"
-                                        : isKids
-                                        ? "bg-sky-500/20 text-sky-400 border border-sky-500/30"
-                                        : is70mm
-                                        ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                                        : isMidnight
-                                        ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
-                                        : "bg-white/10 text-neutral-300 border border-white/20"
-                                    }`}
-                                  >
-                                    {screening.tag}
-                                  </span>
-                                </div>
-
-                                {/* Room / Hall and Format */}
-                                <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-primary)] font-medium">
-                                  <MapPin className="size-3 text-amber-500 shrink-0" />
-                                  <span className="truncate">{hall?.shortName || screening.hallId}</span>
-                                </div>
-                                <p className="text-[10px] font-mono text-[var(--color-text-tertiary)] truncate">
-                                  {screening.format}
-                                </p>
-                              </div>
-
-                              {/* Status and Open Admission Notice */}
-                              <div className="pt-1.5 border-t border-[var(--color-border)]/50 flex items-center justify-between text-[10px] font-mono">
+                              <span className="font-mono font-bold text-xs sm:text-sm tracking-tight">{s.time}</span>
+                              <span className="text-[11px] text-[var(--color-text-secondary)] font-medium">
+                                {hall?.shortName || s.hallId}
+                              </span>
+                              {s.tag !== "Standard" && (
+                                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-black/20 dark:bg-white/10 opacity-80">
+                                  {s.tag}
+                                </span>
+                              )}
+                              {(isFewLeft || isSellingFast) && (
                                 <span
-                                  className={
-                                    screening.availability === "Few Seats Left"
-                                      ? "text-red-400 font-semibold"
-                                      : screening.availability === "Selling Fast"
-                                      ? "text-amber-400 font-semibold"
-                                      : "text-emerald-400 font-medium"
-                                  }
-                                >
-                                  {screening.availability}
-                                </span>
-                                <span className="text-[var(--color-text-tertiary)]">
-                                  Box Office
-                                </span>
-                              </div>
-                            </div>
+                                  className={cn(
+                                    "size-1.5 rounded-full shrink-0",
+                                    isFewLeft ? "bg-rose-500 animate-pulse" : "bg-amber-400"
+                                  )}
+                                  title={s.availability}
+                                />
+                              )}
+                            </button>
                           )
                         })}
                       </div>
