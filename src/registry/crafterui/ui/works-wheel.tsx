@@ -855,10 +855,10 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             )}
           </div>
 
-          {/* Front-card Title & Tagline (Left-hand side) with Word-by-Word Blur Reveal */}
+          {/* Front-card Title & Tagline (Left-hand side) with Word-by-Word Blur Reveal - Desktop Only to prevent mobile overlap */}
           <div
             ref={titleRef}
-            className="pointer-events-none absolute tracking-tight opacity-0 font-serif text-[var(--color-text-primary)] font-light max-w-sm sm:max-w-md select-none"
+            className="pointer-events-none absolute tracking-tight opacity-0 font-serif text-[var(--color-text-primary)] font-light max-w-sm sm:max-w-md select-none hidden md:block"
             style={{
               fontSize: metrics.title,
               top: "50%",
@@ -890,10 +890,10 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             )}
           </div>
 
-          {/* Index List (Top-Right Corner) */}
+          {/* Index List (Top-Right Corner) - Desktop Only */}
           <ol
             ref={indexRef}
-            className="absolute text-right leading-[1.75] transition-opacity duration-300"
+            className="absolute text-right leading-[1.75] transition-opacity duration-300 hidden md:block"
             style={{
               fontSize: metrics.index,
               top: "7.5%",
@@ -931,11 +931,11 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             )}
           </ol>
 
-          {/* Pure Text Metadata Block in the Circled Area */}
+          {/* Pure Text Metadata Block in the Circled Area - Desktop Only */}
           {activeItem && (
             <div
               ref={metaRef}
-              className="pointer-events-none absolute text-right flex flex-col items-end transition-opacity duration-300"
+              className="pointer-events-none absolute text-right hidden md:flex flex-col items-end transition-opacity duration-300"
               style={{
                 top: "40%",
                 right: "2.5%",
@@ -1023,19 +1023,19 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             </div>
           )}
 
-          {/* MercuryMenu anchored in the bottom-left of the stage */}
+          {/* MercuryMenu anchored in the bottom-left of the stage (Desktop only) */}
           {menu && (
             <div
               ref={menuWrapperRef}
-              className="absolute bottom-8 left-8 z-40 transition-opacity duration-300 pointer-events-auto"
+              className="absolute bottom-8 left-8 z-40 transition-opacity duration-300 pointer-events-auto hidden md:block"
             >
               {menu}
             </div>
           )}
 
-          {/* Bottom-right Discover All Movies action at the end of the wheel */}
+          {/* Bottom-right Discover All Movies action at the end of the wheel (Desktop only) */}
           {onDiscoverAll && (
-            <div className="absolute bottom-8 right-8 z-40 transition-opacity duration-300 pointer-events-auto hidden sm:block">
+            <div className="absolute bottom-8 right-8 z-40 transition-opacity duration-300 pointer-events-auto hidden md:block">
               <button
                 type="button"
                 onClick={onDiscoverAll}

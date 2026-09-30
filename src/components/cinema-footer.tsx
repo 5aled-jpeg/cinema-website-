@@ -19,18 +19,18 @@ export function CinemaFooter({
   onNavigateMovies,
 }: CinemaFooterProps = {}) {
   return (
-    <footer className="w-full h-80 sm:h-96 bg-white dark:bg-[#0b0b0e] flex justify-center items-center border-t border-neutral-200 dark:border-neutral-800/80 transition-colors duration-300">
-      <div className="relative overflow-hidden w-full h-full flex justify-between px-8 sm:px-16 md:px-24 items-start py-10 sm:py-14 text-neutral-900 dark:text-neutral-100">
+    <footer className="w-full min-h-[420px] sm:min-h-[384px] bg-white dark:bg-[#0b0b0e] flex justify-center items-center border-t border-neutral-200 dark:border-neutral-800/80 transition-colors duration-300 py-10 sm:py-14">
+      <div className="relative overflow-hidden w-full h-full flex flex-col sm:flex-row justify-between items-start gap-8 sm:gap-12 px-6 sm:px-16 md:px-24 text-neutral-900 dark:text-neutral-100">
         {/* Left: Discover All Movies Vault CTA */}
-        <div className="flex flex-col items-start text-left z-10 max-w-xs sm:max-w-md space-y-3">
+        <div className="flex flex-col items-start text-left z-10 w-full sm:max-w-md space-y-3">
           <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold flex items-center gap-1.5">
             <Sparkles className="size-3" />
             <span>Permanent Repository</span>
           </span>
-          <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tight text-[var(--color-text-primary)]">
+          <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[var(--color-text-primary)]">
             Explore The Full Vault
           </h3>
-          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] font-serif leading-relaxed hidden sm:block">
+          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] font-serif leading-relaxed">
             Over 30+ archival prints and contemporary masterworks available in our streaming vault.
           </p>
           <button
@@ -51,7 +51,7 @@ export function CinemaFooter({
         </div>
 
         {/* Right: Navigation & External Links */}
-        <div className="flex flex-row space-x-12 sm:space-x-16 md:space-x-24 text-sm sm:text-lg md:text-xl font-medium tracking-tight z-10 text-right">
+        <div className="flex flex-row space-x-12 sm:space-x-16 md:space-x-24 text-sm sm:text-base md:text-lg font-medium tracking-tight z-10 text-left sm:text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-[var(--color-border)]/40 pt-6 sm:pt-0">
           <ul className="space-y-3 text-neutral-700 dark:text-neutral-300">
             <li>
               <a
@@ -165,7 +165,7 @@ export function CinemaFooter({
           </ul>
         </div>
 
-        <h2 className="absolute bottom-0 left-4 sm:left-12 translate-y-1/3 sm:text-[192px] text-[88px] font-black uppercase text-neutral-900/10 dark:text-white/10 select-none pointer-events-none leading-none tracking-tighter">
+        <h2 className="absolute bottom-0 right-4 sm:left-12 translate-y-1/3 sm:text-[192px] text-[72px] font-black uppercase text-neutral-900/[0.04] dark:text-white/[0.04] select-none pointer-events-none leading-none tracking-tighter">
           cinema
         </h2>
       </div>

@@ -157,7 +157,7 @@ export default function SchedulePage() {
       <CinemaCursor attachToParent={false} />
 
       {/* Top Fixed Header */}
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[var(--color-bg-base)]/85 border-b border-[var(--color-border)] px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-2xl bg-[var(--color-bg-base)]/98 sm:bg-[var(--color-bg-base)]/85 border-b border-[var(--color-border)] px-4 sm:px-8 py-3 flex items-center justify-between transition-colors shadow-xs">
         {/* Left: Home Navigation */}
         <div className="flex items-center gap-6">
           <button
@@ -183,20 +183,20 @@ export default function SchedulePage() {
         </div>
 
         {/* Right: Actions (Theme Toggle & Admin Portal Link) */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => navigate("/admin", "Cinema Management")}
             data-cursor-interactive="true"
             data-cursor-label="Admin"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 transition-all bg-black/[0.02] dark:bg-white/[0.04] cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-medium text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 transition-all bg-black/[0.02] dark:bg-white/[0.04] cursor-pointer"
           >
             <Shield className="size-3.5" />
             <span>Admin</span>
           </button>
 
-          <div className="pl-1">
-            <LandscapeOrbToggle size={36} />
+          <div className="pl-0.5">
+            <LandscapeOrbToggle size={30} />
           </div>
         </div>
       </header>
@@ -271,9 +271,9 @@ export default function SchedulePage() {
                   onClick={() => setSelectedDate(dateStr)}
                   data-cursor-interactive="true"
                   data-cursor-label={dayName}
-                  className={`relative shrink-0 flex flex-col items-center justify-between w-24 sm:w-28 h-28 p-3 rounded-2xl border transition-all cursor-pointer select-none ${
+                  className={`relative shrink-0 flex flex-col items-center justify-between w-20 sm:w-28 h-24 sm:h-28 p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer select-none ${
                     isSelected
-                      ? "border-amber-500 bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-lg scale-[1.03]"
+                      ? "border-amber-500 bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-lg scale-[1.02]"
                       : "border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.025] hover:border-black/30 dark:hover:border-white/30 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                   }`}
                 >
@@ -282,7 +282,7 @@ export default function SchedulePage() {
                     <span className="font-semibold">{dayName}</span>
                     {isToday && (
                       <span
-                        className={`px-1.5 py-0.5 rounded-full uppercase tracking-widest text-[9px] font-bold ${
+                        className={`px-1 sm:px-1.5 py-0.5 rounded-full uppercase tracking-widest text-[8px] sm:text-[9px] font-bold ${
                           isSelected
                             ? "bg-amber-500 text-neutral-950"
                             : "bg-amber-500/20 text-amber-500"
@@ -294,7 +294,7 @@ export default function SchedulePage() {
                   </div>
 
                   {/* Big Date Number */}
-                  <span className="text-2xl sm:text-3xl font-bold font-mono tracking-tight my-0.5">
+                  <span className="text-xl sm:text-3xl font-bold font-mono tracking-tight my-0.5">
                     {dayNum}
                   </span>
 
@@ -319,10 +319,10 @@ export default function SchedulePage() {
         </section>
 
         {/* HALL & EXPERIENCE FILTER CONTROLS */}
-        <section className="p-4 sm:p-5 rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <section className="p-3 sm:p-5 rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 overflow-hidden">
           {/* Hall Filter Chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] mr-2 flex items-center gap-1.5">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
+            <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] shrink-0 flex items-center gap-1.5 mr-1">
               <SlidersHorizontal className="size-3.5" />
               <span>Halls</span>
             </span>
@@ -332,7 +332,7 @@ export default function SchedulePage() {
               onClick={() => setSelectedHall("all")}
               data-cursor-interactive="true"
               data-cursor-label="Filter"
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all shrink-0 cursor-pointer ${
                 selectedHall === "all"
                   ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-xs"
                   : "border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-text-secondary)]"
@@ -350,7 +350,7 @@ export default function SchedulePage() {
                   onClick={() => setSelectedHall(hall.id)}
                   data-cursor-interactive="true"
                   data-cursor-label="Filter"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-xs"
                       : "border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-text-secondary)]"
@@ -363,8 +363,8 @@ export default function SchedulePage() {
           </div>
 
           {/* Experience / Tag Filter Chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] mr-2">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
+            <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] shrink-0 mr-1">
               Experience
             </span>
 
@@ -382,7 +382,7 @@ export default function SchedulePage() {
                   onClick={() => setSelectedTag(tag.id)}
                   data-cursor-interactive="true"
                   data-cursor-label="Filter"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium font-mono transition-all shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-amber-500 text-neutral-950 font-bold shadow-xs"
                       : "border border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-text-secondary)]"

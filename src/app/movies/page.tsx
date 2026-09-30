@@ -78,7 +78,7 @@ export default function MoviesArchivePage() {
       <CinemaCursor attachToParent={false} />
 
       {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[var(--color-bg-base)]/85 border-b border-[var(--color-border)] px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-2xl bg-[var(--color-bg-base)]/98 sm:bg-[var(--color-bg-base)]/85 border-b border-[var(--color-border)] px-4 sm:px-8 py-3 flex items-center justify-between transition-colors shadow-xs">
         {/* Left: Home Navigation */}
         <div className="flex items-center gap-6">
           <button
@@ -104,37 +104,37 @@ export default function MoviesArchivePage() {
         </div>
 
         {/* Right Actions: Schedule Shortcut & Theme Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => navigate("/schedule", "Exhibition Schedule")}
             data-cursor-interactive="true"
             data-cursor-label="Schedule"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 transition-all bg-black/[0.02] dark:bg-white/[0.04] cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-medium text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 transition-all bg-black/[0.02] dark:bg-white/[0.04] cursor-pointer"
           >
             <Calendar className="size-3.5" />
             <span className="hidden sm:inline">Schedule</span>
           </button>
 
-          <div className="pl-1">
-            <LandscapeOrbToggle size={36} />
+          <div className="pl-0.5">
+            <LandscapeOrbToggle size={30} />
           </div>
         </div>
       </header>
 
       {/* Main Archive Index Container */}
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 flex-1 flex flex-col space-y-8">
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-12 flex-1 flex flex-col space-y-6 sm:space-y-8 pb-20">
         {/* Page Hero Title & Description */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--color-border)]">
-          <div className="space-y-3 max-w-2xl">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 pb-6 border-b border-[var(--color-border)]">
+          <div className="space-y-2 sm:space-y-3 max-w-2xl">
             <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
               <Film className="size-3.5" />
               <span>Full Repository</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase">
+            <h1 className="text-2xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase">
               All Available Films
             </h1>
-            <p className="text-sm sm:text-base text-[var(--color-text-secondary)] font-serif leading-relaxed">
+            <p className="text-xs sm:text-base text-[var(--color-text-secondary)] font-serif leading-relaxed">
               Our permanent 35mm, 70mm, and 4K digital prints available for exhibition, theatrical screening, and cinema stream. Hover any row to reveal its archival print artwork.
             </p>
           </div>
@@ -228,8 +228,8 @@ export default function MoviesArchivePage() {
           ))}
         </div>
 
-        {/* Table Column Header Guide */}
-        <div className="w-full grid grid-cols-[3rem_minmax(0,42%)_minmax(0,1fr)_minmax(3.5rem,16%)_3.5rem] text-[11px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)] px-4 sm:px-8 border-b border-[var(--color-border)] pb-2 select-none">
+        {/* Table Column Header Guide - Visible on tablet/desktop */}
+        <div className="w-full hidden sm:grid grid-cols-[3rem_minmax(0,42%)_minmax(0,1fr)_minmax(3.5rem,16%)_3.5rem] text-[11px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)] px-4 sm:px-8 border-b border-[var(--color-border)] pb-2 select-none">
           <div>Index</div>
           <div>Film Title</div>
           <div>Director / Genre</div>

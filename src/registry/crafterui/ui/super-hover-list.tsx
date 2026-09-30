@@ -196,7 +196,7 @@ export function SuperHoverList({
         }}
         className="h-full cursor-pointer [scrollbar-width:none] overflow-x-hidden overflow-y-auto overscroll-contain [mask-image:linear-gradient(to_bottom,transparent,#000_10%,#000_90%,transparent)] px-4 py-8 sm:px-8 [&::-webkit-scrollbar]:hidden"
       >
-        <div className="mx-auto grid w-full max-w-5xl grid-cols-[3rem_minmax(0,42%)_minmax(0,1fr)_minmax(3.5rem,16%)_3.5rem] text-xs sm:text-sm">
+        <div className="mx-auto grid w-full max-w-5xl grid-cols-[2.2rem_minmax(0,1fr)_0px_0px_2.8rem] sm:grid-cols-[3rem_minmax(0,42%)_minmax(0,1fr)_minmax(3.5rem,16%)_3.5rem] text-xs sm:text-sm">
           {rows.map((item, i) => (
             <div
               key={item.id != null ? `${item.id}-${i}` : i}
@@ -221,7 +221,7 @@ export function SuperHoverList({
                 {String((i % items.length) + 1).padStart(3, "0")}
               </div>
               <div className="min-w-0 truncate font-semibold">{item.title}</div>
-              <div className="min-w-0 truncate opacity-70 font-sans normal-case">{item.subtitle}</div>
+              <div className="min-w-0 truncate opacity-70 font-sans normal-case hidden sm:block">{item.subtitle}</div>
               <div className="relative h-full min-w-0">
                 {item.image ? (
                   <div

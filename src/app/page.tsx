@@ -599,10 +599,46 @@ export default function WorksWheelDemo() {
       {/* Custom Spring Animated Cursor */}
       <CinemaCursor attachToParent={false} />
 
-      {/* Landscape Orb Dark/Light Theme Toggle (Top-Left Corner) */}
-      <div className="fixed top-8 left-8 z-50">
+      {/* Desktop Landscape Orb Dark/Light Theme Toggle (Top-Left Corner - Desktop only) */}
+      <div className="fixed top-8 left-8 z-50 hidden md:block">
         <LandscapeOrbToggle size={42} />
       </div>
+
+      {/* Mobile Top Navigation Bar (Mobile only - eliminates floating corner clutter) */}
+      <header className="fixed top-0 inset-x-0 z-50 h-14 md:hidden px-4 flex items-center justify-between bg-[var(--color-bg-base)]/92 backdrop-blur-xl border-b border-[var(--color-border)]/60 transition-colors">
+        <button
+          type="button"
+          onClick={() => wheelRef.current?.to(0)}
+          className="flex items-center gap-1.5 text-sm font-semibold tracking-tight text-[var(--color-text-primary)] cursor-pointer"
+        >
+          <span className="font-serif italic font-normal text-amber-500 text-base">M</span>
+          <span className="font-sans font-bold tracking-tight">Murdjadjo</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate("/movies", "Complete Cinema Archive")}
+            className="px-2.5 py-1.5 rounded-full text-xs font-mono font-medium border border-[var(--color-border)] bg-black/5 dark:bg-white/10 text-[var(--color-text-primary)] flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+          >
+            <Film className="size-3 text-amber-500" />
+            <span>Movies</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/schedule", "Exhibition Schedule")}
+            className="px-2.5 py-1.5 rounded-full text-xs font-mono font-medium border border-[var(--color-border)] bg-black/5 dark:bg-white/10 text-[var(--color-text-primary)] flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+          >
+            <Calendar className="size-3 text-amber-500" />
+            <span>Schedule</span>
+          </button>
+
+          <div className="pl-0.5">
+            <LandscapeOrbToggle size={30} />
+          </div>
+        </div>
+      </header>
 
       {/* Unified Timeline: Experience Hero (t=0) -> Works Wheel (t=1..7) -> Cinema Footer (t=8) */}
       <WorksWheel
