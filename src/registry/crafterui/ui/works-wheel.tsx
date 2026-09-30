@@ -782,11 +782,6 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                                   IMDb {item.imdbRating}
                                 </span>
                               )}
-                              {item.specs?.format && (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-emerald-500/20 backdrop-blur-md text-emerald-400 border border-emerald-500/30 uppercase">
-                                  {item.specs.format}
-                                </span>
-                              )}
                             </div>
 
                             {/* Bottom Title & Tagline in Hero Banner */}
