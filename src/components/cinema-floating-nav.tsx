@@ -16,10 +16,22 @@ export function CinemaFloatingNav() {
   const [turn, setTurn] = React.useState<number>(0)
   const [footerInView, setFooterInView] = React.useState<boolean>(false)
 
+  const isHome = pathname === "/"
+  const isMovies = pathname === "/movies"
+  const isSchedule = pathname === "/schedule"
+
+  // Reset turn position on route changes
+  React.useEffect(() => {
+    if (!isHome) {
+      setTurn(0)
+    }
+  }, [pathname, isHome])
+
   // Listen to timeline position updates from the Home Page 3D works wheel
   React.useEffect(() => {
-    const handleTurnChange = (e: CustomEvent<{ turn: number; active: number }>) => {
-      const { turn: t } = e.detail || { turn: 0 }
+    const handleTurnChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ turn: number; active: number }>
+      const { turn: t } = customEvent.detail || { turn: 0 }
       setTurn(t)
       if (t < 0.6) {
         setHomeSection("home")
@@ -42,16 +54,17 @@ export function CinemaFloatingNav() {
     }
   }, [])
 
-  const isHome = pathname === "/"
-  const isMovies = pathname === "/movies"
-  const isSchedule = pathname === "/schedule"
-
-  // Detect when user reaches the footer across all tabs
+  // Detect when user reaches the footer on other tabs (/movies, /schedule)
+  // On Home Page (isHome), footer detection is strictly governed by wheel `turn > 7.15`
   React.useEffect(() => {
+    if (isHome) {
+      setFooterInView(false)
+      return
+    }
+
     setFooterInView(false)
 
     const handleScroll = () => {
-      if (isHome) return
       const scrollY = window.scrollY
       const windowHeight = window.innerHeight
       const documentHeight = document.documentElement.scrollHeight
@@ -95,10 +108,15 @@ export function CinemaFloatingNav() {
   }, [pathname, isHome])
 
   // Visibility Rules:
-  // 1. On Home Page: disappeared on Hero (turn < 0.6) AND disappeared when reaching Footer (turn > 7.1 or footerInView)
-  // 2. On other tabs: disappeared when reaching the Footer (footerInView)
+  // 1. On Home Page:
+  //    - Disappeared on Hero page section (turn < 0.45)
+  //    - Visible on Works Wheel carousel (turn >= 0.45 && turn <= 7.15)
+  //    - Disappeared when reaching the Footer (turn > 7.15)
+  // 2. On other tabs (/movies, /schedule):
+  //    - Visible while browsing
+  //    - Disappeared when reaching the Footer (!footerInView)
   const isVisible = isHome
-    ? turn >= 0.6 && turn <= 7.1 && !footerInView
+    ? turn >= 0.45 && turn <= 7.15
     : !footerInView
 
   const menuItems: MercuryMenuItem[] = React.useMemo(() => {
