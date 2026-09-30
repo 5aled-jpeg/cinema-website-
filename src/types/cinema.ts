@@ -6,7 +6,7 @@ export interface Screening {
   date: string;
   time: string;
   hall: string;
-  format: "70mm IMAX" | "Dolby Atmos" | "35mm Vintage" | "Laser VIP";
+  format: "Standard" | "Dolby Atmos" | "Classic" | "VIP Salon" | string;
   price: number;
 }
 

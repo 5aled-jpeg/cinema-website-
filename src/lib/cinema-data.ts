@@ -47,7 +47,7 @@ export interface CinemaHall {
   id: string;
   name: string;
   shortName: string;
-  type: 'vip' | 'imax' | 'standard' | 'kids';
+  type: 'vip' | 'standard' | 'kids';
   capacity: number;
   sound: string;
   projection: string;
@@ -60,7 +60,7 @@ export interface Screening {
   date: string; // YYYY-MM-DD e.g. "2026-09-28"
   time: string; // HH:mm e.g. "18:00"
   hallId: string;
-  tag: 'VIP Salle' | 'Kids Only' | '70mm Archival' | 'Standard' | 'Director Q&A' | 'Midnight Special';
+  tag: 'VIP Salle' | 'Kids Only' | 'Standard' | 'Director Q&A' | 'Midnight Special';
   format: string;
   availability: 'Available' | 'Selling Fast' | 'Few Seats Left';
   notes?: string;
@@ -74,28 +74,28 @@ export const CINEMA_HALLS: CinemaHall[] = [
     type: 'vip',
     capacity: 34,
     sound: 'Dolby Atmos 64-Channel Private Array',
-    projection: 'Christie 4K RGB Pure Laser',
+    projection: 'Artisanal Salon Presentation',
     description: 'Ultra-plush leather recliners with dedicated artisanal beverage service.',
   },
   {
     id: 'screen-1',
-    name: 'Screen 1 — 70mm Grand Auditorium',
-    shortName: 'Screen 1 (70mm)',
-    type: 'imax',
+    name: 'Screen 1 — Grand Auditorium',
+    shortName: 'Screen 1',
+    type: 'standard',
     capacity: 280,
     sound: '12-Channel Custom Immersive Audio',
-    projection: 'Dual 4K Laser & 70mm Mechanical Film Transport',
-    description: 'Our flagship cinematic palace equipped for true 70mm large-format film presentation.',
+    projection: 'Grand Auditorium Presentation',
+    description: 'Our flagship auditorium equipped for grand premiere presentations.',
   },
   {
     id: 'auditorium-2',
-    name: 'Auditorium 2 — Dolby Cinema',
-    shortName: 'Auditorium 2 (Dolby)',
+    name: 'Auditorium 2 — Main Hall',
+    shortName: 'Auditorium 2',
     type: 'standard',
     capacity: 160,
-    sound: 'Dolby Atmos Mastered Soundstage',
-    projection: 'Dolby Vision Dual 4K Laser',
-    description: 'Reference-grade black levels and spatial audio precision.',
+    sound: 'Spatial Audio Precision Soundstage',
+    projection: 'Digital Main Hall Presentation',
+    description: 'Reference black levels and spatial audio precision.',
   },
   {
     id: 'kids-arena',
@@ -104,7 +104,7 @@ export const CINEMA_HALLS: CinemaHall[] = [
     type: 'kids',
     capacity: 85,
     sound: 'Soft Adaptive Family Acoustics',
-    projection: 'Laser 4K Family-Friendly Lighting',
+    projection: 'Family-Friendly Presentation',
     description: 'Gentle ambient lighting, tiered family seating, and sound calibrated for younger ears.',
   },
 ];
@@ -121,7 +121,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     year: 1972,
     duration: '2h 55m',
     tagline: "An offer you can't refuse.",
-    synopsis: 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant youngest son. Photographed in painterly chiaroscuro by Gordon Willis and restored in reference 4K from the original 35mm camera negative.',
+    synopsis: 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant youngest son. Photographed in painterly chiaroscuro by Gordon Willis.',
     stills: [
       {
         url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80',
@@ -154,7 +154,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
       },
     ],
     specs: {
-      format: '70mm / 4K Laser',
+      format: 'Theatrical Feature',
       aspectRatio: '1.85:1 Academy Flat',
       sound: 'Restored 5.1 DTS-HD Master Audio',
       color: 'Technicolor Dye-Transfer Process',
@@ -188,7 +188,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
       },
     ],
     specs: {
-      format: '35mm Archival Print',
+      format: 'Theatrical Presentation',
       aspectRatio: '1.85:1 Standard',
       sound: 'Dolby Digital 5.1 Discrete',
       color: 'Deluxe Color Laboratory',
@@ -222,7 +222,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
       },
     ],
     specs: {
-      format: '65mm Large Format / Dolby Vision',
+      format: 'Theatrical Feature',
       aspectRatio: '2.39:1 Scope',
       sound: 'Dolby Atmos 64-Channel',
       color: 'Kodak Vision3 500T Stock',
@@ -244,7 +244,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
       {
         url: 'https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?auto=format&fit=crop&w=1200&q=80',
         caption: 'Peter Parker above the Queensboro Bridge',
-        aspectRatio: '1.90:1 IMAX',
+        aspectRatio: '2.39:1 Scope',
       },
     ],
     reviews: [
@@ -256,10 +256,10 @@ export const INITIAL_FILMS: CinemaFilm[] = [
       },
     ],
     specs: {
-      format: 'IMAX Laser 3D & 2D / 4K Laser',
-      aspectRatio: '1.90:1 IMAX Expanded',
-      sound: 'IMAX 12-Channel & Dolby Atmos',
-      color: 'Arri Alexa 65 / Panavision Sphero 65',
+      format: 'Theatrical Presentation',
+      aspectRatio: '2.39:1 Scope',
+      sound: 'Dolby Atmos Spatial Audio',
+      color: 'Studio Digital Master',
     },
   },
   {
@@ -290,10 +290,10 @@ export const INITIAL_FILMS: CinemaFilm[] = [
       },
     ],
     specs: {
-      format: '4K Laser Master',
+      format: 'Theatrical Presentation',
       aspectRatio: '2.39:1 Scope',
       sound: 'Dolby Atmos 7.1.4',
-      color: 'Red Monstro 8K VV',
+      color: 'Digital Cinema Master',
     },
   },
   {
@@ -324,10 +324,10 @@ export const INITIAL_FILMS: CinemaFilm[] = [
       },
     ],
     specs: {
-      format: '35mm Film Print / 4K Laser',
+      format: 'Theatrical Presentation',
       aspectRatio: '2.39:1 Scope',
       sound: 'Dolby Digital 5.1 Surround',
-      color: 'Sony Venice 4K',
+      color: 'Digital Cinema Master',
     },
   },
   {
@@ -358,7 +358,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
       },
     ],
     specs: {
-      format: '35mm Archival Print / 4K Laser',
+      format: 'Theatrical Feature',
       aspectRatio: '1.66:1 European Flat',
       sound: '5.1 Surround Sound',
       color: 'Kodak Double-X Black & White / Color Reversal',
@@ -375,7 +375,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '10:00',
     hallId: 'kids-arena',
     tag: 'Kids Only',
-    format: 'Digital 4K Family Matinee',
+    format: 'Family Matinee',
     availability: 'Available',
     notes: 'Acoustics calibrated for young ears. Complimentary kids superhero sticker sheet included.',
   },
@@ -397,20 +397,20 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '18:00',
     hallId: 'screen-1',
     tag: 'Standard',
-    format: 'IMAX Laser 4K',
+    format: 'Theatrical Presentation',
     availability: 'Few Seats Left',
-    notes: 'Full-bleed 1.90:1 expanded aspect ratio on our primary 70-foot screen.',
+    notes: 'Primary auditorium presentation.',
   },
   {
-    id: 'scr-28-gf-70mm',
+    id: 'scr-28-gf-std',
     filmId: 1, // The Godfather
     date: '2026-09-28',
     time: '17:30',
     hallId: 'screen-1',
-    tag: '70mm Archival',
-    format: '70mm Original Film Print',
+    tag: 'Standard',
+    format: 'Theatrical Presentation',
     availability: 'Few Seats Left',
-    notes: 'Archival Technicolor dye-transfer print with five-track magnetic stereophonic sound.',
+    notes: 'Restored studio print with magnetic stereophonic sound.',
   },
   {
     id: 'scr-28-gf-dolby',
@@ -419,9 +419,9 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '21:00',
     hallId: 'auditorium-2',
     tag: 'Standard',
-    format: 'Restored 4K / Dolby Atmos',
+    format: 'Digital Presentation',
     availability: 'Available',
-    notes: 'Reference 4K digital master supervised by Francis Ford Coppola.',
+    notes: 'Supervised by Francis Ford Coppola.',
   },
   {
     id: 'scr-28-wp-vip',
@@ -430,7 +430,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '20:30',
     hallId: 'vip-salle',
     tag: 'VIP Salle',
-    format: 'Dolby Vision Exclusive Preview',
+    format: 'Exclusive Preview',
     availability: 'Selling Fast',
     notes: 'Advance festival sneak preview. No photography permitted.',
   },
@@ -441,7 +441,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '22:45',
     hallId: 'screen-1',
     tag: 'Midnight Special',
-    format: '35mm Archival Strike',
+    format: 'Late-Night Special',
     availability: 'Available',
     notes: 'Late-night genre programming. Doors close strictly at 22:40.',
   },
@@ -454,7 +454,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '11:30',
     hallId: 'kids-arena',
     tag: 'Kids Only',
-    format: 'Digital 4K Family Matinee',
+    format: 'Family Matinee',
     availability: 'Available',
   },
   {
@@ -464,7 +464,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '14:00',
     hallId: 'vip-salle',
     tag: 'VIP Salle',
-    format: 'Restored 4K Luxury Matinee',
+    format: 'VIP Salon Matinee',
     availability: 'Selling Fast',
   },
   {
@@ -474,17 +474,17 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '16:30',
     hallId: 'vip-salle',
     tag: 'VIP Salle',
-    format: 'Dolby Atmos Luxury Recliner',
+    format: 'VIP Luxury Screening',
     availability: 'Few Seats Left',
   },
   {
-    id: 'scr-29-gf-70mm',
+    id: 'scr-29-gf-std',
     filmId: 1,
     date: '2026-09-29',
     time: '19:00',
     hallId: 'screen-1',
-    tag: '70mm Archival',
-    format: '70mm Original Film Print',
+    tag: 'Standard',
+    format: 'Theatrical Presentation',
     availability: 'Few Seats Left',
   },
   {
@@ -494,7 +494,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '20:00',
     hallId: 'auditorium-2',
     tag: 'Standard',
-    format: 'Dolby Cinema 4K',
+    format: 'Theatrical Presentation',
     availability: 'Available',
   },
   {
@@ -504,7 +504,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '22:30',
     hallId: 'auditorium-2',
     tag: 'Midnight Special',
-    format: '35mm Cult Retrospective',
+    format: 'Midnight Retrospective',
     availability: 'Available',
   },
 
@@ -516,17 +516,17 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '18:30',
     hallId: 'vip-salle',
     tag: 'VIP Salle',
-    format: '65mm Master / Dolby Atmos',
+    format: 'VIP Presentation',
     availability: 'Available',
   },
   {
-    id: 'scr-30-td-70mm',
+    id: 'scr-30-td-std',
     filmId: 7,
     date: '2026-09-30',
     time: '20:45',
     hallId: 'screen-1',
     tag: 'Standard',
-    format: '35mm Archival Print',
+    format: 'Theatrical Presentation',
     availability: 'Available',
   },
   {
@@ -536,7 +536,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '21:15',
     hallId: 'auditorium-2',
     tag: 'Standard',
-    format: 'Dolby Cinema 4K',
+    format: 'Theatrical Presentation',
     availability: 'Available',
   },
 
@@ -548,7 +548,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '15:00',
     hallId: 'vip-salle',
     tag: 'VIP Salle',
-    format: 'Dolby Atmos Luxury Recliner',
+    format: 'VIP Luxury Screening',
     availability: 'Available',
   },
   {
@@ -558,7 +558,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '18:30',
     hallId: 'screen-1',
     tag: 'Standard',
-    format: 'IMAX Laser 4K',
+    format: 'Theatrical Presentation',
     availability: 'Selling Fast',
   },
   {
@@ -568,19 +568,19 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '21:15',
     hallId: 'auditorium-2',
     tag: 'Standard',
-    format: 'Dolby Atmos Master',
+    format: 'Theatrical Presentation',
     availability: 'Available',
   },
 
   // --- WEDNESDAY 02 OCTOBER 2026 ---
   {
-    id: 'scr-02-gf-70mm',
+    id: 'scr-02-gf-std',
     filmId: 1,
     date: '2026-10-02',
     time: '19:30',
     hallId: 'screen-1',
-    tag: '70mm Archival',
-    format: '70mm Original Film Print',
+    tag: 'Standard',
+    format: 'Theatrical Presentation',
     availability: 'Few Seats Left',
   },
   {
@@ -590,7 +590,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '22:00',
     hallId: 'auditorium-2',
     tag: 'Midnight Special',
-    format: '35mm Film Print',
+    format: 'Midnight Special',
     availability: 'Available',
   },
 
@@ -602,7 +602,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '17:00',
     hallId: 'screen-1',
     tag: 'Standard',
-    format: '65mm Large Format',
+    format: 'Theatrical Presentation',
     availability: 'Available',
   },
   {
@@ -612,7 +612,7 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '19:45',
     hallId: 'vip-salle',
     tag: 'VIP Salle',
-    format: 'Dolby Atmos Luxury Recliner',
+    format: 'VIP Luxury Screening',
     availability: 'Selling Fast',
   },
 
@@ -624,17 +624,17 @@ export const INITIAL_SCREENINGS: Screening[] = [
     time: '18:00',
     hallId: 'auditorium-2',
     tag: 'Standard',
-    format: '35mm Archival Print',
+    format: 'Theatrical Presentation',
     availability: 'Available',
   },
   {
-    id: 'scr-04-gf-70mm',
+    id: 'scr-04-gf-std',
     filmId: 1,
     date: '2026-10-04',
     time: '21:00',
     hallId: 'screen-1',
-    tag: '70mm Archival',
-    format: '70mm Original Film Print',
+    tag: 'Standard',
+    format: 'Theatrical Presentation',
     availability: 'Few Seats Left',
   },
 ];

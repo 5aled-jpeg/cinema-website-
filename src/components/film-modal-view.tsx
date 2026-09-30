@@ -111,7 +111,7 @@ export function FilmModalView({ film }: FilmModalViewProps) {
                     Projection
                   </span>
                   <span className="text-sm font-semibold text-[var(--color-text-primary)] font-mono">
-                    {film.specs?.format || "70mm / 4K Laser"}
+                    {film.specs?.format || "Theatrical Presentation"}
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04]">
@@ -135,7 +135,7 @@ export function FilmModalView({ film }: FilmModalViewProps) {
                     Color Process
                   </span>
                   <span className="text-sm font-semibold text-[var(--color-text-primary)] font-mono">
-                    {film.specs?.color || "Technicolor 4K HDR"}
+                    {film.specs?.color || "Master Grade"}
                   </span>
                 </div>
               </div>
@@ -172,7 +172,7 @@ export function FilmModalView({ film }: FilmModalViewProps) {
                 Archival & Production Stills
               </h3>
               <p className="text-sm text-[var(--color-text-secondary)]">
-                Exclusive high-resolution cinematography captures from the 4K archival master.
+                Exclusive high-resolution cinematography captures from the archival presentation.
               </p>
             </div>
 

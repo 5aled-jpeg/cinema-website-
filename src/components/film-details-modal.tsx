@@ -207,7 +207,7 @@ export function FilmDetailsModal({
                           Projection
                         </span>
                         <span className="text-sm font-semibold text-[var(--color-text-primary)] font-mono">
-                          {film.specs?.format || "70mm / 4K Laser"}
+                          {film.specs?.format || "Theatrical Presentation"}
                         </span>
                       </div>
                       <div className="p-3.5 rounded-xl border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04]">
@@ -231,7 +231,7 @@ export function FilmDetailsModal({
                           Color Process
                         </span>
                         <span className="text-sm font-semibold text-[var(--color-text-primary)] font-mono">
-                          {film.specs?.color || "Technicolor 4K HDR"}
+                          {film.specs?.color || "Master Grade"}
                         </span>
                       </div>
                     </div>
@@ -309,7 +309,7 @@ export function FilmDetailsModal({
                     ) : (
                       <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-8 flex flex-col items-center justify-center text-center text-neutral-500">
                         <Film className="size-8 mb-2 opacity-50" />
-                        <p className="text-xs font-mono">Additional 70mm archival frame scans loaded during physical screening.</p>
+                        <p className="text-xs font-mono">Additional archival frame scans loaded during physical screening.</p>
                       </div>
                     )}
                   </div>
@@ -473,7 +473,7 @@ export function FilmDetailsModal({
             <div className="p-6 border-t border-[var(--color-border)] bg-black/[0.02] dark:bg-white/[0.02] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[var(--color-text-secondary)]">
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Murdjadjo Cinema Curations · 70mm &amp; Archival Series</span>
+                <span>Murdjadjo Cinema Curations · Feature Exhibition Series</span>
               </div>
               <div className="flex items-center gap-3">
                 <span>Sound Mix: Uncompressed 24-bit 96kHz</span>

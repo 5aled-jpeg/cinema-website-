@@ -102,14 +102,14 @@ export default function SchedulePage() {
     return screenings.filter((s) => s.date === selectedDate)
   }, [screenings, selectedDate])
 
-  // Filtered screenings based on Experience / Hall format
+  // Filtered screenings based on Experience / Hall
   const filteredScreenings = React.useMemo(() => {
     return dayScreenings.filter((s) => {
       if (selectedExperience === "all") return true
+      if (selectedExperience === "screen-1") return s.hallId === "screen-1"
       if (selectedExperience === "vip") return s.tag === "VIP Salle" || s.hallId === "vip-salle"
-      if (selectedExperience === "70mm") return s.tag === "70mm Archival" || s.hallId === "screen-1"
+      if (selectedExperience === "auditorium-2") return s.hallId === "auditorium-2"
       if (selectedExperience === "kids") return s.tag === "Kids Only" || s.hallId === "kids-arena"
-      if (selectedExperience === "dolby") return s.hallId === "auditorium-2" || s.format.toLowerCase().includes("dolby")
       return true
     })
   }, [dayScreenings, selectedExperience])
@@ -304,9 +304,9 @@ export default function SchedulePage() {
 
             {[
               { id: "all", label: "All Screenings" },
-              { id: "70mm", label: "70mm Archival" },
+              { id: "screen-1", label: "Screen 1" },
               { id: "vip", label: "VIP Salle" },
-              { id: "dolby", label: "Dolby Cinema" },
+              { id: "auditorium-2", label: "Auditorium 2" },
               { id: "kids", label: "Kids Arena" },
             ].map((item) => {
               const isActive = selectedExperience === item.id
@@ -420,7 +420,6 @@ export default function SchedulePage() {
                         {screenings.map((s) => {
                           const hall = CINEMA_HALLS.find((h) => h.id === s.hallId)
                           const isVip = s.tag === "VIP Salle"
-                          const is70mm = s.tag === "70mm Archival"
                           const isKids = s.tag === "Kids Only"
                           const isMidnight = s.tag === "Midnight Special"
                           const isFewLeft = s.availability === "Few Seats Left"
@@ -437,8 +436,6 @@ export default function SchedulePage() {
                                 "group inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm transition-all cursor-pointer select-none",
                                 isVip
                                   ? "border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
-                                  : is70mm
-                                  ? "border-rose-500/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
                                   : isKids
                                   ? "border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20"
                                   : isMidnight

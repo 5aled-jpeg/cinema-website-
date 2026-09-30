@@ -30,7 +30,7 @@ const WORKS: WorksWheelItem[] = [
     year: 1972,
     duration: "2h 55m",
     tagline: "An offer you can't refuse.",
-    synopsis: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant youngest son. Photographed in painterly chiaroscuro by Gordon Willis and restored in reference 4K from the original 35mm camera negative under the personal supervision of Francis Ford Coppola.",
+    synopsis: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant youngest son. Photographed in painterly chiaroscuro by Gordon Willis and restored under the personal supervision of Francis Ford Coppola.",
     stills: [
       {
         url: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
@@ -69,36 +69,36 @@ const WORKS: WorksWheelItem[] = [
       },
     ],
     specs: {
-      format: "70mm / 4K Laser",
+      format: "Theatrical Presentation",
       aspectRatio: "1.85:1 Academy Flat",
       sound: "Restored 5.1 DTS-HD Master Audio",
       color: "Technicolor Dye-Transfer Process",
     },
     screenings: [
-      "Fri 17:30 — 70mm IMAX",
+      "Fri 17:30 — Screen 1",
       "Fri 21:00 — Dolby Atmos",
-      "Sat 19:00 — 70mm IMAX",
+      "Sat 19:00 — Screen 1",
     ],
     screeningSlots: [
       {
         time: "17:30",
         date: "Fri Sep 28",
-        format: "70mm IMAX",
-        auditorium: "Screen 1 (IMAX Laser)",
+        format: "Standard",
+        auditorium: "Screen 1",
         availability: "Few Seats Left",
       },
       {
         time: "21:00",
         date: "Fri Sep 28",
         format: "Dolby Atmos",
-        auditorium: "Auditorium 2 (Dolby Cinema)",
+        auditorium: "Auditorium 2",
         availability: "Available",
       },
       {
         time: "19:00",
         date: "Sat Sep 29",
-        format: "70mm IMAX",
-        auditorium: "Screen 1 (IMAX Laser)",
+        format: "Standard",
+        auditorium: "Screen 1",
         availability: "Selling Fast",
       },
     ],
@@ -114,7 +114,7 @@ const WORKS: WorksWheelItem[] = [
     year: 2002,
     duration: "1h 40m",
     tagline: "Survive the Hive.",
-    synopsis: "A special military unit fights a powerful, out-of-control supercomputer and hundreds of scientists who have mutated into flesh-eating creatures after a laboratory accident. Presented in an archival 35mm strike for our Midnight Genre Retrospective.",
+    synopsis: "A special military unit fights a powerful, out-of-control supercomputer and hundreds of scientists who have mutated into flesh-eating creatures after a laboratory accident. Presented for our Midnight Genre Retrospective.",
     stills: [
       {
         url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80",
@@ -142,15 +142,15 @@ const WORKS: WorksWheelItem[] = [
       },
     ],
     specs: {
-      format: "35mm Archival Print",
+      format: "Standard Presentation",
       aspectRatio: "1.85:1 Standard",
       sound: "Dolby Digital 5.1 Discrete",
       color: "Deluxe Color Laboratory",
     },
     screenings: [
       "Fri 18:00 — Dolby Atmos",
-      "Fri 21:15 — 35mm Archival",
-      "Sat 23:00 — Laser VIP",
+      "Fri 21:15 — Screen 2",
+      "Sat 23:00 — VIP Salon",
     ],
     screeningSlots: [
       {
@@ -163,14 +163,14 @@ const WORKS: WorksWheelItem[] = [
       {
         time: "21:15",
         date: "Fri Sep 28",
-        format: "35mm Archival",
-        auditorium: "Screen 2 (Archival 35mm)",
+        format: "Standard",
+        auditorium: "Screen 2",
         availability: "Few Seats Left",
       },
       {
         time: "23:00",
         date: "Sat Sep 29",
-        format: "Laser VIP",
+        format: "VIP Salon",
         auditorium: "VIP Screening Lounge",
         availability: "Selling Fast",
       },
@@ -187,7 +187,7 @@ const WORKS: WorksWheelItem[] = [
     year: 2025,
     duration: "1h 54m",
     tagline: "Faith is the ultimate currency.",
-    synopsis: "When a high-society charity gala on a secluded Mediterranean volcanic island is taken hostage by radical purists, an uneasy alliance between an eccentric billionaire and a washed-up stunt performer triggers an explosive battle for survival. Photographed in visceral, large-format 65mm.",
+    synopsis: "When a high-society charity gala on a secluded Mediterranean volcanic island is taken hostage by radical purists, an uneasy alliance between an eccentric billionaire and a washed-up stunt performer triggers an explosive battle for survival.",
     stills: [
       {
         url: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80",
@@ -215,22 +215,22 @@ const WORKS: WorksWheelItem[] = [
       },
     ],
     specs: {
-      format: "65mm / 70mm Large Format",
+      format: "Theatrical Presentation",
       aspectRatio: "2.39:1 Scope",
       sound: "Dolby Atmos 64-Channel Immersive",
-      color: "Arri Color Science 4K Master",
+      color: "Arri Color Science Master Grade",
     },
     screenings: [
-      "Fri 19:15 — 70mm IMAX",
+      "Fri 19:15 — Screen 1",
       "Fri 22:00 — Dolby Atmos",
-      "Sat 18:30 — 70mm IMAX",
+      "Sat 18:30 — Screen 1",
     ],
     screeningSlots: [
       {
         time: "19:15",
         date: "Fri Sep 28",
-        format: "70mm IMAX",
-        auditorium: "Screen 1 (IMAX Laser)",
+        format: "Standard",
+        auditorium: "Screen 1",
         availability: "Available",
       },
       {
@@ -243,8 +243,8 @@ const WORKS: WorksWheelItem[] = [
       {
         time: "18:30",
         date: "Sat Sep 29",
-        format: "70mm IMAX",
-        auditorium: "Screen 1 (IMAX Laser)",
+        format: "Standard",
+        auditorium: "Screen 1",
         availability: "Selling Fast",
       },
     ],
@@ -260,17 +260,17 @@ const WORKS: WorksWheelItem[] = [
     year: 2026,
     duration: "2h 28m",
     tagline: "A clean slate. A new shadow.",
-    synopsis: "Stripped of his identity, Peter Parker navigates the gritty streets of Manhattan as an anonymous protector, facing the rise of an underground crime syndicate that threatens to tear the city apart. Filmed with IMAX digital cameras for an expanded 1.90:1 aspect ratio throughout.",
+    synopsis: "Stripped of his identity, Peter Parker navigates the gritty streets of Manhattan as an anonymous protector, facing the rise of an underground crime syndicate that threatens to tear the city apart.",
     stills: [
       {
         url: "https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?auto=format&fit=crop&w=1200&q=80",
         caption: "Rain-slicked Manhattan skyline descent",
-        aspectRatio: "1.90:1 IMAX",
+        aspectRatio: "1.90:1",
       },
       {
         url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
         caption: "Chinatown rooftop reconnaissance",
-        aspectRatio: "1.90:1 IMAX",
+        aspectRatio: "1.90:1",
       },
     ],
     reviews: [
@@ -288,36 +288,36 @@ const WORKS: WorksWheelItem[] = [
       },
     ],
     specs: {
-      format: "IMAX Laser 4K Digital",
-      aspectRatio: "1.90:1 Expanded IMAX / 2.39:1 Scope",
-      sound: "12-Channel IMAX Immersive Audio",
+      format: "Digital Presentation",
+      aspectRatio: "1.90:1 / 2.39:1 Scope",
+      sound: "12-Channel Immersive Audio",
       color: "HDR10 Exhibition Master",
     },
     screenings: [
-      "Fri 16:45 — 70mm IMAX",
-      "Fri 20:30 — 70mm IMAX",
-      "Sat 14:15 — 70mm IMAX",
+      "Fri 16:45 — Screen 1",
+      "Fri 20:30 — Screen 1",
+      "Sat 14:15 — Screen 1",
     ],
     screeningSlots: [
       {
         time: "16:45",
         date: "Fri Sep 28",
-        format: "70mm IMAX",
-        auditorium: "Screen 1 (IMAX Laser)",
+        format: "Standard",
+        auditorium: "Screen 1",
         availability: "Selling Fast",
       },
       {
         time: "20:30",
         date: "Fri Sep 28",
-        format: "70mm IMAX",
-        auditorium: "Screen 1 (IMAX Laser)",
+        format: "Standard",
+        auditorium: "Screen 1",
         availability: "Few Seats Left",
       },
       {
         time: "14:15",
         date: "Sat Sep 29",
-        format: "70mm IMAX",
-        auditorium: "Screen 1 (IMAX Laser)",
+        format: "Standard",
+        auditorium: "Screen 1",
         availability: "Available",
       },
     ],
@@ -361,14 +361,14 @@ const WORKS: WorksWheelItem[] = [
       },
     ],
     specs: {
-      format: "35mm Panavision Anamorphic",
+      format: "Panavision Anamorphic",
       aspectRatio: "2.39:1 Anamorphic Scope",
       sound: "Dolby Atmos Immersive",
       color: "Kodak Vision3 5219 Emulsion",
     },
     screenings: [
       "Fri 18:15 — Dolby Atmos",
-      "Fri 21:45 — Laser VIP",
+      "Fri 21:45 — VIP Salon",
       "Sat 20:00 — Dolby Atmos",
     ],
     screeningSlots: [
@@ -382,8 +382,8 @@ const WORKS: WorksWheelItem[] = [
       {
         time: "21:45",
         date: "Fri Sep 28",
-        format: "Laser VIP",
-        auditorium: "VIP Screening Lounge",
+        format: "VIP Salon",
+        auditorium: "VIP Salon Lounge",
         availability: "Few Seats Left",
       },
       {
@@ -434,14 +434,14 @@ const WORKS: WorksWheelItem[] = [
       },
     ],
     specs: {
-      format: "Arri Alexa Mini LF 4K",
+      format: "Digital Master Presentation",
       aspectRatio: "2.39:1 Scope",
       sound: "5.1 Surround Sound Discrete",
       color: "ACES Precision Color Pipeline",
     },
     screenings: [
       "Fri 20:00 — Dolby Atmos",
-      "Fri 23:15 — Laser VIP",
+      "Fri 23:15 — VIP Salon",
       "Sat 22:30 — Dolby Atmos",
     ],
     screeningSlots: [
@@ -455,8 +455,8 @@ const WORKS: WorksWheelItem[] = [
       {
         time: "23:15",
         date: "Fri Sep 28",
-        format: "Laser VIP",
-        auditorium: "VIP Screening Lounge",
+        format: "VIP Salon",
+        auditorium: "VIP Salon Lounge",
         availability: "Selling Fast",
       },
       {
@@ -507,22 +507,22 @@ const WORKS: WorksWheelItem[] = [
       },
     ],
     specs: {
-      format: "35mm Archival Print / 4K Laser",
+      format: "Theatrical Presentation",
       aspectRatio: "1.66:1 European Flat",
       sound: "5.1 Surround Sound",
       color: "Kodak Double-X Black & White / Color Reversal",
     },
     screenings: [
-      "Fri 17:00 — 35mm Archival",
+      "Fri 17:00 — Screen 2",
       "Fri 19:45 — Dolby Atmos",
-      "Sat 21:30 — 70mm IMAX",
+      "Sat 21:30 — Screen 1",
     ],
     screeningSlots: [
       {
         time: "17:00",
         date: "Fri Sep 28",
-        format: "35mm Archival",
-        auditorium: "Screen 2 (Archival 35mm)",
+        format: "Standard",
+        auditorium: "Screen 2",
         availability: "Few Seats Left",
       },
       {
@@ -535,8 +535,8 @@ const WORKS: WorksWheelItem[] = [
       {
         time: "21:30",
         date: "Sat Sep 29",
-        format: "70mm IMAX",
-        auditorium: "Screen 1 (IMAX Laser)",
+        format: "Standard",
+        auditorium: "Screen 1",
         availability: "Available",
       },
     ],

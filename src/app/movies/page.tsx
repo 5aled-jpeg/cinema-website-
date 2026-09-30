@@ -6,13 +6,9 @@ import {
   ArrowLeft,
   Calendar,
   Film,
-  Play,
-  Pause,
   SlidersHorizontal,
   Sparkles,
   Info,
-  Shield,
-  Layers,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -29,8 +25,8 @@ import { FilmModalView } from "@/components/film-modal-view"
 
 export default function MoviesArchivePage() {
   const { navigate } = useCinemaTransition()
-  const [mode, setMode] = React.useState<"super" | "native">("super")
-  const [autoplay, setAutoplay] = React.useState<boolean>(false)
+  const mode: "super" | "native" = "native"
+  const autoplay = true
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all")
   const [activeFilmForModal, setActiveFilmForModal] = React.useState<ArchiveFilmItem | null>(null)
 
@@ -41,7 +37,6 @@ export default function MoviesArchivePage() {
       { id: "scifi", label: "Sci-Fi & Cyberpunk" },
       { id: "horror", label: "Horror & Midnight" },
       { id: "drama", label: "Drama & Romance" },
-      { id: "70mm", label: "70mm & IMAX" },
     ],
     []
   )
@@ -54,7 +49,6 @@ export default function MoviesArchivePage() {
       if (selectedCategory === "scifi") return cat.includes("sci-fi") || cat.includes("cyberpunk")
       if (selectedCategory === "horror") return cat.includes("horror") || cat.includes("thriller")
       if (selectedCategory === "drama") return cat.includes("drama") || cat.includes("romance")
-      if (selectedCategory === "70mm") return cat.includes("70mm") || cat.includes("imax")
       return true
     })
   }, [selectedCategory])
@@ -125,81 +119,17 @@ export default function MoviesArchivePage() {
       {/* Main Archive Index Container */}
       <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-12 flex-1 flex flex-col space-y-6 sm:space-y-8 pb-20">
         {/* Page Hero Title & Description */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 pb-6 border-b border-[var(--color-border)]">
-          <div className="space-y-2 sm:space-y-3 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
-              <Film className="size-3.5" />
-              <span>Full Repository</span>
-            </div>
-            <h1 className="text-2xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase">
-              All Available Films
-            </h1>
-            <p className="text-xs sm:text-base text-[var(--color-text-secondary)] font-serif leading-relaxed">
-              Our permanent 35mm, 70mm, and 4K digital prints available for exhibition, theatrical screening, and cinema stream. Hover any row to reveal its archival print artwork.
-            </p>
+        <div className="space-y-2 sm:space-y-3 pb-6 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
+            <Film className="size-3.5" />
+            <span>Full Repository</span>
           </div>
-
-          {/* Interactive Mode Controls (Super Hover / Native + Autoplay) */}
-          <div className="flex items-center gap-2 self-start md:self-end shrink-0">
-            {/* Super vs Native Mode Toggle */}
-            <div className="inline-flex p-1 rounded-full bg-black/5 dark:bg-white/10 border border-[var(--color-border)] text-xs font-mono">
-              <button
-                type="button"
-                onClick={() => setMode("super")}
-                data-cursor-interactive="true"
-                data-cursor-label="Mode"
-                className={cn(
-                  "px-3 py-1 rounded-full transition-all cursor-pointer font-medium",
-                  mode === "super"
-                    ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-xs"
-                    : "text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
-                )}
-              >
-                Super Hover
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("native")}
-                data-cursor-interactive="true"
-                data-cursor-label="Mode"
-                className={cn(
-                  "px-3 py-1 rounded-full transition-all cursor-pointer font-medium",
-                  mode === "native"
-                    ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-xs"
-                    : "text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
-                )}
-              >
-                Native
-              </button>
-            </div>
-
-            {/* Autoplay Toggle */}
-            <button
-              type="button"
-              onClick={() => setAutoplay((prev) => !prev)}
-              data-cursor-interactive="true"
-              data-cursor-label={autoplay ? "Pause" : "Play"}
-              className={cn(
-                "p-2 rounded-full border border-[var(--color-border)] text-xs transition-all cursor-pointer flex items-center gap-1.5 px-3 font-mono",
-                autoplay
-                  ? "bg-amber-500 text-neutral-950 border-amber-500 font-bold"
-                  : "bg-black/[0.02] dark:bg-white/[0.04] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-              )}
-              title={autoplay ? "Pause Autoplay" : "Enable Autoplay"}
-            >
-              {autoplay ? (
-                <>
-                  <Pause className="size-3" />
-                  <span className="text-[11px] hidden sm:inline">Playing</span>
-                </>
-              ) : (
-                <>
-                  <Play className="size-3" />
-                  <span className="text-[11px] hidden sm:inline">Autoplay</span>
-                </>
-              )}
-            </button>
-          </div>
+          <h1 className="text-2xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase">
+            All Available Films
+          </h1>
+          <p className="text-xs sm:text-base text-[var(--color-text-secondary)] font-serif leading-relaxed">
+            Browse our complete collection of films available for exhibition.
+          </p>
         </div>
 
         {/* Category Filters */}
@@ -291,7 +221,7 @@ export default function MoviesArchivePage() {
                 tagline: activeFilmForModal.tagline,
                 synopsis: activeFilmForModal.synopsis,
                 specs: {
-                  format: "70mm / 4K Laser Master",
+                  format: "Theatrical Exhibition",
                   aspectRatio: "2.39:1 Anamorphic",
                   sound: "Dolby Atmos Discrete Array",
                   color: "Original Studio Color Reversal",

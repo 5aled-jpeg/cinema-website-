@@ -90,7 +90,7 @@ export function CinemaPageCurtainsProvider({
     if (href === "/" || href === "") return "Works '26 · Index"
     if (href.includes("schedule")) return "Exhibition Schedule"
     if (href.includes("admin")) return "Cinema Management"
-    if (href.includes("#the-godfather")) return "The Godfather · 70mm"
+    if (href.includes("#the-godfather")) return "The Godfather"
     if (href.includes("#curations")) return "Archival Curations"
     return "Murdjadjo Cinema"
   }
@@ -302,7 +302,7 @@ export function CinemaPageCurtainsProvider({
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-neutral-400">
                   <span className="flex items-center gap-1.5">
                     <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
-                    <span>70MM MASTER</span>
+                    <span>THEATRICAL FEATURE</span>
                   </span>
                   <span>24 FPS · DOLBY ATMOS</span>
                 </div>

@@ -328,7 +328,7 @@ export const Component = ({ onExplore, active: activeProp = true }: ExperienceHe
             CINEMA
           </h1>
           <p className="mt-8 font-sans text-base sm:text-lg md:text-xl text-neutral-600 dark:text-neutral-400 font-normal leading-relaxed max-w-xl tracking-[-0.01em] transition-colors duration-300">
-            Watch our latest upcoming films, archival 70mm screenings, and handpicked masterworks curated for true cinephiles.
+            Watch our latest upcoming films, theatrical exhibitions, and handpicked masterworks curated for true cinephiles.
           </p>
         </div>
 
