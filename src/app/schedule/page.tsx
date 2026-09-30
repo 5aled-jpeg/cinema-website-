@@ -38,6 +38,7 @@ import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle"
 import { CinemaFooter } from "@/components/cinema-footer"
 import { useCinemaTransition } from "@/components/cinema-page-curtains"
 import { CinemaLogo } from "@/components/cinema-logo"
+import { Schedule3DStage } from "@/components/schedule-3d-stage"
 import CenterUnderline from "@/components/fancy/text/underline-center"
 import ComesInGoesOutUnderline from "@/components/fancy/text/underline-comes-in-goes-out"
 import {
@@ -187,9 +188,11 @@ export default function SchedulePage() {
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-14 space-y-10 sm:space-y-14 pb-28">
-        {/* Page Hero Editorial Title */}
+      {/* 3D Interactive Stage Canvas */}
+      <Schedule3DStage>
+        {/* Main Content Area */}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-14 space-y-10 sm:space-y-14 pb-28">
+          {/* Page Hero Editorial Title */}
         <div className="space-y-2 sm:space-y-3">
           <div className="flex items-center gap-2 text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
             <Sparkles className="size-3.5" />
@@ -357,7 +360,7 @@ export default function SchedulePage() {
                 {groupedByFilm.map(({ film, screenings }) => (
                   <article
                     key={film.id}
-                    className="p-5 sm:p-7 md:p-8 rounded-2xl sm:rounded-3xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] hover:border-black/25 dark:hover:border-white/20 transition-all flex flex-col lg:flex-row gap-6 sm:gap-8 items-start lg:items-center justify-between shadow-xs"
+                    className="p-5 sm:p-7 md:p-8 rounded-2xl sm:rounded-3xl border border-[var(--color-border)] bg-[var(--color-bg-base)]/80 dark:bg-[var(--color-bg-base)]/60 backdrop-blur-md hover:border-amber-500/40 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col lg:flex-row gap-6 sm:gap-8 items-start lg:items-center justify-between shadow-xs [transform-style:preserve-3d]"
                   >
                     {/* Film Thumbnail & Info */}
                     <div className="flex items-start sm:items-center gap-4 sm:gap-6 min-w-0 flex-1">
@@ -501,6 +504,7 @@ export default function SchedulePage() {
         </section>
 
       </main>
+      </Schedule3DStage>
 
       {/* Film Detail Modal (When user clicks curator notes) */}
       {activeFilmForModal && (
