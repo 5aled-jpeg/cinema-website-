@@ -19,7 +19,10 @@ export function CinemaFooter({
   onNavigateMovies,
 }: CinemaFooterProps = {}) {
   return (
-    <footer className="w-full min-h-[420px] sm:min-h-[384px] bg-white dark:bg-[#0b0b0e] flex justify-center items-center border-t border-neutral-200 dark:border-neutral-800/80 transition-colors duration-300 py-10 sm:py-14">
+    <footer
+      id="cinema-footer"
+      className="w-full min-h-[420px] sm:min-h-[384px] bg-white dark:bg-[#0b0b0e] flex justify-center items-center border-t border-neutral-200 dark:border-neutral-800/80 transition-colors duration-300 py-10 sm:py-14"
+    >
       <div className="relative overflow-hidden w-full h-full flex flex-col sm:flex-row justify-between items-start gap-8 sm:gap-12 px-6 sm:px-16 md:px-24 text-neutral-900 dark:text-neutral-100">
         {/* Left: Discover All Movies Vault CTA */}
         <div className="flex flex-col items-start text-left z-10 w-full sm:max-w-md space-y-3">
