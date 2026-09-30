@@ -560,41 +560,6 @@ export default function SchedulePage() {
           </AnimatePresence>
         </section>
 
-        {/* HALL SPECIFICATIONS AT-A-GLANCE (EDITORIAL STRIP) */}
-        <section className="pt-10 border-t border-[var(--color-border)] space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-mono uppercase tracking-[0.25em] text-[var(--color-text-tertiary)] font-semibold">
-              The Auditoriums
-            </h3>
-            <span className="text-xs font-mono text-amber-500">
-              Reference Projection Standards
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {CINEMA_HALLS.map((hall) => (
-              <div
-                key={hall.id}
-                className="p-4 rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] space-y-2"
-              >
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-bold text-[var(--color-text-primary)]">
-                    {hall.shortName}
-                  </span>
-                  <span className="text-[var(--color-text-tertiary)]">
-                    {hall.capacity} seats
-                  </span>
-                </div>
-                <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                  {hall.description}
-                </p>
-                <div className="pt-2 border-t border-[var(--color-border)] text-[11px] font-mono text-amber-500">
-                  {hall.projection}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
 
       {/* Film Detail Modal (When user clicks curator notes) */}
