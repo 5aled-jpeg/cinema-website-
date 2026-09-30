@@ -1,17 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { Calendar, Clapperboard, Film, Home, Sparkles } from "lucide-react"
+import { Calendar, Film } from "lucide-react"
 
 import {
   WorksWheel,
   type WorksWheelItem,
   type WorksWheelHandle,
 } from "@/registry/crafterui/ui/works-wheel"
-import {
-  MercuryMenu,
-  type MercuryMenuItem,
-} from "@/registry/crafterui/ui/mercury-menu"
 import { CinemaCursor } from "@/components/cinema-cursor"
 import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle"
 import { CinemaFooter } from "@/components/cinema-footer"
@@ -548,75 +544,40 @@ const glyph = "size-3.5 opacity-70"
 
 export default function WorksWheelDemo() {
   const wheelRef = React.useRef<WorksWheelHandle>(null)
-  const [activeTab, setActiveTab] = React.useState<string>("home")
   const { navigate } = useCinemaTransition()
 
-  const menuItems: MercuryMenuItem[] = React.useMemo(
-    () => [
-      {
-        id: "home",
-        label: "Home Page",
-        icon: <Home className={glyph} aria-hidden="true" />,
-        active: activeTab === "home",
-        onSelect: () => {
-          setActiveTab("home")
-          wheelRef.current?.to(0)
-          if (typeof window !== "undefined") {
-            window.scrollTo({ top: 0, behavior: "smooth" })
-          }
-        },
-      },
-      {
-        id: "featured",
-        label: "Featured",
-        icon: <Film className={glyph} aria-hidden="true" />,
-        active: activeTab === "films",
-        onSelect: () => {
-          setActiveTab("films")
-          wheelRef.current?.to(1)
-        },
-      },
-      {
-        id: "movies",
-        label: "All Movies",
-        icon: <Clapperboard className={glyph} aria-hidden="true" />,
-        active: false,
-        onSelect: () => {
-          navigate("/movies", "Complete Cinema Archive")
-          setTimeout(() => {
-            if (typeof window !== "undefined" && window.location.pathname !== "/movies") {
-              window.location.href = "/movies"
-            }
-          }, 450)
-        },
-      },
-      {
-        id: "schedule",
-        label: "Schedule",
-        icon: <Calendar className={glyph} aria-hidden="true" />,
-        active: false,
-        onSelect: () => {
-          navigate("/schedule", "Exhibition Schedule")
-          setTimeout(() => {
-            if (typeof window !== "undefined" && window.location.pathname !== "/schedule") {
-              window.location.href = "/schedule"
-            }
-          }, 450)
-        },
-      },
-      {
-        id: "curations",
-        label: "Curations",
-        icon: <Sparkles className={glyph} aria-hidden="true" />,
-        active: activeTab === "curations",
-        onSelect: () => {
-          setActiveTab("curations")
-          wheelRef.current?.to(5)
-        },
-      },
-    ],
-    [activeTab, navigate],
-  )
+  // Handle cross-tab navigation and deep links to sections
+  React.useEffect(() => {
+    const handleNav = (e: CustomEvent<string>) => {
+      if (e.detail === "home") {
+        wheelRef.current?.to(0)
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      } else if (e.detail === "featured") {
+        wheelRef.current?.to(1)
+      } else if (e.detail === "curations") {
+        wheelRef.current?.to(5)
+      }
+    }
+
+    const checkHash = () => {
+      if (typeof window === "undefined") return
+      const hash = window.location.hash
+      if (hash === "#featured") {
+        setTimeout(() => wheelRef.current?.to(1), 250)
+      } else if (hash === "#curations" || hash === "#the-godfather") {
+        setTimeout(() => wheelRef.current?.to(5), 250)
+      }
+    }
+
+    checkHash()
+    window.addEventListener("cinema-nav" as unknown as keyof WindowEventMap, handleNav as EventListener)
+    window.addEventListener("hashchange", checkHash)
+
+    return () => {
+      window.removeEventListener("cinema-nav" as unknown as keyof WindowEventMap, handleNav as EventListener)
+      window.removeEventListener("hashchange", checkHash)
+    }
+  }, [])
 
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-[var(--color-bg-base)] text-[var(--color-text-primary)]">
@@ -663,17 +624,6 @@ export default function WorksWheelDemo() {
         </div>
       </header>
 
-      {/* Primary Cinema Quick Navigation Menu (Bottom-Left Corner - Fixed across Hero, Wheel, and Footer) */}
-      <div className="fixed bottom-6 left-6 sm:bottom-8 sm:left-8 z-50 pointer-events-auto">
-        <MercuryMenu
-          items={menuItems}
-          align="left"
-          panelWidth={180}
-          size={40}
-          label="Cinema Navigation Menu"
-        />
-      </div>
-
       {/* Unified Timeline: Experience Hero (t=0) -> Works Wheel (t=1..7) -> Cinema Footer (t=8) */}
       <WorksWheel
         ref={wheelRef}
@@ -682,13 +632,13 @@ export default function WorksWheelDemo() {
         action="View"
         hero={<ExperienceHero onExplore={() => wheelRef.current?.to(1)} />}
         onDiscoverAll={() => navigate("/movies", "Complete Cinema Archive")}
-        onTurnChange={(t) => {
-          if (t < 0.6) {
-            setActiveTab("home")
-          } else if (t < 4.5) {
-            setActiveTab("films")
-          } else {
-            setActiveTab("curations")
+        onTurnChange={(t, near) => {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("cinema-turn-change", {
+                detail: { turn: t, active: near },
+              })
+            )
           }
         }}
         footer={
