@@ -167,9 +167,17 @@ export default function MoviesArchivePage() {
           <div className="text-center">Art Reveal</div>
           <div className="text-right">Year</div>
         </div>
+        {/* Table Column Header Guide - Mobile */}
+        <div className="w-full flex sm:hidden items-center justify-between text-[11px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)] px-4 border-b border-[var(--color-border)] pb-2 select-none">
+          <div className="flex items-center gap-4">
+            <span>#</span>
+            <span>Film Title</span>
+          </div>
+          <div>Year</div>
+        </div>
 
         {/* THE SUPER HOVER LIST (Core CrafterUI Component) */}
-        <div className="h-[620px] w-full rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] shadow-inner overflow-hidden">
+        <div className="h-[580px] sm:h-[620px] w-full rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] shadow-inner overflow-hidden">
           <SuperHoverList
             items={superHoverItems}
             mode={mode}

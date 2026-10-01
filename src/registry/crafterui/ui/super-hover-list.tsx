@@ -152,8 +152,8 @@ export function SuperHoverList({
   }, [setAutoActive])
 
   // Handle user scroll / touch movement:
-  // "once the user start scrooling then show these backgrounds icon"
   const handleScroll = React.useCallback(() => {
+    if (!autoplay) return
     updateActiveRowOnScroll()
 
     if (scrollTimeoutRef.current) {
@@ -164,7 +164,7 @@ export function SuperHoverList({
     scrollTimeoutRef.current = setTimeout(() => {
       setAutoActive(null)
     }, 850)
-  }, [updateActiveRowOnScroll, setAutoActive])
+  }, [autoplay, updateActiveRowOnScroll, setAutoActive])
 
   React.useEffect(() => {
     return () => {
@@ -221,10 +221,11 @@ export function SuperHoverList({
     }
   }, [autoplay, speed, setAutoActive, items.length])
 
+  // Reveal artwork strictly on desktop (sm: screen breakpoint and pointer hover)
   const revealSelector =
     mode === "super"
-      ? "[&[data-super-hover-active]_.sh-art]:opacity-100 [&[data-super-hover-active]]:border-b-current [&[data-autoplay-active]_.sh-art]:opacity-100 [&[data-autoplay-active]]:border-b-current"
-      : "[&:hover_.sh-art]:opacity-100 hover:border-b-current [&[data-autoplay-active]_.sh-art]:opacity-100 [&[data-autoplay-active]]:border-b-current"
+      ? "sm:[&[data-super-hover-active]_.sh-art]:opacity-100 sm:[&[data-super-hover-active]]:border-b-current"
+      : "sm:[&:hover_.sh-art]:opacity-100 sm:hover:border-b-current"
 
   return (
     <div
@@ -235,8 +236,7 @@ export function SuperHoverList({
     >
       <div
         ref={rootRef}
-        onScroll={handleScroll}
-        onTouchMove={handleScroll}
+        onScroll={autoplay ? handleScroll : undefined}
         onPointerEnter={() => {
           hoveringRef.current = true
           autoActiveRef.current?.removeAttribute("data-autoplay-active")
@@ -266,7 +266,7 @@ export function SuperHoverList({
               }}
               className={cn(
                 "col-span-5 grid grid-cols-subgrid items-center gap-x-2 border-b border-transparent py-2.5 transition-colors duration-150 cursor-pointer select-none",
-                "hover:text-amber-400 [&[data-super-hover-active]]:text-amber-400",
+                "sm:hover:text-amber-400 active:text-amber-400 sm:[&[data-super-hover-active]]:text-amber-400",
                 "[&[data-artwork-below]_.sh-art]:top-[calc(100%+0.5rem)] [&[data-artwork-below]_.sh-art]:bottom-auto",
                 revealSelector
               )}
@@ -284,7 +284,7 @@ export function SuperHoverList({
                 {item.image ? (
                   <div
                     aria-hidden
-                    className="sh-art pointer-events-none absolute bottom-0 right-2 sm:left-1/2 z-20 sm:-translate-x-1/2 rounded-xl bg-cover bg-center opacity-0 shadow-2xl ring-1 ring-white/10 transition-all duration-200 ease-out w-[72px] h-[98px] sm:w-[132px] sm:h-[178px]"
+                    className="sh-art hidden sm:block pointer-events-none absolute bottom-0 sm:left-1/2 z-20 sm:-translate-x-1/2 rounded-xl bg-cover bg-center opacity-0 shadow-2xl ring-1 ring-white/10 transition-all duration-200 ease-out sm:w-[132px] sm:h-[178px]"
                     style={{
                       backgroundImage: `url(${item.image})`,
                     }}
