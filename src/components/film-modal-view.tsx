@@ -129,11 +129,18 @@ export function FilmModalView({ film }: FilmModalViewProps) {
                       key={idx}
                       className="group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5 transition-all hover:border-amber-500/40 hover:shadow-lg"
                     >
-                      <div className="aspect-[16/10] overflow-hidden bg-neutral-900">
+                      <div
+                        className={cn(
+                          "overflow-hidden bg-neutral-900 flex items-center justify-center",
+                          still.aspectRatio?.includes("2:3") || still.aspectRatio?.includes("Theatrical")
+                            ? "aspect-[2/3] max-w-[280px] mx-auto"
+                            : "aspect-[16/10]"
+                        )}
+                      >
                         <img
                           src={still.url}
                           alt={still.caption || `${film.title} Still ${idx + 1}`}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
                       </div>
@@ -154,11 +161,11 @@ export function FilmModalView({ film }: FilmModalViewProps) {
                 ) : (
                   /* Fallback to main film artwork still */
                   <div className="col-span-full group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5">
-                    <div className="aspect-[16/9] overflow-hidden bg-neutral-900">
+                    <div className="aspect-[2/3] max-h-[440px] mx-auto overflow-hidden bg-neutral-900 flex items-center justify-center">
                       <img
                         src={film.image}
                         alt={film.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                       />
                     </div>

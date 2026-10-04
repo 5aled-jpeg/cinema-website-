@@ -124,18 +124,18 @@ export interface WorksWheelHandle {
   getTarget: () => number
 }
 
-/* Geometry upscaled for prominent card presence and legible typography */
-const CARD_H = 0.38 // front card height, ratio of stage
-const CARD_MAX_W = 0.42 // ... but never wider than this much of the stage
-const CARD_RATIO = 1.45 // card width / height
-const STEP = 40 // degrees between cards on the drum
-const DRUM = 2.22 // drum radius, in card heights
-const LENS = 2.7 // perspective distance
-const RING_R = 1.14 // ring radius
-const BOW = 1.82
-const TITLE = 0.135 // ring label and front-card title upscaled
-const INDEX = 0.042 // index down the right-hand side upscaled
-const CULL = 1.6
+/* Geometry optimized for authentic 2:3 portrait theatrical posters (full image backgrounds without cropping) */
+const CARD_H = 0.54 // front card height, ratio of stage
+const CARD_MAX_W = 0.38 // max width ratio of stage
+const CARD_RATIO = 0.68 // card width / height (exact 2:3 cinematic theatrical poster aspect ratio)
+const STEP = 36 // degrees between cards on the drum (360 / 10 = 36)
+const DRUM = 2.05 // drum radius, in card heights
+const LENS = 2.8 // perspective distance
+const RING_R = 1.15 // ring radius
+const BOW = 1.6
+const TITLE = 0.085 // ring label and front-card title
+const INDEX = 0.036 // index down the right-hand side
+const CULL = 1.8
 
 const WHEEL_UNITS = 650
 const DRAG_UNITS = 350
@@ -231,14 +231,14 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
     const metrics = React.useMemo(() => {
       const { w, h } = stage
       const isMobile = w > 0 && w < 640
-      const cardMaxW = isMobile ? 0.78 : CARD_MAX_W
-      const cardHRatio = isMobile ? 0.44 : CARD_H
+      const cardMaxW = isMobile ? 0.74 : CARD_MAX_W
+      const cardHRatio = isMobile ? 0.50 : CARD_H
       const cardW = Math.min(h * cardHRatio * CARD_RATIO, w * cardMaxW)
       const cardH = cardW / CARD_RATIO
       const drumR = cardH * DRUM
       const ringR = cardH * RING_R
       const ringScale = count
-        ? clamp(((2 * Math.PI * ringR) / count) * 0.82 / (cardW || 1), 0.16, 1)
+        ? clamp(((2 * Math.PI * ringR) / count) * 0.78 / (cardW || 1), 0.2, 0.95)
         : 1
       return {
         cardW,
@@ -248,7 +248,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
         drumR,
         bow: cardH * BOW,
         depth: cardH * LENS,
-        title: cardH * (isMobile ? 0.11 : TITLE),
+        title: cardH * (isMobile ? 0.08 : TITLE),
         index: cardH * INDEX,
         isMobile,
       }
@@ -744,7 +744,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                           <DialogImage
                             src={item.image}
                             alt={item.title}
-                            className="size-full object-cover"
+                            className="size-full object-cover object-center"
                           />
                           {/* Ambient Depth Shadow for Background Cards */}
                           <div
@@ -758,14 +758,14 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                           <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/15 dark:ring-white/10" />
 
                           {/* Card Header & View Pill Reveal */}
-                          <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/85 via-black/35 to-transparent flex items-end justify-between pointer-events-none">
+                          <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-4.5 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end justify-between pointer-events-none">
                             <div className="translate-y-0.5 group-hover:translate-y-0 transition-transform duration-200">
-                              <DialogTitle className="text-white font-serif font-semibold text-lg tracking-tight drop-shadow-sm">
+                              <DialogTitle className="text-white font-serif font-semibold text-base sm:text-lg tracking-tight drop-shadow-sm">
                                 {item.title}
                               </DialogTitle>
                               {item.category && (
-                                <span className="text-[11px] font-mono uppercase tracking-wider text-white/70 block mt-0.5">
-                                  {item.category.split("·")[0].trim()}
+                                <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-amber-400/90 block mt-0.5">
+                                  {item.category.split("·")[0].trim()} {item.imdbRating ? `· ★ ${item.imdbRating}` : ''}
                                 </span>
                               )}
                             </div>
