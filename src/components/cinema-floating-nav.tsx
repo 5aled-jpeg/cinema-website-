@@ -55,7 +55,7 @@ export function CinemaFloatingNav() {
   }, [])
 
   // Detect when user reaches the footer on other tabs (/movies, /schedule)
-  // On Home Page (isHome), footer detection is strictly governed by wheel `turn > 7.15`
+  // On Home Page (isHome), footer detection is strictly governed by wheel `turn > 10.15`
   React.useEffect(() => {
     if (isHome) {
       setFooterInView(false)
@@ -110,13 +110,13 @@ export function CinemaFloatingNav() {
   // Visibility Rules:
   // 1. On Home Page:
   //    - Disappeared on Hero page section (turn < 0.45)
-  //    - Visible on Works Wheel carousel (turn >= 0.45 && turn <= 7.15)
-  //    - Disappeared when reaching the Footer (turn > 7.15)
+  //    - Visible on Works Wheel carousel (turn >= 0.45 && turn <= 10.15)
+  //    - Disappeared when reaching the Footer (turn > 10.15)
   // 2. On other tabs (/movies, /schedule):
   //    - Visible while browsing
   //    - Disappeared when reaching the Footer (!footerInView)
   const isVisible = isHome
-    ? turn >= 0.45 && turn <= 7.15
+    ? turn >= 0.45 && turn <= 10.15
     : !footerInView
 
   const menuItems: MercuryMenuItem[] = React.useMemo(() => {

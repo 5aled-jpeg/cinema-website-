@@ -1,9 +1,12 @@
 'use client';
 
 import * as React from 'react';
+import { usePathname } from 'next/navigation';
 import { Sparkles, ArrowRight } from 'lucide-react';
+import { useCinemaTransition } from '@/components/cinema-page-curtains';
 import CenterUnderline from '@/components/fancy/text/underline-center';
 import ComesInGoesOutUnderline from '@/components/fancy/text/underline-comes-in-goes-out';
+import { cn } from '@/lib/utils';
 
 export interface CinemaFooterProps {
   onNavigateHome?: () => void;
@@ -18,12 +21,55 @@ export function CinemaFooter({
   onNavigateCurations,
   onNavigateMovies,
 }: CinemaFooterProps = {}) {
+  const pathname = usePathname();
+  const { navigate } = useCinemaTransition();
+
+  const isHome = pathname === '/';
+  const isMovies = pathname === '/movies';
+  const isSchedule = pathname === '/schedule';
+
+  const handleGoMovies = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onNavigateMovies) {
+      onNavigateMovies();
+    } else {
+      navigate('/movies', 'Complete Cinema Archive');
+    }
+  };
+
+  const handleGoHome = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onNavigateHome) {
+      onNavigateHome();
+    } else {
+      navigate('/', "Works '26 · Index");
+    }
+  };
+
+  const handleGoSchedule = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onNavigateSchedule) {
+      onNavigateSchedule();
+    } else {
+      navigate('/schedule', 'Exhibition Schedule');
+    }
+  };
+
+  const handleGoCurations = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onNavigateCurations) {
+      onNavigateCurations();
+    } else {
+      navigate('/#curations', 'Archival Curations');
+    }
+  };
+
   return (
     <footer
       id="cinema-footer"
-      className="w-full min-h-[420px] sm:min-h-[384px] bg-white dark:bg-[#0b0b0e] flex justify-center items-center border-t border-neutral-200 dark:border-neutral-800/80 transition-colors duration-300 py-10 sm:py-14"
+      className="w-full min-h-[380px] bg-white dark:bg-[#0b0b0e] flex justify-center items-center border-t border-neutral-200 dark:border-neutral-800/80 transition-colors duration-300 py-12 sm:py-16 relative"
     >
-      <div className="relative overflow-hidden w-full h-full flex flex-col sm:flex-row justify-between items-start gap-8 sm:gap-12 px-6 sm:px-16 md:px-24 text-neutral-900 dark:text-neutral-100">
+      <div className="relative overflow-hidden w-full max-w-7xl flex flex-col sm:flex-row justify-between items-start gap-8 sm:gap-12 px-6 sm:px-16 md:px-24 text-neutral-900 dark:text-neutral-100">
         {/* Left: Discover All Movies Vault CTA */}
         <div className="flex flex-col items-start text-left z-10 w-full sm:max-w-md space-y-3">
           <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold flex items-center gap-1.5">
@@ -33,20 +79,15 @@ export function CinemaFooter({
           <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[var(--color-text-primary)]">
             Explore The Full Vault
           </h3>
-          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] font-serif leading-relaxed">
-            Over 30+ archival prints and contemporary masterworks available in our streaming vault.
+          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] font-serif leading-relaxed max-w-sm">
+            12 timeless cinematic masterworks and archival prints in our permanent exhibition repertory.
           </p>
           <button
             type="button"
-            onClick={(e) => {
-              if (onNavigateMovies) {
-                e.preventDefault();
-                onNavigateMovies();
-              }
-            }}
+            onClick={handleGoMovies}
             data-cursor-interactive="true"
             data-cursor-label="All Films"
-            className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+            className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
           >
             <span>Discover All Movies</span>
             <ArrowRight className="size-3.5" />
@@ -59,15 +100,15 @@ export function CinemaFooter({
             <li>
               <a
                 href="#home"
-                onClick={(e) => {
-                  if (onNavigateHome) {
-                    e.preventDefault();
-                    onNavigateHome();
-                  }
-                }}
+                onClick={handleGoHome}
                 data-cursor-interactive="true"
                 data-cursor-label="Home"
-                className="hover:text-black dark:hover:text-white cursor-pointer transition-colors inline-block"
+                className={cn(
+                  "cursor-pointer transition-colors inline-block",
+                  isHome
+                    ? "text-amber-500 dark:text-amber-400 font-semibold"
+                    : "hover:text-black dark:hover:text-white"
+                )}
               >
                 <CenterUnderline>Home</CenterUnderline>
               </a>
@@ -75,15 +116,15 @@ export function CinemaFooter({
             <li>
               <a
                 href="/movies"
-                onClick={(e) => {
-                  if (onNavigateMovies) {
-                    e.preventDefault();
-                    onNavigateMovies();
-                  }
-                }}
+                onClick={handleGoMovies}
                 data-cursor-interactive="true"
                 data-cursor-label="All Movies"
-                className="hover:text-black dark:hover:text-white cursor-pointer transition-colors inline-block text-amber-500 dark:text-amber-400 font-semibold"
+                className={cn(
+                  "cursor-pointer transition-colors inline-block",
+                  isMovies
+                    ? "text-amber-500 dark:text-amber-400 font-semibold"
+                    : "hover:text-black dark:hover:text-white"
+                )}
               >
                 <CenterUnderline>All Movies</CenterUnderline>
               </a>
@@ -91,15 +132,15 @@ export function CinemaFooter({
             <li>
               <a
                 href="/schedule"
-                onClick={(e) => {
-                  if (onNavigateSchedule) {
-                    e.preventDefault();
-                    onNavigateSchedule();
-                  }
-                }}
+                onClick={handleGoSchedule}
                 data-cursor-interactive="true"
                 data-cursor-label="Schedule"
-                className="hover:text-black dark:hover:text-white cursor-pointer transition-colors inline-block"
+                className={cn(
+                  "cursor-pointer transition-colors inline-block",
+                  isSchedule
+                    ? "text-amber-500 dark:text-amber-400 font-semibold"
+                    : "hover:text-black dark:hover:text-white"
+                )}
               >
                 <CenterUnderline>Schedule</CenterUnderline>
               </a>
@@ -107,12 +148,7 @@ export function CinemaFooter({
             <li>
               <a
                 href="#curations"
-                onClick={(e) => {
-                  if (onNavigateCurations) {
-                    e.preventDefault();
-                    onNavigateCurations();
-                  }
-                }}
+                onClick={handleGoCurations}
                 data-cursor-interactive="true"
                 data-cursor-label="Films"
                 className="hover:text-black dark:hover:text-white cursor-pointer transition-colors inline-block"
@@ -168,7 +204,7 @@ export function CinemaFooter({
           </ul>
         </div>
 
-        <h2 className="absolute bottom-0 right-4 sm:left-12 translate-y-1/3 sm:text-[192px] text-[72px] font-black uppercase text-neutral-900/[0.04] dark:text-white/[0.04] select-none pointer-events-none leading-none tracking-tighter">
+        <h2 className="absolute -bottom-2 sm:bottom-0 right-4 sm:left-12 sm:text-[180px] text-[72px] font-black uppercase text-neutral-900/[0.03] dark:text-white/[0.03] select-none pointer-events-none leading-none tracking-tighter">
           cinema
         </h2>
       </div>
