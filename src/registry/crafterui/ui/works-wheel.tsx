@@ -972,18 +972,6 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                 </button>
               </li>
             ))}
-            {onDiscoverAll && (
-              <li className="pt-2 mt-2 border-t border-[var(--color-border)]/60">
-                <button
-                  type="button"
-                  onClick={onDiscoverAll}
-                  className="cursor-pointer transition-colors outline-none text-amber-500 hover:text-amber-400 font-semibold flex items-center justify-end gap-1.5 ml-auto text-xs uppercase tracking-wider"
-                >
-                  <span>Discover All Movies</span>
-                  <span aria-hidden="true">↗</span>
-                </button>
-              </li>
-            )}
           </ol>
 
           {/* Pure Text Metadata Block in the Circled Area - Desktop Only */}
@@ -992,7 +980,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               ref={metaRef}
               className="pointer-events-none absolute text-right hidden md:flex flex-col items-end transition-opacity duration-300"
               style={{
-                top: "40%",
+                bottom: "2.5rem",
                 right: "2.5%",
                 maxWidth: "320px",
               }}
