@@ -34,10 +34,10 @@ export default function MoviesArchivePage() {
   const categories = React.useMemo(
     () => [
       { id: "all", label: "All Films" },
-      { id: "crime", label: "Crime & Noir" },
-      { id: "scifi", label: "Sci-Fi & Cyberpunk" },
-      { id: "horror", label: "Horror & Midnight" },
-      { id: "drama", label: "Drama & Romance" },
+      { id: "drama", label: "Drama & Classics" },
+      { id: "crime", label: "Crime & Thriller" },
+      { id: "action", label: "Action & Adventure" },
+      { id: "fantasy", label: "Fantasy & Animation" },
     ],
     []
   )
@@ -46,10 +46,10 @@ export default function MoviesArchivePage() {
     if (selectedCategory === "all") return ARCHIVE_FILMS
     return ARCHIVE_FILMS.filter((film) => {
       const cat = (film.category + " " + film.subtitle).toLowerCase()
-      if (selectedCategory === "crime") return cat.includes("crime") || cat.includes("noir")
-      if (selectedCategory === "scifi") return cat.includes("sci-fi") || cat.includes("cyberpunk")
-      if (selectedCategory === "horror") return cat.includes("horror") || cat.includes("thriller")
-      if (selectedCategory === "drama") return cat.includes("drama") || cat.includes("romance")
+      if (selectedCategory === "drama") return cat.includes("drama") || cat.includes("classic") || cat.includes("masterpiece")
+      if (selectedCategory === "crime") return cat.includes("crime") || cat.includes("thriller") || cat.includes("noir")
+      if (selectedCategory === "action") return cat.includes("action") || cat.includes("adventure")
+      if (selectedCategory === "fantasy") return cat.includes("fantasy") || cat.includes("animation")
       return true
     })
   }, [selectedCategory])

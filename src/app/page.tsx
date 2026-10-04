@@ -17,528 +17,686 @@ import { CinemaLogo } from "@/components/cinema-logo"
 
 const WORKS: WorksWheelItem[] = [
   {
-    id: 1,
-    title: "The Godfather",
-    image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
-    href: "#the-godfather",
-    category: "Crime · Drama · Classic",
-    imdbRating: "9.2",
-    director: "Francis Ford Coppola",
-    year: 1972,
-    duration: "2h 55m",
-    tagline: "An offer you can't refuse.",
-    synopsis: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant youngest son. Photographed in painterly chiaroscuro by Gordon Willis and restored under the personal supervision of Francis Ford Coppola.",
-    stills: [
+    "id": 1,
+    "title": "The Shawshank Redemption",
+    "image": "https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#the-shawshank-redemption",
+    "category": "Drama",
+    "imdbRating": "9.3",
+    "director": "Frank Darabont",
+    "year": 1994,
+    "duration": "2h 22m",
+    "tagline": "Nominated for 7 Oscars. 21 wins & 43 nominations total",
+    "synopsis": "Chronicles the experiences of a formerly successful banker as a prisoner in the gloomy jailhouse of Shawshank after being found guilty of a crime he did not commit. The film portrays the man's unique way of dealing with his new, torturous life; along the way he befriends a number of fellow prisoners, most notably a wise long-term inmate named Red.",
+    "stills": [
       {
-        url: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
-        caption: "The study of Don Vito Corleone",
-        aspectRatio: "1.85:1 Academy",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?auto=format&fit=crop&w=1200&q=80",
-        caption: "Michael Corleone in Corleone, Sicily",
-        aspectRatio: "1.85:1 Academy",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
-        caption: "Opening wedding reception exterior",
-        aspectRatio: "1.85:1 Academy",
-      },
+        "url": "https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "The Shawshank Redemption — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
     ],
-    reviews: [
+    "reviews": [
       {
-        critic: "Roger Ebert",
-        publication: "Chicago Sun-Times",
-        quote: "The Godfather is not only a great popular entertainment, but an inspired work of cinematic art. One of the undisputed masterworks of world cinema.",
-        rating: "4/4 ★",
+        "critic": "Roger Ebert",
+        "publication": "Chicago Sun-Times",
+        "quote": "The Shawshank Redemption is a film that ennobles human dignity and hope, achieving true cinematic grandeur through patience and deep humanity.",
+        "rating": "4/4 ★"
       },
       {
-        critic: "Pauline Kael",
-        publication: "The New Yorker",
-        quote: "If ever there was a great example of how the best popular movies come out of a merger of commerce and art, The Godfather is it.",
-        rating: "Essential",
-      },
-      {
-        critic: "Sight & Sound",
-        publication: "BFI",
-        quote: "A monumental tragedy of the American dream, photographed with painterly chiaroscuro by Gordon Willis.",
-        rating: "All-Time Top 10",
-      },
+        "critic": "Vincent Canby",
+        "publication": "The New York Times",
+        "quote": "A triumphant, quietly uplifting prison drama directed with remarkable sensitivity and masterly narrative command.",
+        "rating": "Essential"
+      }
     ],
-    specs: {
-      format: "Theatrical Presentation",
-      aspectRatio: "1.85:1 Academy Flat",
-      sound: "Restored 5.1 DTS-HD Master Audio",
-      color: "Technicolor Dye-Transfer Process",
+    "specs": {
+      "format": "35mm Archival Print / 4K Digital Master",
+      "aspectRatio": "1.85:1 Academy Flat",
+      "sound": "Dolby Atmos 5.1 Restored Array",
+      "color": "Technicolor Laboratory"
     },
-    screenings: [
+    "screenings": [
       "Fri 17:30 — Screen 1",
-      "Fri 21:00 — Dolby Atmos",
-      "Sat 19:00 — Screen 1",
+      "Fri 20:45 — Auditorium 2",
+      "Sat 19:00 — VIP Salle"
     ],
-    screeningSlots: [
+    "screeningSlots": [
       {
-        time: "17:30",
-        date: "Fri Sep 28",
-        format: "Standard",
-        auditorium: "Screen 1",
-        availability: "Few Seats Left",
+        "time": "17:30",
+        "date": "Fri Sep 28",
+        "format": "Standard",
+        "auditorium": "Screen 1",
+        "availability": "Few Seats Left"
       },
       {
-        time: "21:00",
-        date: "Fri Sep 28",
-        format: "Dolby Atmos",
-        auditorium: "Auditorium 2",
-        availability: "Available",
+        "time": "20:45",
+        "date": "Fri Sep 28",
+        "format": "Dolby Atmos",
+        "auditorium": "Auditorium 2",
+        "availability": "Available"
       },
       {
-        time: "19:00",
-        date: "Sat Sep 29",
-        format: "Standard",
-        auditorium: "Screen 1",
-        availability: "Selling Fast",
-      },
-    ],
+        "time": "19:00",
+        "date": "Sat Sep 29",
+        "format": "VIP Salle",
+        "auditorium": "VIP Salle",
+        "availability": "Selling Fast"
+      }
+    ]
   },
   {
-    id: 2,
-    title: "Resident Evil",
-    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80",
-    href: "#resident-evil",
-    category: "Sci-Fi · Action · Horror",
-    imdbRating: "6.7",
-    director: "Paul W.S. Anderson",
-    year: 2002,
-    duration: "1h 40m",
-    tagline: "Survive the Hive.",
-    synopsis: "A special military unit fights a powerful, out-of-control supercomputer and hundreds of scientists who have mutated into flesh-eating creatures after a laboratory accident. Presented for our Midnight Genre Retrospective.",
-    stills: [
+    "id": 2,
+    "title": "The Godfather",
+    "image": "https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#the-godfather",
+    "category": "Crime · Drama",
+    "imdbRating": "9.2",
+    "director": "Francis Ford Coppola",
+    "year": 1972,
+    "duration": "2h 55m",
+    "tagline": "Won 3 Oscars. 31 wins & 31 nominations total",
+    "synopsis": "The Godfather \"Don\" Vito Corleone is the head of the Corleone mafia family in New York. He is at the event of his daughter's wedding. Michael, Vito's youngest son and a decorated WWII Marine is also present at the wedding. Michael seems to be uninterested in being a part of the family business. Vito is a powerful man, and is kind to all those who give him respect but is ruthless against those who do not. But when a powerful and treacherous rival wants to sell drugs and needs the Don's influence for the same, Vito refuses to do it. What follows is a clash between Vito's fading old values and the new ways which may cause Michael to do the thing he was most reluctant in doing and wage a mob war against all the other mafia families which could tear the Corleone family apart.",
+    "stills": [
       {
-        url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80",
-        caption: "Alice in the subterranean Hive corridor",
-        aspectRatio: "1.85:1",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
-        caption: "Red Queen central mainframe chamber",
-        aspectRatio: "1.85:1",
-      },
+        "url": "https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "The Godfather — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
     ],
-    reviews: [
+    "reviews": [
       {
-        critic: "Peter Travers",
-        publication: "Rolling Stone",
-        quote: "A kinetic, pulse-pounding techno-horror blast that birthed a modern gaming cinema milestone.",
-        rating: "Cult Favorite",
+        "critic": "Roger Ebert",
+        "publication": "Chicago Sun-Times",
+        "quote": "The Godfather is not only a great popular entertainment, but an inspired work of cinematic art. One of the undisputed masterworks of world cinema.",
+        "rating": "4/4 ★"
       },
       {
-        critic: "Sight & Sound",
-        publication: "BFI",
-        quote: "Anderson crafts a geometric, claustrophobic industrial labyrinth elevated by Marco Beltrami and Marilyn Manson's visceral score.",
-        rating: "Archival Pick",
-      },
+        "critic": "Pauline Kael",
+        "publication": "The New Yorker",
+        "quote": "If ever there was a great example of how the best popular movies come out of a merger of commerce and art, The Godfather is it.",
+        "rating": "Essential"
+      }
     ],
-    specs: {
-      format: "Standard Presentation",
-      aspectRatio: "1.85:1 Standard",
-      sound: "Dolby Digital 5.1 Discrete",
-      color: "Deluxe Color Laboratory",
+    "specs": {
+      "format": "35mm Theatrical Preservation Print",
+      "aspectRatio": "1.85:1 Academy Flat",
+      "sound": "Restored 5.1 DTS-HD Master Audio",
+      "color": "Technicolor Dye-Transfer Process"
     },
-    screenings: [
-      "Fri 18:00 — Dolby Atmos",
-      "Fri 21:15 — Screen 2",
-      "Sat 23:00 — VIP Salon",
+    "screenings": [
+      "Fri 18:00 — VIP Salle",
+      "Fri 21:30 — Screen 1",
+      "Sat 17:00 — Auditorium 2"
     ],
-    screeningSlots: [
+    "screeningSlots": [
       {
-        time: "18:00",
-        date: "Fri Sep 28",
-        format: "Dolby Atmos",
-        auditorium: "Auditorium 3",
-        availability: "Available",
+        "time": "18:00",
+        "date": "Fri Sep 28",
+        "format": "VIP Salle",
+        "auditorium": "VIP Salle",
+        "availability": "Selling Fast"
       },
       {
-        time: "21:15",
-        date: "Fri Sep 28",
-        format: "Standard",
-        auditorium: "Screen 2",
-        availability: "Few Seats Left",
+        "time": "21:30",
+        "date": "Fri Sep 28",
+        "format": "Standard",
+        "auditorium": "Screen 1",
+        "availability": "Few Seats Left"
       },
       {
-        time: "23:00",
-        date: "Sat Sep 29",
-        format: "VIP Salon",
-        auditorium: "VIP Screening Lounge",
-        availability: "Selling Fast",
-      },
-    ],
+        "time": "17:00",
+        "date": "Sat Sep 29",
+        "format": "Dolby Atmos",
+        "auditorium": "Auditorium 2",
+        "availability": "Available"
+      }
+    ]
   },
   {
-    id: 3,
-    title: "Sacrifice",
-    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80",
-    href: "#sacrifice",
-    category: "Action · Thriller · Satire",
-    imdbRating: "8.1",
-    director: "Romain Gavras",
-    year: 2025,
-    duration: "1h 54m",
-    tagline: "Faith is the ultimate currency.",
-    synopsis: "When a high-society charity gala on a secluded Mediterranean volcanic island is taken hostage by radical purists, an uneasy alliance between an eccentric billionaire and a washed-up stunt performer triggers an explosive battle for survival.",
-    stills: [
+    "id": 3,
+    "title": "The Dark Knight",
+    "image": "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg",
+    "href": "#the-dark-knight",
+    "category": "Action · Crime · Drama",
+    "imdbRating": "9.1",
+    "director": "Christopher Nolan",
+    "year": 2008,
+    "duration": "2h 32m",
+    "tagline": "Won 2 Oscars. 163 wins & 165 nominations total",
+    "synopsis": "Set within a year after the events of Batman Begins (2005), Batman, Lieutenant James Gordon, and new District Attorney Harvey Dent successfully begin to round up the criminals that plague Gotham City, until a mysterious and sadistic criminal mastermind known only as \"The Joker\" appears in Gotham, creating a new wave of chaos. Batman's struggle against The Joker becomes deeply personal, forcing him to \"confront everything he believes\" and improve his technology to stop him. A love triangle develops between Bruce Wayne, Dent, and Rachel Dawes.",
+    "stills": [
       {
-        url: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80",
-        caption: "Volcanic caldera ridge standoff",
-        aspectRatio: "2.39:1 Anamorphic",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
-        caption: "Charity gala ballroom siege",
-        aspectRatio: "2.39:1 Anamorphic",
-      },
+        "url": "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg",
+        "caption": "The Dark Knight — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
     ],
-    reviews: [
+    "reviews": [
       {
-        critic: "David Ehrlich",
-        publication: "IndieWire",
-        quote: "Romain Gavras unleashes a ferociously stylized, razor-sharp satire of modern decadence that detonates across the screen.",
-        rating: "A-",
+        "critic": "Peter Travers",
+        "publication": "Rolling Stone",
+        "quote": "The Dark Knight is pitch-black, brilliant, and unforgettable. Heath Ledger's Joker is an explosive tour de force for the ages.",
+        "rating": "4/4 ★"
       },
       {
-        critic: "Cahiers du Cinéma",
-        publication: "Paris",
-        quote: "Pure visual electricity. Gavras commands large-format cinema with the choreography of an operatic street war.",
-        rating: "Critics Pick",
-      },
+        "critic": "Manohla Dargis",
+        "publication": "The New York Times",
+        "quote": "Christopher Nolan bridges the divide between artistic ambition and blockbuster spectacle with unprecedented cinematic muscle.",
+        "rating": "Critics Pick"
+      }
     ],
-    specs: {
-      format: "Theatrical Presentation",
-      aspectRatio: "2.39:1 Scope",
-      sound: "Dolby Atmos 64-Channel Immersive",
-      color: "Arri Color Science Master Grade",
+    "specs": {
+      "format": "70mm IMAX 15/70 Presentation",
+      "aspectRatio": "1.43:1 IMAX / 2.39:1 Scope",
+      "sound": "Dolby Atmos 64-Channel Array",
+      "color": "Original Photochemical Color Master"
     },
-    screenings: [
-      "Fri 19:15 — Screen 1",
-      "Fri 22:00 — Dolby Atmos",
-      "Sat 18:30 — Screen 1",
+    "screenings": [
+      "Fri 19:30 — Grand Auditorium",
+      "Fri 22:45 — VIP Salle",
+      "Sat 20:15 — Grand Auditorium"
     ],
-    screeningSlots: [
+    "screeningSlots": [
       {
-        time: "19:15",
-        date: "Fri Sep 28",
-        format: "Standard",
-        auditorium: "Screen 1",
-        availability: "Available",
+        "time": "19:30",
+        "date": "Fri Sep 28",
+        "format": "IMAX Laser",
+        "auditorium": "Grand Auditorium",
+        "availability": "Selling Fast"
       },
       {
-        time: "22:00",
-        date: "Fri Sep 28",
-        format: "Dolby Atmos",
-        auditorium: "Auditorium 1",
-        availability: "Few Seats Left",
+        "time": "22:45",
+        "date": "Fri Sep 28",
+        "format": "VIP Salle",
+        "auditorium": "VIP Salle",
+        "availability": "Few Seats Left"
       },
       {
-        time: "18:30",
-        date: "Sat Sep 29",
-        format: "Standard",
-        auditorium: "Screen 1",
-        availability: "Selling Fast",
-      },
-    ],
+        "time": "20:15",
+        "date": "Sat Sep 29",
+        "format": "IMAX Laser",
+        "auditorium": "Grand Auditorium",
+        "availability": "Available"
+      }
+    ]
   },
   {
-    id: 4,
-    title: "Spider-Man: Brand New Day",
-    image: "https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?auto=format&fit=crop&w=1200&q=80",
-    href: "#spider-man-brand-new-day",
-    category: "Action · Adventure · Sci-Fi",
-    imdbRating: "8.8",
-    director: "Destin Daniel Cretton",
-    year: 2026,
-    duration: "2h 28m",
-    tagline: "A clean slate. A new shadow.",
-    synopsis: "Stripped of his identity, Peter Parker navigates the gritty streets of Manhattan as an anonymous protector, facing the rise of an underground crime syndicate that threatens to tear the city apart.",
-    stills: [
+    "id": 4,
+    "title": "The Godfather Part II",
+    "image": "https://m.media-amazon.com/images/M/MV5BMDIxMzBlZDktZjMxNy00ZGI4LTgxNDEtYWRlNzRjMjJmOGQ1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#the-godfather-part-ii",
+    "category": "Crime · Drama",
+    "imdbRating": "9.0",
+    "director": "Francis Ford Coppola",
+    "year": 1974,
+    "duration": "3h 22m",
+    "tagline": "Won 6 Oscars. 17 wins & 21 nominations total",
+    "synopsis": "The continuing saga of the Corleone crime family tells the story of a young Vito Corleone growing up in Sicily and in 1910s New York; and follows Michael Corleone in the 1950s as he attempts to expand the family business into Las Vegas, Hollywood and Cuba.",
+    "stills": [
       {
-        url: "https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?auto=format&fit=crop&w=1200&q=80",
-        caption: "Rain-slicked Manhattan skyline descent",
-        aspectRatio: "1.90:1",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
-        caption: "Chinatown rooftop reconnaissance",
-        aspectRatio: "1.90:1",
-      },
+        "url": "https://m.media-amazon.com/images/M/MV5BMDIxMzBlZDktZjMxNy00ZGI4LTgxNDEtYWRlNzRjMjJmOGQ1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "The Godfather Part II — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
     ],
-    reviews: [
+    "reviews": [
       {
-        critic: "Justin Chang",
-        publication: "Los Angeles Times",
-        quote: "A grounded, emotionally resonant return to street-level heroism with breathtaking aerial cinematography.",
-        rating: "Outstanding",
+        "critic": "Vincent Canby",
+        "publication": "The New York Times",
+        "quote": "The Godfather Part II is a brilliant, operatic tapestry that deepens and expands upon its predecessor with Shakespearean tragedy.",
+        "rating": "Masterpiece"
       },
       {
-        critic: "Total Film",
-        publication: "London",
-        quote: "Spectacular in every frame. The tactile action and raw character stakes make this an instant high-water mark.",
-        rating: "5/5 ★",
-      },
+        "critic": "Gene Siskel",
+        "publication": "Chicago Tribune",
+        "quote": "One of the greatest sequels ever made, featuring transcendent performances from Al Pacino and Robert De Niro.",
+        "rating": "4/4 ★"
+      }
     ],
-    specs: {
-      format: "Digital Presentation",
-      aspectRatio: "1.90:1 / 2.39:1 Scope",
-      sound: "12-Channel Immersive Audio",
-      color: "HDR10 Exhibition Master",
+    "specs": {
+      "format": "35mm Studio Archival Reference",
+      "aspectRatio": "1.85:1 Academy Flat",
+      "sound": "Restored 5.1 Discrete Surround",
+      "color": "Technicolor Dye-Transfer Process"
     },
-    screenings: [
+    "screenings": [
       "Fri 16:45 — Screen 1",
-      "Fri 20:30 — Screen 1",
-      "Sat 14:15 — Screen 1",
+      "Fri 20:30 — Auditorium 2",
+      "Sat 18:30 — VIP Salle"
     ],
-    screeningSlots: [
+    "screeningSlots": [
       {
-        time: "16:45",
-        date: "Fri Sep 28",
-        format: "Standard",
-        auditorium: "Screen 1",
-        availability: "Selling Fast",
+        "time": "16:45",
+        "date": "Fri Sep 28",
+        "format": "Standard",
+        "auditorium": "Screen 1",
+        "availability": "Available"
       },
       {
-        time: "20:30",
-        date: "Fri Sep 28",
-        format: "Standard",
-        auditorium: "Screen 1",
-        availability: "Few Seats Left",
+        "time": "20:30",
+        "date": "Fri Sep 28",
+        "format": "Dolby Atmos",
+        "auditorium": "Auditorium 2",
+        "availability": "Selling Fast"
       },
       {
-        time: "14:15",
-        date: "Sat Sep 29",
-        format: "Standard",
-        auditorium: "Screen 1",
-        availability: "Available",
-      },
-    ],
+        "time": "18:30",
+        "date": "Sat Sep 29",
+        "format": "VIP Salle",
+        "auditorium": "VIP Salle",
+        "availability": "Few Seats Left"
+      }
+    ]
   },
   {
-    id: 5,
-    title: "Weapons",
-    image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
-    href: "#weapons",
-    category: "Mystery · Horror · Drama",
-    imdbRating: "8.4",
-    director: "Zach Cregger",
-    year: 2025,
-    duration: "2h 08m",
-    tagline: "Every secret leaves a trace.",
-    synopsis: "An interconnected mystery revolving around the disappearance of high school students in a sleepy coastal community, told through shifting perspectives that reveal a sinister web of paranoia, grief, and generational dread.",
-    stills: [
+    "id": 5,
+    "title": "The Lord of the Rings: The Return of the King",
+    "image": "https://m.media-amazon.com/images/M/MV5BMTZkMjBjNWMtZGI5OC00MGU0LTk4ZTItODg2NWM3NTVmNWQ4XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#the-lord-of-the-rings-the-return-of-the-king",
+    "category": "Adventure · Drama · Fantasy",
+    "imdbRating": "9.0",
+    "director": "Peter Jackson",
+    "year": 2003,
+    "duration": "3h 21m",
+    "tagline": "Won 11 Oscars. 215 wins & 124 nominations total",
+    "synopsis": "The final confrontation between the forces of good and evil fighting for control of the future of Middle-earth. Frodo and Sam reach Mordor in their quest to destroy the One Ring, while Aragorn leads the forces of good against Sauron's evil army at the stone city of Minas Tirith.",
+    "stills": [
       {
-        url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
-        caption: "Fog-drenched coastal crossroads at twilight",
-        aspectRatio: "2.39:1 Anamorphic",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
-        caption: "Municipal archive discovery",
-        aspectRatio: "2.39:1 Anamorphic",
-      },
+        "url": "https://m.media-amazon.com/images/M/MV5BMTZkMjBjNWMtZGI5OC00MGU0LTk4ZTItODg2NWM3NTVmNWQ4XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "The Lord of the Rings: The Return of the King — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
     ],
-    reviews: [
+    "reviews": [
       {
-        critic: "Bilge Ebiri",
-        publication: "Vulture",
-        quote: "Cregger confirms he is one of the most daring genre architects working today. Relentless, terrifying, and deeply human.",
-        rating: "Critic's Pick",
+        "critic": "Richard Corliss",
+        "publication": "TIME Magazine",
+        "quote": "Peter Jackson delivers a staggering triumph. A monumental climax to the greatest fantasy trilogy in motion picture history.",
+        "rating": "10/10"
       },
       {
-        critic: "The A.V. Club",
-        publication: "Chicago",
-        quote: "A masterclass in narrative misdirection and sustained dread that keeps audiences breathless until the final second.",
-        rating: "A",
-      },
+        "critic": "Roger Ebert",
+        "publication": "Chicago Sun-Times",
+        "quote": "A masterpiece of visual storytelling, emotional resonance, and sheer scale that will stand untouched for generations.",
+        "rating": "4/4 ★"
+      }
     ],
-    specs: {
-      format: "Panavision Anamorphic",
-      aspectRatio: "2.39:1 Anamorphic Scope",
-      sound: "Dolby Atmos Immersive",
-      color: "Kodak Vision3 5219 Emulsion",
+    "specs": {
+      "format": "4K Laser Extended Roadshow Edition",
+      "aspectRatio": "2.39:1 Anamorphic Scope",
+      "sound": "Dolby Atmos 12-Channel Immersive",
+      "color": "Digital Intermediate Color Grade"
     },
-    screenings: [
-      "Fri 18:15 — Dolby Atmos",
-      "Fri 21:45 — VIP Salon",
-      "Sat 20:00 — Dolby Atmos",
+    "screenings": [
+      "Fri 17:00 — Grand Auditorium",
+      "Fri 21:00 — Auditorium 2",
+      "Sat 16:30 — Grand Auditorium"
     ],
-    screeningSlots: [
+    "screeningSlots": [
       {
-        time: "18:15",
-        date: "Fri Sep 28",
-        format: "Dolby Atmos",
-        auditorium: "Auditorium 2",
-        availability: "Available",
+        "time": "17:00",
+        "date": "Fri Sep 28",
+        "format": "Roadshow 4K",
+        "auditorium": "Grand Auditorium",
+        "availability": "Selling Fast"
       },
       {
-        time: "21:45",
-        date: "Fri Sep 28",
-        format: "VIP Salon",
-        auditorium: "VIP Salon Lounge",
-        availability: "Few Seats Left",
+        "time": "21:00",
+        "date": "Fri Sep 28",
+        "format": "Dolby Atmos",
+        "auditorium": "Auditorium 2",
+        "availability": "Available"
       },
       {
-        time: "20:00",
-        date: "Sat Sep 29",
-        format: "Dolby Atmos",
-        auditorium: "Auditorium 2",
-        availability: "Selling Fast",
-      },
-    ],
+        "time": "16:30",
+        "date": "Sat Sep 29",
+        "format": "Roadshow 4K",
+        "auditorium": "Grand Auditorium",
+        "availability": "Few Seats Left"
+      }
+    ]
   },
   {
-    id: 6,
-    title: "Barbarian",
-    image: "https://images.unsplash.com/photo-1509281373149-e957c6296406?auto=format&fit=crop&w=1200&q=80",
-    href: "#barbarian",
-    category: "Horror · Mystery · Thriller",
-    imdbRating: "7.0",
-    director: "Zach Cregger",
-    year: 2022,
-    duration: "1h 42m",
-    tagline: "Some doors are meant to stay locked.",
-    synopsis: "A young woman arriving in Detroit for a job interview finds her rental home double-booked with a strange man. Deciding to stay the night, she soon discovers there's far more to fear than just an unexpected guest.",
-    stills: [
+    "id": 6,
+    "title": "12 Angry Men",
+    "image": "https://m.media-amazon.com/images/M/MV5BYjE4NzdmOTYtYjc5Yi00YzBiLWEzNDEtNTgxZGQ2MWVkN2NiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#12-angry-men",
+    "category": "Crime · Drama",
+    "imdbRating": "9.0",
+    "director": "Sidney Lumet",
+    "year": 1957,
+    "duration": "1h 36m",
+    "tagline": "Nominated for 3 Oscars. 16 wins & 12 nominations total",
+    "synopsis": "The defense and the prosecution have rested, and the jury is filing into the jury room to decide if a young man is guilty or innocent of murdering his father. What begins as an open-and-shut case of murder soon becomes a detective story that presents a succession of clues creating doubt, and a mini-drama of each of the jurors' prejudices and preconceptions about the trial, the accused, AND each other. Based on the play, all of the action takes place on the stage of the jury room.",
+    "stills": [
       {
-        url: "https://images.unsplash.com/photo-1509281373149-e957c6296406?auto=format&fit=crop&w=1200&q=80",
-        caption: "476 Barbary Street exterior at nightfall",
-        aspectRatio: "2.39:1",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80",
-        caption: "The subterranean hidden corridor",
-        aspectRatio: "2.39:1",
-      },
+        "url": "https://m.media-amazon.com/images/M/MV5BYjE4NzdmOTYtYjc5Yi00YzBiLWEzNDEtNTgxZGQ2MWVkN2NiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "12 Angry Men — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
     ],
-    reviews: [
+    "reviews": [
       {
-        critic: "Clarisse Loughrey",
-        publication: "The Independent",
-        quote: "Brilliant, subversive, and gleefully unpredictable. One of the sharpest horror films in recent memory.",
-        rating: "5/5 ★",
+        "critic": "A.H. Weiler",
+        "publication": "The New York Times",
+        "quote": "12 Angry Men is a tense, absorbing, and compelling drama that reaches into the very conscience of jury deliberation and human justice.",
+        "rating": "Classic"
       },
       {
-        critic: "Rolling Stone",
-        publication: "New York",
-        quote: "A wild thrill ride that continually pulls the rug out from under the audience with breathtaking skill.",
-        rating: "Certified Fresh",
-      },
+        "critic": "Roger Ebert",
+        "publication": "Chicago Sun-Times",
+        "quote": "Sidney Lumet uses camera angles and claustrophobic framing with unmatched precision. A textbook in pure dramatic mastery.",
+        "rating": "4/4 ★"
+      }
     ],
-    specs: {
-      format: "Digital Master Presentation",
-      aspectRatio: "2.39:1 Scope",
-      sound: "5.1 Surround Sound Discrete",
-      color: "ACES Precision Color Pipeline",
+    "specs": {
+      "format": "35mm Black & White Fine-Grain Master",
+      "aspectRatio": "1.66:1 European Aspect",
+      "sound": "Uncompressed Monaural Archival Sound",
+      "color": "Kodak Double-X Monochrome"
     },
-    screenings: [
-      "Fri 20:00 — Dolby Atmos",
-      "Fri 23:15 — VIP Salon",
-      "Sat 22:30 — Dolby Atmos",
+    "screenings": [
+      "Fri 15:00 — Salon Privé",
+      "Fri 18:30 — Screen 1",
+      "Sat 21:15 — Salon Privé"
     ],
-    screeningSlots: [
+    "screeningSlots": [
       {
-        time: "20:00",
-        date: "Fri Sep 28",
-        format: "Dolby Atmos",
-        auditorium: "Auditorium 3",
-        availability: "Available",
+        "time": "15:00",
+        "date": "Fri Sep 28",
+        "format": "Archival 35mm",
+        "auditorium": "Salon Privé",
+        "availability": "Available"
       },
       {
-        time: "23:15",
-        date: "Fri Sep 28",
-        format: "VIP Salon",
-        auditorium: "VIP Salon Lounge",
-        availability: "Selling Fast",
+        "time": "18:30",
+        "date": "Fri Sep 28",
+        "format": "Standard",
+        "auditorium": "Screen 1",
+        "availability": "Few Seats Left"
       },
       {
-        time: "22:30",
-        date: "Sat Sep 29",
-        format: "Dolby Atmos",
-        auditorium: "Auditorium 3",
-        availability: "Available",
-      },
-    ],
+        "time": "21:15",
+        "date": "Sat Sep 29",
+        "format": "Archival 35mm",
+        "auditorium": "Salon Privé",
+        "availability": "Selling Fast"
+      }
+    ]
   },
   {
-    id: 7,
-    title: "The Drama",
-    image: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?auto=format&fit=crop&w=1200&q=80",
-    href: "#the-drama",
-    category: "Dark Comedy · Romance · Drama",
-    imdbRating: "8.6",
-    director: "Kristoffer Borgli",
-    year: 2026,
-    duration: "1h 58m",
-    tagline: "A wedding without secrets is no wedding at all.",
-    synopsis: "In the days leading up to what should be an idyllic Parisian nuptial celebration, an unexpected confession unravels the couple's relationship, spiraling into a razor-sharp, surreal comedy of errors and psychological absurdity.",
-    stills: [
+    "id": 7,
+    "title": "The Lord of the Rings: The Fellowship of the Ring",
+    "image": "https://m.media-amazon.com/images/M/MV5BNzIxMDQ2YTctNDY4MC00ZTRhLTk4ODQtMTVlOWY4NTdiYmMwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#the-lord-of-the-rings-the-fellowship-of-the-ring",
+    "category": "Adventure · Drama · Fantasy",
+    "imdbRating": "8.9",
+    "director": "Peter Jackson",
+    "year": 2001,
+    "duration": "2h 58m",
+    "tagline": "Won 4 Oscars. 126 wins & 127 nominations total",
+    "synopsis": "An ancient Ring thought lost for centuries has been found, and through a strange twist of fate has been given to a small Hobbit named Frodo. When Gandalf discovers the Ring is in fact the One Ring of the Dark Lord Sauron, Frodo must make an epic quest to Mount Doom in order to destroy it. However, he does not go alone. He is joined by Gandalf, Legolas the elf, Gimli the Dwarf, Aragorn, Boromir, and his three Hobbit friends Merry, Pippin, and Samwise. Through mountains, snow, darkness, forests, rivers and plains, facing evil and danger at every corner the Fellowship of the Ring must go. Their quest to destroy the One Ring is the only hope for the end of the Dark Lords reign.",
+    "stills": [
       {
-        url: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?auto=format&fit=crop&w=1200&q=80",
-        caption: "Rehearsal dinner terrace dialogue",
-        aspectRatio: "1.66:1 European",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
-        caption: "The Parisian salon evening confession",
-        aspectRatio: "1.66:1 European",
-      },
+        "url": "https://m.media-amazon.com/images/M/MV5BNzIxMDQ2YTctNDY4MC00ZTRhLTk4ODQtMTVlOWY4NTdiYmMwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "The Lord of the Rings: The Fellowship of the Ring — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
     ],
-    reviews: [
+    "reviews": [
       {
-        critic: "Guy Lodge",
-        publication: "Variety",
-        quote: "A deliciously uncomfortable satire of modern romance and social performance, directed with precision and wicked humor.",
-        rating: "Fest Winner",
+        "critic": "Kenneth Turan",
+        "publication": "Los Angeles Times",
+        "quote": "Jackson creates an immersive mythical universe of breathtaking beauty, profound camaraderie, and visceral adventure.",
+        "rating": "A+"
       },
       {
-        critic: "The Guardian",
-        publication: "London",
-        quote: "Borgli proves once again to be cinema's most astute chronicler of social self-sabotage.",
-        rating: "4/5 ★",
-      },
+        "critic": "Peter Travers",
+        "publication": "Rolling Stone",
+        "quote": "The Fellowship of the Ring captures the pure majesty of Tolkien's epic world with heart-stopping grandeur.",
+        "rating": "4/4 ★"
+      }
     ],
-    specs: {
-      format: "Theatrical Presentation",
-      aspectRatio: "1.66:1 European Flat",
-      sound: "5.1 Surround Sound",
-      color: "Kodak Double-X Black & White / Color Reversal",
+    "specs": {
+      "format": "4K Laser Extended Roadshow Edition",
+      "aspectRatio": "2.39:1 Anamorphic Scope",
+      "sound": "Dolby Atmos 12-Channel Immersive",
+      "color": "Digital Intermediate Color Grade"
     },
-    screenings: [
-      "Fri 17:00 — Screen 2",
-      "Fri 19:45 — Dolby Atmos",
-      "Sat 21:30 — Screen 1",
+    "screenings": [
+      "Fri 14:30 — Grand Auditorium",
+      "Fri 19:15 — Auditorium 2",
+      "Sat 15:30 — Grand Auditorium"
     ],
-    screeningSlots: [
+    "screeningSlots": [
       {
-        time: "17:00",
-        date: "Fri Sep 28",
-        format: "Standard",
-        auditorium: "Screen 2",
-        availability: "Few Seats Left",
+        "time": "14:30",
+        "date": "Fri Sep 28",
+        "format": "Roadshow 4K",
+        "auditorium": "Grand Auditorium",
+        "availability": "Available"
       },
       {
-        time: "19:45",
-        date: "Fri Sep 28",
-        format: "Dolby Atmos",
-        auditorium: "Auditorium 1",
-        availability: "Available",
+        "time": "19:15",
+        "date": "Fri Sep 28",
+        "format": "Dolby Atmos",
+        "auditorium": "Auditorium 2",
+        "availability": "Selling Fast"
       },
       {
-        time: "21:30",
-        date: "Sat Sep 29",
-        format: "Standard",
-        auditorium: "Screen 1",
-        availability: "Available",
-      },
-    ],
+        "time": "15:30",
+        "date": "Sat Sep 29",
+        "format": "Roadshow 4K",
+        "auditorium": "Grand Auditorium",
+        "availability": "Few Seats Left"
+      }
+    ]
   },
-]
+  {
+    "id": 8,
+    "title": "Pulp Fiction",
+    "image": "https://m.media-amazon.com/images/M/MV5BYTViYTE3ZGQtNDBlMC00ZTAyLTkyODMtZGRiZDg0MjA2YThkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#pulp-fiction",
+    "category": "Crime · Drama",
+    "imdbRating": "8.8",
+    "director": "Quentin Tarantino",
+    "year": 1994,
+    "duration": "2h 34m",
+    "tagline": "Won 1 Oscar. 69 wins & 72 nominations total",
+    "synopsis": "Jules Winnfield (Samuel L. Jackson) and Vincent Vega (John Travolta) are two hitmen who are out to retrieve a suitcase stolen from their employer, mob boss Marsellus Wallace (Ving Rhames). Wallace has also asked Vincent to take his wife Mia (Uma Thurman) out a few days later when Wallace himself will be out of town. Butch Coolidge (Bruce Willis) is an aging boxer who is paid by Wallace to lose his fight. The lives of these seemingly unrelated people are woven together comprising of a series of funny, bizarre and uncalled-for incidents.",
+    "stills": [
+      {
+        "url": "https://m.media-amazon.com/images/M/MV5BYTViYTE3ZGQtNDBlMC00ZTAyLTkyODMtZGRiZDg0MjA2YThkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "Pulp Fiction — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
+    ],
+    "reviews": [
+      {
+        "critic": "Todd McCarthy",
+        "publication": "Variety",
+        "quote": "Pulp Fiction is a tour de force of intoxicating dialogue, non-linear swagger, and pop-culture brilliance that redefined American indie cinema.",
+        "rating": "Palme d'Or"
+      },
+      {
+        "critic": "Janet Maslin",
+        "publication": "The New York Times",
+        "quote": "Quentin Tarantino strikes pure cinematic gold. Hypnotic, wildly entertaining, and razor-sharp from first frame to last.",
+        "rating": "Critics Pick"
+      }
+    ],
+    "specs": {
+      "format": "35mm Vintage 1994 Theatrical Print",
+      "aspectRatio": "2.35:1 Panavision Scope",
+      "sound": "Dolby Digital 5.1 Discrete",
+      "color": "Deluxe Color Laboratory"
+    },
+    "screenings": [
+      "Fri 19:45 — Screen 1",
+      "Fri 22:30 — Auditorium 2",
+      "Sat 21:00 — VIP Salle"
+    ],
+    "screeningSlots": [
+      {
+        "time": "19:45",
+        "date": "Fri Sep 28",
+        "format": "35mm Vintage",
+        "auditorium": "Screen 1",
+        "availability": "Selling Fast"
+      },
+      {
+        "time": "22:30",
+        "date": "Fri Sep 28",
+        "format": "Midnight Special",
+        "auditorium": "Auditorium 2",
+        "availability": "Few Seats Left"
+      },
+      {
+        "time": "21:00",
+        "date": "Sat Sep 29",
+        "format": "VIP Salle",
+        "auditorium": "VIP Salle",
+        "availability": "Available"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Fight Club",
+    "image": "https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmEyYjBiMjI1Y2M5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#fight-club",
+    "category": "Crime · Drama · Thriller",
+    "imdbRating": "8.8",
+    "director": "David Fincher",
+    "year": 1999,
+    "duration": "2h 19m",
+    "tagline": "Nominated for 1 Oscar. 12 wins & 38 nominations total",
+    "synopsis": "A nameless first-person narrator attends support groups in an attempt to subdue his emotional state and relieve his insomniac state. When he meets Marla, another fake attendee of support groups, his life seems to become a little more bearable. However, when he associates himself with Tyler he is dragged into an underground fight club and soap-making scheme. Together the two men spiral out of control and engage in competitive rivalry for love and power.",
+    "stills": [
+      {
+        "url": "https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmEyYjBiMjI1Y2M5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "Fight Club — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
+    ],
+    "reviews": [
+      {
+        "critic": "David Ansen",
+        "publication": "Newsweek",
+        "quote": "David Fincher directs with ferociously dark wit and breathtaking visual ingenuity. An unforgettable satirical sledgehammer.",
+        "rating": "Cult Icon"
+      },
+      {
+        "critic": "Peter Travers",
+        "publication": "Rolling Stone",
+        "quote": "Fight Club is a visionary adrenaline shot—bold, subversive, and undeniably brilliant filmmaking.",
+        "rating": "4/4 ★"
+      }
+    ],
+    "specs": {
+      "format": "35mm Special Midnight Exhibition",
+      "aspectRatio": "2.39:1 Super 35 Scope",
+      "sound": "5.1 Surround Sound Discrete",
+      "color": "Technicolor Enriched Bleach Bypass"
+    },
+    "screenings": [
+      "Fri 20:00 — Auditorium 2",
+      "Fri 23:00 — Screen 1",
+      "Sat 22:15 — VIP Salle"
+    ],
+    "screeningSlots": [
+      {
+        "time": "20:00",
+        "date": "Fri Sep 28",
+        "format": "Dolby Atmos",
+        "auditorium": "Auditorium 2",
+        "availability": "Available"
+      },
+      {
+        "time": "23:00",
+        "date": "Fri Sep 28",
+        "format": "Midnight 35mm",
+        "auditorium": "Screen 1",
+        "availability": "Selling Fast"
+      },
+      {
+        "time": "22:15",
+        "date": "Sat Sep 29",
+        "format": "VIP Salle",
+        "auditorium": "VIP Salle",
+        "availability": "Few Seats Left"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Gladiator",
+    "image": "https://m.media-amazon.com/images/M/MV5BYWQ4YmNjYjEtOWE1Zi00Y2U4LWI4NTAtMTU0MjkxNWQ1ZmJiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "href": "#gladiator",
+    "category": "Action · Adventure · Drama",
+    "imdbRating": "8.5",
+    "director": "Ridley Scott",
+    "year": 2000,
+    "duration": "2h 35m",
+    "tagline": "Won 5 Oscars. 61 wins & 105 nominations total",
+    "synopsis": "Maximus is a powerful Roman general, loved by the people and the aging Emperor, Marcus Aurelius. Before his death, the Emperor chooses Maximus to be his heir over his own son, Commodus, and a power struggle leaves Maximus and his family condemned to death. The powerful general is captured and put into the Gladiator games until he dies. The only desire that fuels him now is the chance to rise to the top so that he will be able to look into the eyes of the man who will feel his revenge.",
+    "stills": [
+      {
+        "url": "https://m.media-amazon.com/images/M/MV5BYWQ4YmNjYjEtOWE1Zi00Y2U4LWI4NTAtMTU0MjkxNWQ1ZmJiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        "caption": "Gladiator — Official Archival Exhibition Artwork",
+        "aspectRatio": "2:3 Theatrical"
+      }
+    ],
+    "reviews": [
+      {
+        "critic": "Elvis Mitchell",
+        "publication": "The New York Times",
+        "quote": "Ridley Scott crafts a colossal, visceral sword-and-sandals epic anchored by Russell Crowe's towering, soulful authority.",
+        "rating": "Critics Pick"
+      },
+      {
+        "critic": "Roger Ebert",
+        "publication": "Chicago Sun-Times",
+        "quote": "Gladiator brings the Colosseum roaring back to life with sweeping operatic scale and heartfelt tragic power.",
+        "rating": "3.5/4 ★"
+      }
+    ],
+    "specs": {
+      "format": "70mm Large Format Exhibition",
+      "aspectRatio": "2.39:1 Panavision Scope",
+      "sound": "Dolby Atmos Discrete Array",
+      "color": "Deluxe Color Master"
+    },
+    "screenings": [
+      "Fri 18:15 — Grand Auditorium",
+      "Fri 21:45 — Auditorium 2",
+      "Sat 19:30 — VIP Salle"
+    ],
+    "screeningSlots": [
+      {
+        "time": "18:15",
+        "date": "Fri Sep 28",
+        "format": "70mm Large Format",
+        "auditorium": "Grand Auditorium",
+        "availability": "Available"
+      },
+      {
+        "time": "21:45",
+        "date": "Fri Sep 28",
+        "format": "Dolby Atmos",
+        "auditorium": "Auditorium 2",
+        "availability": "Selling Fast"
+      },
+      {
+        "time": "19:30",
+        "date": "Sat Sep 29",
+        "format": "VIP Salle",
+        "auditorium": "VIP Salle",
+        "availability": "Few Seats Left"
+      }
+    ]
+  }
+];
 
 const glyph = "size-3.5 opacity-70"
 
