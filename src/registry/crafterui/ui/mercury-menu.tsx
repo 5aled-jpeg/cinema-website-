@@ -455,7 +455,11 @@ export function MercuryMenu({
 
   return (
     <div
-      className={cn("relative select-none", className)}
+      className={cn(
+        "relative select-none",
+        "[--mercury-surface:#0a0a0c] [--mercury-rim:rgba(255,255,255,0.15)] dark:[--mercury-surface:#ffffff] dark:[--mercury-rim:rgba(0,0,0,0.12)]",
+        className
+      )}
       style={{ width: size, height: size }}
       {...props}
     >
@@ -473,7 +477,7 @@ export function MercuryMenu({
         <div ref={bodiesRef} className="absolute inset-0" aria-hidden="true">
           <div
             ref={triggerBodyRef}
-            className="bg-background border-border absolute rounded-full border shadow-[0_3px_6px_-1px_rgb(0_0_0/0.10)]"
+            className="bg-neutral-950 dark:bg-white border-neutral-800 dark:border-neutral-200 absolute rounded-full border shadow-[0_4px_16px_rgba(0,0,0,0.35)] dark:shadow-[0_4px_16px_rgba(255,255,255,0.25)] transition-colors"
             style={{ width: BUTTON, height: BUTTON, left: 0, top: 0 }}
           />
           {/* The crisp panel is the SAME squircle the goo blob draws, so the two
@@ -481,12 +485,12 @@ export function MercuryMenu({
           <svg
             ref={panelBodyRef}
             className="absolute overflow-visible opacity-0"
-            style={{ ...panelBox, filter: "drop-shadow(0 3px 6px rgb(0 0 0 / 0.10))" }}
+            style={{ ...panelBox, filter: "drop-shadow(0 4px 16px rgba(0, 0, 0, 0.35))" }}
             width={panelWidth}
             height={geo.height}
             viewBox={`0 0 ${panelWidth} ${geo.height}`}
           >
-            <path d={geo.path} className="fill-background stroke-border" strokeWidth={1} />
+            <path d={geo.path} className="fill-neutral-950 dark:fill-white stroke-neutral-800 dark:stroke-neutral-200" strokeWidth={1} />
           </svg>
         </div>
 
@@ -502,7 +506,7 @@ export function MercuryMenu({
           style={{
             left: HALF - geo.cx,
             top: HALF - geo.cy,
-            filter: "drop-shadow(0 3px 6px rgb(0 0 0 / 0.10))",
+            filter: "drop-shadow(0 4px 16px rgba(0, 0, 0, 0.35))",
           }}
           aria-hidden="true"
           focusable="false"
@@ -514,7 +518,7 @@ export function MercuryMenu({
             <path
               ref={panelBlobRef}
               d={geo.blobPath}
-              className="fill-background [transform-box:fill-box]"
+              className="fill-neutral-950 dark:fill-white [transform-box:fill-box]"
               style={{ transformOrigin: `${geo.originX}px ${geo.originY}px` }}
             />
             <circle
@@ -522,7 +526,7 @@ export function MercuryMenu({
               cx={geo.cx}
               cy={geo.cy}
               r={HALF}
-              className="fill-background [transform-box:fill-box] [transform-origin:50%_50%]"
+              className="fill-neutral-950 dark:fill-white [transform-box:fill-box] [transform-origin:50%_50%]"
             />
             {GRAB_CHAIN.map((link, i) => (
               <circle
@@ -533,7 +537,7 @@ export function MercuryMenu({
                 cx={geo.cx}
                 cy={geo.cy}
                 r={11}
-                className="fill-background [transform-box:fill-box] [transform-origin:50%_50%]"
+                className="fill-neutral-950 dark:fill-white [transform-box:fill-box] [transform-origin:50%_50%]"
               />
             ))}
           </g>
@@ -579,8 +583,8 @@ export function MercuryMenu({
               className={cn(
                 "group flex w-full items-center justify-between gap-2.5 rounded-[10px] px-2.5 text-left text-[13px] font-medium outline-none transition-all cursor-pointer select-none focus-visible:outline-2 focus-visible:-outline-offset-2",
                 item.active
-                  ? "bg-amber-500/15 text-amber-500 dark:text-amber-400 font-semibold"
-                  : "text-foreground/80 hover:text-foreground hover:bg-foreground/5"
+                  ? "bg-amber-500/20 text-amber-400 dark:text-amber-600 font-semibold"
+                  : "text-neutral-300 dark:text-neutral-700 hover:text-white dark:hover:text-neutral-950 hover:bg-white/10 dark:hover:bg-neutral-950/5"
               )}
               style={{ height: ROW }}
               onPointerDown={(e) => {
@@ -600,8 +604,8 @@ export function MercuryMenu({
                     className={cn(
                       "flex shrink-0 transition-colors",
                       item.active
-                        ? "text-amber-500 dark:text-amber-400"
-                        : "text-foreground/70 group-hover:text-foreground"
+                        ? "text-amber-400 dark:text-amber-600"
+                        : "text-neutral-400 dark:text-neutral-500 group-hover:text-white dark:group-hover:text-neutral-950"
                     )}
                   >
                     {item.icon}
@@ -610,7 +614,7 @@ export function MercuryMenu({
                 <span className="truncate">{item.label}</span>
               </div>
               {item.active && (
-                <span className="size-1.5 rounded-full bg-amber-500 shrink-0 animate-pulse" />
+                <span className="size-1.5 rounded-full bg-amber-400 dark:bg-amber-600 shrink-0 animate-pulse" />
               )}
             </button>
           ))}
@@ -621,7 +625,7 @@ export function MercuryMenu({
           type="button"
           data-cursor-interactive="true"
           data-cursor-label={isOpen ? "Close" : "Menu"}
-          className="text-foreground/80 hover:text-foreground hover:bg-foreground/5 [[data-liquid]_&]:bg-transparent focus-visible:outline-foreground absolute inset-0 grid place-items-center rounded-full outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 cursor-pointer"
+          className="text-white hover:text-white dark:text-neutral-950 dark:hover:text-black [[data-liquid]_&]:bg-transparent focus-visible:outline-neutral-400 absolute inset-0 grid place-items-center rounded-full outline-none transition-colors cursor-pointer"
           aria-expanded={isOpen}
           aria-haspopup="menu"
           aria-controls={menuId}

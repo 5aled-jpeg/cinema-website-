@@ -82,9 +82,9 @@ export function GooFilter({ id, width, height, blur = 1 }: GooFilterProps) {
           translucent border token - which is what `--border` is in dark mode -
           read at exactly the weight it does on the crisp bodies. Flooding the
           rim alone would leave it lying on the page instead. */}
-      <feFlood style={{ floodColor: "var(--background)" }} result="surface" />
+      <feFlood style={{ floodColor: "var(--mercury-surface, var(--background))" }} result="surface" />
       <feComposite in="surface" in2="outer" operator="in" result="surfaceShape" />
-      <feFlood style={{ floodColor: "var(--border)" }} result="rim" />
+      <feFlood style={{ floodColor: "var(--mercury-rim, var(--border))" }} result="rim" />
       <feComposite in="rim" in2="outer" operator="in" result="rimShape" />
       <feMerge>
         <feMergeNode in="surfaceShape" />

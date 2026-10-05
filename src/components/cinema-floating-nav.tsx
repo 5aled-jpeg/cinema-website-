@@ -12,7 +12,6 @@ const glyph = "size-3.5 opacity-80"
 export function CinemaFloatingNav() {
   const pathname = usePathname()
   const { navigate } = useCinemaTransition()
-  const [homeSection, setHomeSection] = React.useState<"home" | "films" | "curations">("home")
   const [turn, setTurn] = React.useState<number>(0)
   const [footerInView, setFooterInView] = React.useState<boolean>(false)
 
@@ -33,13 +32,6 @@ export function CinemaFloatingNav() {
       const customEvent = e as CustomEvent<{ turn: number; active: number }>
       const { turn: t } = customEvent.detail || { turn: 0 }
       setTurn(t)
-      if (t < 0.6) {
-        setHomeSection("home")
-      } else if (t < 4.5) {
-        setHomeSection("films")
-      } else {
-        setHomeSection("curations")
-      }
     }
 
     window.addEventListener(
@@ -55,7 +47,7 @@ export function CinemaFloatingNav() {
   }, [])
 
   // Detect when user reaches the footer on other tabs (/movies, /schedule)
-  // On Home Page (isHome), footer detection is strictly governed by wheel `turn > 10.15`
+  // On Home Page (isHome), footer detection is strictly governed by wheel `turn > 10.35`
   React.useEffect(() => {
     if (isHome) {
       setFooterInView(false)
@@ -110,13 +102,13 @@ export function CinemaFloatingNav() {
   // Visibility Rules:
   // 1. On Home Page:
   //    - Disappeared on Hero page section (turn < 0.45)
-  //    - Visible on Works Wheel carousel (turn >= 0.45 && turn <= 10.15)
-  //    - Disappeared when reaching the Footer (turn > 10.15)
+  //    - Visible on Works Wheel carousel across all 10 films (turn >= 0.45 && turn <= 10.35)
+  //    - Disappeared when reaching the Footer (turn > 10.35)
   // 2. On other tabs (/movies, /schedule):
   //    - Visible while browsing
   //    - Disappeared when reaching the Footer (!footerInView)
   const isVisible = isHome
-    ? turn >= 0.45 && turn <= 10.15
+    ? turn >= 0.45 && turn <= 10.35
     : !footerInView
 
   const menuItems: MercuryMenuItem[] = React.useMemo(() => {
@@ -125,7 +117,7 @@ export function CinemaFloatingNav() {
         id: "home",
         label: "Home Page",
         icon: <Home className={glyph} aria-hidden="true" />,
-        active: isHome && homeSection === "home",
+        active: isHome,
         onSelect: () => {
           if (isHome) {
             window.dispatchEvent(new CustomEvent("cinema-nav", { detail: "home" }))
@@ -135,24 +127,6 @@ export function CinemaFloatingNav() {
             setTimeout(() => {
               if (typeof window !== "undefined" && window.location.pathname !== "/") {
                 window.location.href = "/"
-              }
-            }, 450)
-          }
-        },
-      },
-      {
-        id: "featured",
-        label: "Featured",
-        icon: <Film className={glyph} aria-hidden="true" />,
-        active: isHome && homeSection === "films",
-        onSelect: () => {
-          if (isHome) {
-            window.dispatchEvent(new CustomEvent("cinema-nav", { detail: "featured" }))
-          } else {
-            navigate("/#featured", "Works '26 · Featured")
-            setTimeout(() => {
-              if (typeof window !== "undefined" && !window.location.pathname.startsWith("/")) {
-                window.location.href = "/#featured"
               }
             }, 450)
           }
@@ -194,26 +168,8 @@ export function CinemaFloatingNav() {
           }
         },
       },
-      {
-        id: "curations",
-        label: "Curations",
-        icon: <Sparkles className={glyph} aria-hidden="true" />,
-        active: isHome && homeSection === "curations",
-        onSelect: () => {
-          if (isHome) {
-            window.dispatchEvent(new CustomEvent("cinema-nav", { detail: "curations" }))
-          } else {
-            navigate("/#curations", "Archival Curations")
-            setTimeout(() => {
-              if (typeof window !== "undefined" && !window.location.hash.includes("curations")) {
-                window.location.href = "/#curations"
-              }
-            }, 450)
-          }
-        },
-      },
     ]
-  }, [isHome, isMovies, isSchedule, homeSection, navigate])
+  }, [isHome, isMovies, isSchedule, navigate])
 
   return (
     <div
@@ -228,7 +184,7 @@ export function CinemaFloatingNav() {
       <MercuryMenu
         items={menuItems}
         align="left"
-        panelWidth={184}
+        panelWidth={160}
         size={42}
         label="Cinema Navigation Menu"
       />

@@ -55,15 +55,6 @@ export function CinemaFooter({
     }
   };
 
-  const handleGoCurations = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (onNavigateCurations) {
-      onNavigateCurations();
-    } else {
-      navigate('/#curations', 'Archival Curations');
-    }
-  };
-
   return (
     <footer
       id="cinema-footer"
@@ -143,17 +134,6 @@ export function CinemaFooter({
                 )}
               >
                 <CenterUnderline>Schedule</CenterUnderline>
-              </a>
-            </li>
-            <li>
-              <a
-                href="#curations"
-                onClick={handleGoCurations}
-                data-cursor-interactive="true"
-                data-cursor-label="Films"
-                className="hover:text-black dark:hover:text-white cursor-pointer transition-colors inline-block"
-              >
-                <CenterUnderline>Curations</CenterUnderline>
               </a>
             </li>
           </ul>
