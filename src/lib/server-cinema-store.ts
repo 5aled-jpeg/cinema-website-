@@ -17,8 +17,11 @@ export interface CinemaStoreData {
   lastUpdated: string;
 }
 
+import os from 'os';
+
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'cinema-store.json');
+const TMP_FILE = path.join(os.tmpdir(), 'cinema-store.json');
 
 const DEFAULT_STORE: CinemaStoreData = {
   films: INITIAL_FILMS,
@@ -31,6 +34,11 @@ const DEFAULT_STORE: CinemaStoreData = {
 let memoryStore: CinemaStoreData | null = null;
 
 export async function getCinemaStore(): Promise<CinemaStoreData> {
+  if (memoryStore) {
+    return memoryStore;
+  }
+
+  // 1. Try reading committed project data file
   try {
     const raw = await fs.readFile(DATA_FILE, 'utf-8');
     const parsed = JSON.parse(raw) as CinemaStoreData;
@@ -39,15 +47,32 @@ export async function getCinemaStore(): Promise<CinemaStoreData> {
       return parsed;
     }
   } catch {
-    // If file doesn't exist or is invalid, initialize with defaults
+    // Continue to fallback
   }
 
-  // Ensure directory exists and write default store
+  // 2. Try reading from serverless tmpdir fallback
+  try {
+    const raw = await fs.readFile(TMP_FILE, 'utf-8');
+    const parsed = JSON.parse(raw) as CinemaStoreData;
+    if (parsed && Array.isArray(parsed.films) && Array.isArray(parsed.wheelIds)) {
+      memoryStore = parsed;
+      return parsed;
+    }
+  } catch {
+    // Continue to initialization
+  }
+
+  // 3. Try initializing data directory (local development)
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(DATA_FILE, JSON.stringify(DEFAULT_STORE, null, 2), 'utf-8');
-  } catch (err) {
-    console.error('Failed to initialize cinema store file:', err);
+  } catch {
+    // Read-only filesystem on Vercel, try tmpdir
+    try {
+      await fs.writeFile(TMP_FILE, JSON.stringify(DEFAULT_STORE, null, 2), 'utf-8');
+    } catch {
+      // Memory store fallback
+    }
   }
 
   memoryStore = DEFAULT_STORE;
@@ -64,13 +89,18 @@ export async function saveCinemaStore(
     lastUpdated: new Date().toISOString(),
   };
 
+  memoryStore = next;
+
+  // Persist to disk if writable, fallback to /tmp or memory on Vercel serverless
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(DATA_FILE, JSON.stringify(next, null, 2), 'utf-8');
-    memoryStore = next;
-  } catch (err) {
-    console.error('Failed to persist cinema store file:', err);
-    throw new Error('Failed to persist cinema store to disk');
+  } catch {
+    try {
+      await fs.writeFile(TMP_FILE, JSON.stringify(next, null, 2), 'utf-8');
+    } catch {
+      // In-memory update maintained
+    }
   }
 
   return next;
