@@ -30,6 +30,31 @@ export default function MoviesArchivePage() {
   const autoplay = false
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all")
   const [activeFilmForModal, setActiveFilmForModal] = React.useState<ArchiveFilmItem | null>(null)
+  const [archiveFilmsList, setArchiveFilmsList] = React.useState<ArchiveFilmItem[]>(ARCHIVE_FILMS)
+
+  // Fetch live films from server store
+  React.useEffect(() => {
+    fetch('/api/cinema-data')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.success && Array.isArray(json?.data?.films) && json.data.films.length > 0) {
+          const mapped: ArchiveFilmItem[] = json.data.films.map((f: any) => ({
+            id: f.id,
+            title: f.title,
+            subtitle: `${f.director} · ${f.category}`,
+            meta: f.year ? f.year.toString() : '2026',
+            image: f.image,
+            category: f.category,
+            imdbRating: f.imdbRating || '8.5',
+            duration: f.duration || '2h 00m',
+            tagline: f.tagline || 'Exclusively in theatrical exhibition.',
+            synopsis: f.synopsis || '',
+          }))
+          setArchiveFilmsList(mapped)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const categories = React.useMemo(
     () => [
@@ -43,8 +68,8 @@ export default function MoviesArchivePage() {
   )
 
   const filteredFilms = React.useMemo(() => {
-    if (selectedCategory === "all") return ARCHIVE_FILMS
-    return ARCHIVE_FILMS.filter((film) => {
+    if (selectedCategory === "all") return archiveFilmsList
+    return archiveFilmsList.filter((film) => {
       const cat = (film.category + " " + film.subtitle).toLowerCase()
       if (selectedCategory === "drama") return cat.includes("drama") || cat.includes("classic") || cat.includes("masterpiece")
       if (selectedCategory === "crime") return cat.includes("crime") || cat.includes("thriller") || cat.includes("noir")
@@ -52,7 +77,7 @@ export default function MoviesArchivePage() {
       if (selectedCategory === "fantasy") return cat.includes("fantasy") || cat.includes("animation")
       return true
     })
-  }, [selectedCategory])
+  }, [selectedCategory, archiveFilmsList])
 
   const superHoverItems: SuperHoverListItem[] = React.useMemo(
     () =>

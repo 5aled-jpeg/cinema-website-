@@ -81,11 +81,28 @@ export default function SchedulePage() {
   const [selectedExperience, setSelectedExperience] = React.useState<string>("all")
   const [activeFilmForModal, setActiveFilmForModal] = React.useState<CinemaFilm | null>(null)
 
-  // Listen to client updates from localStorage or custom events
+  // Listen to client updates from localStorage or custom events and fetch server store
   React.useEffect(() => {
     const loadData = () => {
       setFilms(getFilms())
       setScreenings(getScreenings())
+      fetch('/api/cinema-data')
+        .then((r) => r.json())
+        .then((json) => {
+          if (json?.success && json?.data) {
+            if (Array.isArray(json.data.films) && json.data.films.length > 0) {
+              setFilms(json.data.films)
+            }
+            if (Array.isArray(json.data.screenings) && json.data.screenings.length > 0) {
+              setScreenings(json.data.screenings)
+              const dates = Array.from(new Set(json.data.screenings.map((s: any) => s.date))).sort() as string[]
+              if (dates.length > 0) {
+                setSelectedDate((curr) => (dates.includes(curr) ? curr : dates[0]))
+              }
+            }
+          }
+        })
+        .catch(() => {})
     }
     loadData()
     window.addEventListener("cenima_data_updated", loadData)

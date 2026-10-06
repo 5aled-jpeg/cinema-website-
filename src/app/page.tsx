@@ -703,6 +703,42 @@ const glyph = "size-3.5 opacity-70"
 export default function WorksWheelDemo() {
   const wheelRef = React.useRef<WorksWheelHandle>(null)
   const { navigate } = useCinemaTransition()
+  const [wheelItems, setWheelItems] = React.useState<WorksWheelItem[]>(WORKS)
+
+  // Fetch live wheel items from admin server store
+  React.useEffect(() => {
+    fetch('/api/cinema-data')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.success && Array.isArray(json?.data?.wheelFilms) && json.data.wheelFilms.length > 0) {
+          const mapped: WorksWheelItem[] = json.data.wheelFilms.map((f: any) => ({
+            id: f.id,
+            title: f.title,
+            image: f.image,
+            href: `#film-${f.id}`,
+            category: f.category,
+            imdbRating: f.imdbRating || '8.5',
+            director: f.director,
+            year: f.year,
+            duration: f.duration,
+            tagline: f.tagline || 'Exclusively in theatrical exhibition.',
+            synopsis: f.synopsis || '',
+            stills: f.stills?.length ? f.stills : [{ url: f.image, caption: `${f.title} Key Art`, aspectRatio: '2:3 Theatrical' }],
+            reviews: f.reviews || [],
+            specs: f.specs || {
+              format: '35mm Archival Print',
+              aspectRatio: '2.39:1 Anamorphic',
+              sound: 'Dolby Atmos Restored',
+              color: 'Technicolor Grade',
+            },
+            screenings: ['Daily Archival Showings'],
+            screeningSlots: [],
+          }))
+          setWheelItems(mapped)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Handle cross-tab navigation and deep links to sections
   React.useEffect(() => {
@@ -785,7 +821,7 @@ export default function WorksWheelDemo() {
       {/* Unified Timeline: Experience Hero (t=0) -> Works Wheel (t=1..7) -> Cinema Footer (t=8) */}
       <WorksWheel
         ref={wheelRef}
-        items={WORKS}
+        items={wheelItems}
         label="Works '26"
         action="View"
         hero={<ExperienceHero onExplore={() => wheelRef.current?.to(1)} />}
