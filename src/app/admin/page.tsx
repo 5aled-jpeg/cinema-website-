@@ -528,7 +528,7 @@ export default function AdminDashboardPage() {
   }, [screenings, selectedDate]);
 
   return (
-    <div data-admin-page="true" className="min-h-screen bg-[#07080a] text-neutral-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
+    <div data-admin-portal="true" className="admin-portal min-h-screen bg-[#07080a] text-neutral-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
       {/* Toast Notification */}
       {toast && (
         <div

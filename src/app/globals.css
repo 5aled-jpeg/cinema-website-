@@ -39,31 +39,70 @@
   box-sizing: border-box;
 }
 
-/* Custom cursor is scoped strictly to pages that mount it */
-body.has-custom-cursor {
-  cursor: none;
+/* Hide native cursor ONLY on public exhibition pages where custom CinemaCursor is active */
+html:not(.admin-active):not(:has(.admin-portal)) body:not(.admin-active) * {
+  cursor: none !important;
 }
 
-/* Ensure inputs, textareas, selects, and buttons always retain standard hardware cursors */
-body.has-custom-cursor input,
-body.has-custom-cursor textarea,
-body.has-custom-cursor select,
-body.has-custom-cursor [contenteditable],
-[data-admin-page],
-[data-admin-page] * {
-  cursor: auto !important;
+/* Explicitly restore native hardware mouse pointers for the Admin Portal */
+html.admin-active,
+html.admin-active *,
+body.admin-active,
+body.admin-active *,
+html body .admin-portal,
+html body .admin-portal *,
+html body .admin-portal *::before,
+html body .admin-portal *::after,
+html body [data-admin-portal="true"],
+html body [data-admin-portal="true"] *,
+html body [data-admin-portal="true"] *::before,
+html body [data-admin-portal="true"] *::after {
+  cursor: default !important;
 }
 
-body.has-custom-cursor input,
-body.has-custom-cursor textarea {
+html body .admin-portal button,
+html body .admin-portal a,
+html body .admin-portal select,
+html body .admin-portal [role="button"],
+html body .admin-portal [role="tab"],
+html body .admin-portal input[type="checkbox"],
+html body .admin-portal input[type="radio"],
+html body .admin-portal input[type="submit"],
+html body .admin-portal label,
+html body [data-admin-portal="true"] button,
+html body [data-admin-portal="true"] a,
+html body [data-admin-portal="true"] select,
+html body [data-admin-portal="true"] [role="button"],
+html body [data-admin-portal="true"] [role="tab"],
+html body [data-admin-portal="true"] input[type="checkbox"],
+html body [data-admin-portal="true"] input[type="radio"],
+html body [data-admin-portal="true"] input[type="submit"],
+html body [data-admin-portal="true"] label {
+  cursor: pointer !important;
+}
+
+html body .admin-portal input[type="text"],
+html body .admin-portal input[type="password"],
+html body .admin-portal input[type="url"],
+html body .admin-portal input[type="number"],
+html body .admin-portal input[type="date"],
+html body .admin-portal input[type="time"],
+html body .admin-portal textarea,
+html body [data-admin-portal="true"] input[type="text"],
+html body [data-admin-portal="true"] input[type="password"],
+html body [data-admin-portal="true"] input[type="url"],
+html body [data-admin-portal="true"] input[type="number"],
+html body [data-admin-portal="true"] input[type="date"],
+html body [data-admin-portal="true"] input[type="time"],
+html body [data-admin-portal="true"] textarea {
   cursor: text !important;
 }
 
-body.has-custom-cursor button,
-body.has-custom-cursor a,
-body.has-custom-cursor [role="button"],
-body.has-custom-cursor [role="tab"] {
-  cursor: pointer !important;
+html body .admin-portal button:disabled,
+html body .admin-portal input:disabled,
+html body [data-admin-portal="true"] button:disabled,
+html body [data-admin-portal="true"] input:disabled {
+  cursor: not-allowed !important;
 }
 
 html {
