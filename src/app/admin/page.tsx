@@ -79,10 +79,6 @@ export default function AdminDashboardPage() {
     tagline: 'An indelible theatrical exhibition.',
     synopsis: '',
     image: '',
-    format: '35mm Archival Print',
-    aspectRatio: '2.39:1 Anamorphic',
-    sound: 'Dolby Atmos Master Audio',
-    color: 'Technicolor Archival Grade',
     isOnWheel: false,
   });
 
@@ -215,10 +211,6 @@ export default function AdminDashboardPage() {
       tagline: 'An indelible theatrical exhibition.',
       synopsis: '',
       image: '',
-      format: '35mm Archival Print',
-      aspectRatio: '2.39:1 Anamorphic',
-      sound: 'Dolby Atmos Master Audio',
-      color: 'Technicolor Archival Grade',
       isOnWheel: wheelIds.length < 10,
     });
     setFilmModalOpen(true);
@@ -237,10 +229,6 @@ export default function AdminDashboardPage() {
       tagline: film.tagline,
       synopsis: film.synopsis,
       image: film.image,
-      format: film.specs?.format || '35mm Archival Print',
-      aspectRatio: film.specs?.aspectRatio || '2.39:1 Anamorphic',
-      sound: film.specs?.sound || 'Dolby Atmos Master Audio',
-      color: film.specs?.color || 'Technicolor Archival Grade',
       isOnWheel: wheelIds.includes(film.id),
     });
     setFilmModalOpen(true);
@@ -278,10 +266,6 @@ export default function AdminDashboardPage() {
         tagline: fetched.tagline || prev.tagline,
         synopsis: fetched.synopsis || prev.synopsis,
         image: fetched.image || prev.image,
-        format: fetched.specs?.format || prev.format,
-        aspectRatio: fetched.specs?.aspectRatio || prev.aspectRatio,
-        sound: fetched.specs?.sound || prev.sound,
-        color: fetched.specs?.color || prev.color,
       }));
 
       showToast('success', `✨ Successfully fetched "${fetched.title}" from IMDb!`);
@@ -314,11 +298,11 @@ export default function AdminDashboardPage() {
         image:
           filmFormData.image.trim() ||
           'https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg',
-        specs: {
-          format: filmFormData.format,
-          aspectRatio: filmFormData.aspectRatio,
-          sound: filmFormData.sound,
-          color: filmFormData.color,
+        specs: editingFilm?.specs || {
+          format: 'Theatrical Exhibition',
+          aspectRatio: '2.39:1 Anamorphic',
+          sound: 'Dolby Atmos Master Audio',
+          color: 'Technicolor Grade',
         },
       };
 
@@ -1234,51 +1218,6 @@ export default function AdminDashboardPage() {
                   placeholder="Enter complete theatrical synopsis..."
                   className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400 resize-none leading-relaxed"
                 />
-              </div>
-
-              {/* Technical Specifications */}
-              <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3">
-                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest font-bold block">
-                  Exhibition Specifications
-                </span>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[10px] text-neutral-500 font-mono uppercase block mb-1">Format</label>
-                    <input
-                      type="text"
-                      value={filmFormData.format}
-                      onChange={(e) => setFilmFormData({ ...filmFormData, format: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-neutral-500 font-mono uppercase block mb-1">Aspect Ratio</label>
-                    <input
-                      type="text"
-                      value={filmFormData.aspectRatio}
-                      onChange={(e) => setFilmFormData({ ...filmFormData, aspectRatio: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-neutral-500 font-mono uppercase block mb-1">Sound Master</label>
-                    <input
-                      type="text"
-                      value={filmFormData.sound}
-                      onChange={(e) => setFilmFormData({ ...filmFormData, sound: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-neutral-500 font-mono uppercase block mb-1">Color Grade</label>
-                    <input
-                      type="text"
-                      value={filmFormData.color}
-                      onChange={(e) => setFilmFormData({ ...filmFormData, color: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-xs text-white"
-                    />
-                  </div>
-                </div>
               </div>
 
               {/* Works Wheel Checkbox */}
