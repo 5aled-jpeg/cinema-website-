@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { upsertFilm, deleteFilmById, getAllFilms } from '@/lib/server-cinema-store';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const films = await getAllFilms();

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { setWheelFilmIds, getWheelFilms } from '@/lib/server-cinema-store';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const wheelFilms = await getWheelFilms();

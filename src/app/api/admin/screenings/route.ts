@@ -5,6 +5,8 @@ import {
   deleteScreeningById,
 } from '@/lib/server-cinema-store';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const screenings = await getAllScreenings();

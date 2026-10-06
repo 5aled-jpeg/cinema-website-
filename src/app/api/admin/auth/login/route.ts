@@ -9,6 +9,8 @@ import {
   recordSuccessfulLogin,
 } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const ip =

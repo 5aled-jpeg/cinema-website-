@@ -152,7 +152,7 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-screen w-full bg-[#050608] text-white flex items-center justify-center p-4 relative overflow-hidden select-none">
+    <div data-admin-page="true" className="min-h-screen w-full bg-[#050608] text-white flex items-center justify-center p-4 relative overflow-hidden select-none">
       {/* Background cinematic aura & film stripes */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(217,119,6,0.12),transparent_70%)] pointer-events-none" />
       <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />

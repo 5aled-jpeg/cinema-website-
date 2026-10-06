@@ -37,7 +37,33 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  cursor: none !important;
+}
+
+/* Custom cursor is scoped strictly to pages that mount it */
+body.has-custom-cursor {
+  cursor: none;
+}
+
+/* Ensure inputs, textareas, selects, and buttons always retain standard hardware cursors */
+body.has-custom-cursor input,
+body.has-custom-cursor textarea,
+body.has-custom-cursor select,
+body.has-custom-cursor [contenteditable],
+[data-admin-page],
+[data-admin-page] * {
+  cursor: auto !important;
+}
+
+body.has-custom-cursor input,
+body.has-custom-cursor textarea {
+  cursor: text !important;
+}
+
+body.has-custom-cursor button,
+body.has-custom-cursor a,
+body.has-custom-cursor [role="button"],
+body.has-custom-cursor [role="tab"] {
+  cursor: pointer !important;
 }
 
 html {
