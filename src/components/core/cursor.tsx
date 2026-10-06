@@ -48,37 +48,27 @@ export function Cursor({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(pointer: fine)');
+    if (!media.matches) return;
 
-    let hasMoved = false;
+    document.body.style.cursor = 'none';
+    document.documentElement.style.cursor = 'none';
 
     const updatePosition = (e: PointerEvent | MouseEvent) => {
-      // Ignore simulated pointer events on touch taps
-      if ('pointerType' in e && e.pointerType === 'touch') return;
-
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
       setIsVisible(true);
-
-      if (!hasMoved) {
-        hasMoved = true;
-        document.body.classList.add('has-custom-cursor');
-      }
-
       onPositionChange?.(e.clientX, e.clientY);
     };
 
     const handleDocLeave = (e: MouseEvent) => {
       if (!e.relatedTarget) {
         setIsVisible(false);
-        document.body.classList.remove('has-custom-cursor');
       }
     };
 
     const handleDocEnter = () => {
       setIsVisible(true);
-      if (hasMoved) {
-        document.body.classList.add('has-custom-cursor');
-      }
     };
 
     window.addEventListener('pointermove', updatePosition, { passive: true });
@@ -86,7 +76,8 @@ export function Cursor({
     document.addEventListener('mouseenter', handleDocEnter);
 
     return () => {
-      document.body.classList.remove('has-custom-cursor');
+      document.body.style.cursor = '';
+      document.documentElement.style.cursor = '';
       window.removeEventListener('pointermove', updatePosition);
       document.removeEventListener('mouseout', handleDocLeave);
       document.removeEventListener('mouseenter', handleDocEnter);

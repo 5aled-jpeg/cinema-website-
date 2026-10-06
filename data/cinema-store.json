@@ -479,19 +479,45 @@
         "sound": "5.1 DTS Master Surround",
         "color": "Arri Raw Color Master"
       }
+    },
+    {
+      "id": 13,
+      "slug": "heart-of-the-beast",
+      "title": "Heart of the Beast",
+      "image": "https://m.media-amazon.com/images/M/MV5BMDVlMTRhMjgtMjdmZi00NjJhLWExMmYtODExNWJkZGZjNjdhXkEyXkFqcGc@._V1_FMjpg_UX1200_.jpg",
+      "category": "Action, Adventure, Drama",
+      "imdbRating": "7.5",
+      "director": "David Ayer",
+      "year": 2026,
+      "duration": "1h 41m",
+      "tagline": "Starring Brad Pitt, J.K. Simmons. Directed by David Ayer.",
+      "synopsis": "After a harrowing plane crash, a Special Forces officer and his combat dog find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements.",
+      "stills": [
+        {
+          "url": "https://m.media-amazon.com/images/M/MV5BMDVlMTRhMjgtMjdmZi00NjJhLWExMmYtODExNWJkZGZjNjdhXkEyXkFqcGc@._V1_FMjpg_UX1200_.jpg",
+          "caption": "Heart of the Beast"
+        }
+      ],
+      "reviews": [],
+      "specs": {
+        "format": "35mm / 70mm Archival Presentation",
+        "aspectRatio": "2.39:1 Anamorphic Panavision",
+        "sound": "Dolby Atmos Master Audio",
+        "color": "Technicolor Archival Grade"
+      }
     }
   ],
   "wheelIds": [
     1,
-    2,
     3,
     4,
-    5,
     6,
     7,
     9,
-    10,
-    11
+    11,
+    12,
+    2,
+    13
   ],
   "halls": [
     {
@@ -546,39 +572,6 @@
       "format": "Family Matinee",
       "availability": "Available",
       "notes": "Calibrated acoustics for younger ears. Free Spider-Verse poster sheet."
-    },
-    {
-      "id": "scr-28-sp-vip",
-      "filmId": 11,
-      "date": "2026-09-28",
-      "time": "15:00",
-      "hallId": "vip-salle",
-      "tag": "VIP Salle",
-      "format": "Dolby Atmos Luxury Recliner",
-      "availability": "Selling Fast",
-      "notes": "Artisanal snack service and lounge admission."
-    },
-    {
-      "id": "scr-28-sh-std",
-      "filmId": 1,
-      "date": "2026-09-28",
-      "time": "17:30",
-      "hallId": "screen-1",
-      "tag": "Standard",
-      "format": "Archival 35mm Master",
-      "availability": "Few Seats Left",
-      "notes": "Original theatrical audio mix."
-    },
-    {
-      "id": "scr-28-gf-std",
-      "filmId": 2,
-      "date": "2026-09-28",
-      "time": "18:00",
-      "hallId": "vip-salle",
-      "tag": "VIP Salle",
-      "format": "Salon Privé 4K",
-      "availability": "Selling Fast",
-      "notes": "Restored under Francis Ford Coppola supervision."
     },
     {
       "id": "scr-28-dk-imax",
@@ -843,7 +836,18 @@
       "format": "Salon Privé 4K",
       "availability": "Few Seats Left",
       "notes": "Late evening salon."
+    },
+    {
+      "id": "scr-1791289028247-856",
+      "filmId": 4,
+      "date": "2026-10-06",
+      "time": "08:00",
+      "hallId": "screen-1",
+      "tag": "Standard",
+      "format": "35mm Archival Print",
+      "availability": "Available",
+      "notes": ""
     }
   ],
-  "lastUpdated": "2026-10-06T00:41:17.949Z"
+  "lastUpdated": "2026-10-06T13:36:12.573Z"
 }

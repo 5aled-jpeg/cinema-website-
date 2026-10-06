@@ -21,23 +21,11 @@ export function CinemaCursor({ attachToParent = false }: CinemaCursorProps) {
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    const checkFinePointer = () => {
-      const fine = window.matchMedia('(pointer: fine)').matches;
-      const anyFine = window.matchMedia('(any-pointer: fine)').matches;
-      return fine || anyFine;
-    };
-
-    setHasFinePointer(checkFinePointer());
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
-        setHasFinePointer(true);
-      }
-    };
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    return () => window.removeEventListener('pointermove', handlePointerMove);
+    const media = window.matchMedia('(pointer: fine)');
+    setHasFinePointer(media.matches);
+    const listener = (e: MediaQueryListEvent) => setHasFinePointer(e.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
   }, []);
 
   React.useEffect(() => {
@@ -113,8 +101,8 @@ export function CinemaCursor({ attachToParent = false }: CinemaCursorProps) {
     >
       <motion.div
         animate={{
-          width: isCard ? 88 : isAction ? 24 : 14,
-          height: isCard ? 32 : isAction ? 24 : 14,
+          width: isCard ? 84 : isAction ? 26 : 16,
+          height: isCard ? 32 : isAction ? 26 : 16,
         }}
         transition={{
           type: 'spring',
@@ -122,7 +110,7 @@ export function CinemaCursor({ attachToParent = false }: CinemaCursorProps) {
           damping: 35,
           mass: 0.5,
         }}
-        className="flex items-center justify-center rounded-[24px] bg-black/85 text-white backdrop-blur-md shadow-[0_0_15px_rgba(245,158,11,0.25)] border border-amber-400/40 transition-[background-color,border-color,color] duration-150"
+        className="flex items-center justify-center rounded-[24px] bg-neutral-900/80 dark:bg-neutral-100/90 text-white dark:text-neutral-950 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.22)] border border-white/20 dark:border-black/20 transition-[background-color,border-color,color] duration-150"
       >
         <AnimatePresence>
           {isCard ? (
@@ -132,8 +120,8 @@ export function CinemaCursor({ attachToParent = false }: CinemaCursorProps) {
               exit={{ opacity: 0, scale: 0.6 }}
               className="inline-flex w-full items-center justify-center px-2.5"
             >
-              <div className="inline-flex items-center text-xs font-semibold tracking-tight text-amber-300 select-none whitespace-nowrap">
-                {hoverState.label} <PlusIcon className="ml-1 h-3.5 w-3.5 text-amber-400" />
+              <div className="inline-flex items-center text-xs font-medium tracking-tight text-white dark:text-neutral-950 select-none whitespace-nowrap">
+                {hoverState.label} <PlusIcon className="ml-1 h-3.5 w-3.5" />
               </div>
             </motion.div>
           ) : isAction ? (
@@ -141,16 +129,9 @@ export function CinemaCursor({ attachToParent = false }: CinemaCursorProps) {
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
-              className="size-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+              className="size-1.5 rounded-full bg-white/90 dark:bg-neutral-950/90"
             />
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              className="size-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.9)]"
-            />
-          )}
+          ) : null}
         </AnimatePresence>
       </motion.div>
     </Cursor>
