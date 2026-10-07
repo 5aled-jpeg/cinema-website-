@@ -11,14 +11,12 @@ import { cn } from '@/lib/utils';
 export interface CinemaFooterProps {
   onNavigateHome?: () => void;
   onNavigateSchedule?: () => void;
-  onNavigateCurations?: () => void;
   onNavigateMovies?: () => void;
 }
 
 export function CinemaFooter({
   onNavigateHome,
   onNavigateSchedule,
-  onNavigateCurations,
   onNavigateMovies,
 }: CinemaFooterProps = {}) {
   const pathname = usePathname();

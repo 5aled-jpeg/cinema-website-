@@ -40,26 +40,12 @@ export interface FilmStill {
   aspectRatio?: string
 }
 
-export interface FilmReview {
-  critic: string
-  publication: string
-  quote: string
-  rating?: string
-}
-
 export interface FilmScreeningSlot {
   time: string
   date: string
   format: string
   auditorium: string
   availability: "Selling Fast" | "Available" | "Few Seats Left"
-}
-
-export interface FilmSpecs {
-  format?: string
-  aspectRatio?: string
-  sound?: string
-  color?: string
 }
 
 export interface WorksWheelItem {
@@ -86,10 +72,6 @@ export interface WorksWheelItem {
   synopsis?: string
   /** Archival & production film stills */
   stills?: FilmStill[]
-  /** Film reviews from acclaimed critics */
-  reviews?: FilmReview[]
-  /** Exhibition & technical specs */
-  specs?: FilmSpecs
   /** Upcoming screening times */
   screenings?: string[]
   /** Detailed screening time slots */

@@ -1,24 +1,15 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { motion, AnimatePresence } from "motion/react"
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Film,
   Sparkles,
-  Volume2,
   SlidersHorizontal,
   Info,
-  Shield,
   ArrowLeft,
-  Tv,
-  Check,
-  MapPin,
-  ExternalLink,
 } from "lucide-react"
 
 import {
@@ -28,7 +19,6 @@ import {
   getFilms,
   getScreenings,
   type CinemaFilm,
-  type CinemaHall,
   type Screening,
 } from "@/lib/cinema-data"
 import { cn } from "@/lib/utils"
@@ -39,18 +29,6 @@ import { CinemaFooter } from "@/components/cinema-footer"
 import { useCinemaTransition } from "@/components/cinema-page-curtains"
 import { CinemaLogo } from "@/components/cinema-logo"
 import { Schedule3DStage } from "@/components/schedule-3d-stage"
-import CenterUnderline from "@/components/fancy/text/underline-center"
-import ComesInGoesOutUnderline from "@/components/fancy/text/underline-comes-in-goes-out"
-import {
-  Dialog,
-  DialogClose,
-  DialogContainer,
-  DialogContent,
-  DialogDescription,
-  DialogImage,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/linear-modal"
 import { FilmModalView } from "@/components/film-modal-view"
 
 // Format helper for calendar display
@@ -560,8 +538,6 @@ export default function SchedulePage() {
                 tagline: activeFilmForModal.tagline,
                 synopsis: activeFilmForModal.synopsis,
                 stills: activeFilmForModal.stills,
-                reviews: activeFilmForModal.reviews,
-                specs: activeFilmForModal.specs,
                 screeningSlots: dayScreenings
                   .filter((s) => s.filmId === activeFilmForModal.id)
                   .map((s) => ({
@@ -581,7 +557,6 @@ export default function SchedulePage() {
       <CinemaFooter
         onNavigateHome={() => navigate("/", "Works '26 · Index")}
         onNavigateSchedule={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        onNavigateCurations={() => navigate("/#the-godfather", "Archival Curations")}
       />
     </div>
   )

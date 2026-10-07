@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import {
   Film,
   Sparkles,
-  Calendar,
-  Clock,
   Images,
   ArrowRight,
 } from 'lucide-react';

@@ -298,12 +298,6 @@ export default function AdminDashboardPage() {
         image:
           filmFormData.image.trim() ||
           'https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg',
-        specs: editingFilm?.specs || {
-          format: 'Theatrical Exhibition',
-          aspectRatio: '2.39:1 Anamorphic',
-          sound: 'Dolby Atmos Master Audio',
-          color: 'Technicolor Grade',
-        },
       };
 
       const res = await fetch('/api/admin/films', {

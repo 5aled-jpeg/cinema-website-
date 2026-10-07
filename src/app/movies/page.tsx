@@ -7,8 +7,6 @@ import {
   Calendar,
   Film,
   SlidersHorizontal,
-  Sparkles,
-  Info,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -254,12 +252,6 @@ export default function MoviesArchivePage() {
                 duration: activeFilmForModal.duration,
                 tagline: activeFilmForModal.tagline,
                 synopsis: activeFilmForModal.synopsis,
-                specs: {
-                  format: "Theatrical Exhibition",
-                  aspectRatio: "2.39:1 Anamorphic",
-                  sound: "Dolby Atmos Discrete Array",
-                  color: "Original Studio Color Reversal",
-                },
               }}
             />
           </div>
@@ -270,7 +262,6 @@ export default function MoviesArchivePage() {
       <CinemaFooter
         onNavigateHome={() => navigate("/", "Works '26 · Index")}
         onNavigateSchedule={() => navigate("/schedule", "Exhibition Schedule")}
-        onNavigateCurations={() => navigate("/#curations", "Archival Curations")}
       />
     </div>
   )

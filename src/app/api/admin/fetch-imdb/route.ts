@@ -13,12 +13,6 @@ interface ImdbFetchResponse {
   synopsis: string;
   image: string;
   stills: { url: string; caption: string }[];
-  specs: {
-    format: string;
-    aspectRatio: string;
-    sound: string;
-    color: string;
-  };
 }
 
 function formatRuntimeMinutes(runtimeStr?: string): string {
@@ -169,12 +163,6 @@ export async function POST(request: Request) {
           caption: `${title} - Archival Exhibition Key Art`,
         },
       ],
-      specs: {
-        format: '35mm / 70mm Archival Presentation',
-        aspectRatio: '2.39:1 Anamorphic Panavision',
-        sound: 'Dolby Atmos Master Audio',
-        color: 'Technicolor Archival Grade',
-      },
     };
 
     return NextResponse.json({

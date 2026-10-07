@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
-import { Home, Film, Clapperboard, Calendar, Sparkles } from "lucide-react"
+import { Home, Clapperboard, Calendar } from "lucide-react"
 import { MercuryMenu, type MercuryMenuItem } from "@/registry/crafterui/ui/mercury-menu"
 import { useCinemaTransition } from "@/components/cinema-page-curtains"
 import { cn } from "@/lib/utils"

@@ -4,28 +4,6 @@ export interface FilmStill {
   aspectRatio?: string;
 }
 
-export interface FilmReview {
-  critic: string;
-  publication: string;
-  quote: string;
-  rating?: string;
-}
-
-export interface FilmSpecs {
-  format?: string;
-  aspectRatio?: string;
-  sound?: string;
-  color?: string;
-}
-
-export interface FilmScreeningSlot {
-  time: string;
-  date: string;
-  format: string;
-  auditorium: string;
-  availability: 'Selling Fast' | 'Available' | 'Few Seats Left';
-}
-
 export interface CinemaFilm {
   id: number;
   slug: string;
@@ -39,8 +17,6 @@ export interface CinemaFilm {
   tagline: string;
   synopsis: string;
   stills: FilmStill[];
-  reviews: FilmReview[];
-  specs: FilmSpecs;
 }
 
 export interface CinemaHall {
@@ -128,27 +104,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "The Shawshank Redemption — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Roger Ebert",
-        "publication": "Chicago Sun-Times",
-        "quote": "The Shawshank Redemption is a film that ennobles human dignity and hope, achieving true cinematic grandeur through patience and deep humanity.",
-        "rating": "4/4 ★"
-      },
-      {
-        "critic": "Vincent Canby",
-        "publication": "The New York Times",
-        "quote": "A triumphant, quietly uplifting prison drama directed with remarkable sensitivity and masterly narrative command.",
-        "rating": "Essential"
-      }
-    ],
-    "specs": {
-      "format": "35mm Archival Print / 4K Digital Master",
-      "aspectRatio": "1.85:1 Academy Flat",
-      "sound": "Dolby Atmos 5.1 Restored Array",
-      "color": "Technicolor Laboratory"
-    }
+    ]
   },
   {
     "id": 2,
@@ -168,27 +124,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "The Godfather — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Roger Ebert",
-        "publication": "Chicago Sun-Times",
-        "quote": "The Godfather is not only a great popular entertainment, but an inspired work of cinematic art. One of the undisputed masterworks of world cinema.",
-        "rating": "4/4 ★"
-      },
-      {
-        "critic": "Pauline Kael",
-        "publication": "The New Yorker",
-        "quote": "If ever there was a great example of how the best popular movies come out of a merger of commerce and art, The Godfather is it.",
-        "rating": "Essential"
-      }
-    ],
-    "specs": {
-      "format": "35mm Theatrical Preservation Print",
-      "aspectRatio": "1.85:1 Academy Flat",
-      "sound": "Restored 5.1 DTS-HD Master Audio",
-      "color": "Technicolor Dye-Transfer Process"
-    }
+    ]
   },
   {
     "id": 3,
@@ -208,27 +144,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "The Dark Knight — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Peter Travers",
-        "publication": "Rolling Stone",
-        "quote": "The Dark Knight is pitch-black, brilliant, and unforgettable. Heath Ledger's Joker is an explosive tour de force for the ages.",
-        "rating": "4/4 ★"
-      },
-      {
-        "critic": "Manohla Dargis",
-        "publication": "The New York Times",
-        "quote": "Christopher Nolan bridges the divide between artistic ambition and blockbuster spectacle with unprecedented cinematic muscle.",
-        "rating": "Critics Pick"
-      }
-    ],
-    "specs": {
-      "format": "70mm IMAX 15/70 Presentation",
-      "aspectRatio": "1.43:1 IMAX / 2.39:1 Scope",
-      "sound": "Dolby Atmos 64-Channel Array",
-      "color": "Original Photochemical Color Master"
-    }
+    ]
   },
   {
     "id": 4,
@@ -248,27 +164,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "The Godfather Part II — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Vincent Canby",
-        "publication": "The New York Times",
-        "quote": "The Godfather Part II is a brilliant, operatic tapestry that deepens and expands upon its predecessor with Shakespearean tragedy.",
-        "rating": "Masterpiece"
-      },
-      {
-        "critic": "Gene Siskel",
-        "publication": "Chicago Tribune",
-        "quote": "One of the greatest sequels ever made, featuring transcendent performances from Al Pacino and Robert De Niro.",
-        "rating": "4/4 ★"
-      }
-    ],
-    "specs": {
-      "format": "35mm Studio Archival Reference",
-      "aspectRatio": "1.85:1 Academy Flat",
-      "sound": "Restored 5.1 Discrete Surround",
-      "color": "Technicolor Dye-Transfer Process"
-    }
+    ]
   },
   {
     "id": 5,
@@ -288,27 +184,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "The Lord of the Rings: The Return of the King — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Richard Corliss",
-        "publication": "TIME Magazine",
-        "quote": "Peter Jackson delivers a staggering triumph. A monumental climax to the greatest fantasy trilogy in motion picture history.",
-        "rating": "10/10"
-      },
-      {
-        "critic": "Roger Ebert",
-        "publication": "Chicago Sun-Times",
-        "quote": "A masterpiece of visual storytelling, emotional resonance, and sheer scale that will stand untouched for generations.",
-        "rating": "4/4 ★"
-      }
-    ],
-    "specs": {
-      "format": "4K Laser Extended Roadshow Edition",
-      "aspectRatio": "2.39:1 Anamorphic Scope",
-      "sound": "Dolby Atmos 12-Channel Immersive",
-      "color": "Digital Intermediate Color Grade"
-    }
+    ]
   },
   {
     "id": 6,
@@ -328,27 +204,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "12 Angry Men — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "A.H. Weiler",
-        "publication": "The New York Times",
-        "quote": "12 Angry Men is a tense, absorbing, and compelling drama that reaches into the very conscience of jury deliberation and human justice.",
-        "rating": "Classic"
-      },
-      {
-        "critic": "Roger Ebert",
-        "publication": "Chicago Sun-Times",
-        "quote": "Sidney Lumet uses camera angles and claustrophobic framing with unmatched precision. A textbook in pure dramatic mastery.",
-        "rating": "4/4 ★"
-      }
-    ],
-    "specs": {
-      "format": "35mm Black & White Fine-Grain Master",
-      "aspectRatio": "1.66:1 European Aspect",
-      "sound": "Uncompressed Monaural Archival Sound",
-      "color": "Kodak Double-X Monochrome"
-    }
+    ]
   },
   {
     "id": 7,
@@ -368,27 +224,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "The Lord of the Rings: The Fellowship of the Ring — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Kenneth Turan",
-        "publication": "Los Angeles Times",
-        "quote": "Jackson creates an immersive mythical universe of breathtaking beauty, profound camaraderie, and visceral adventure.",
-        "rating": "A+"
-      },
-      {
-        "critic": "Peter Travers",
-        "publication": "Rolling Stone",
-        "quote": "The Fellowship of the Ring captures the pure majesty of Tolkien's epic world with heart-stopping grandeur.",
-        "rating": "4/4 ★"
-      }
-    ],
-    "specs": {
-      "format": "4K Laser Extended Roadshow Edition",
-      "aspectRatio": "2.39:1 Anamorphic Scope",
-      "sound": "Dolby Atmos 12-Channel Immersive",
-      "color": "Digital Intermediate Color Grade"
-    }
+    ]
   },
   {
     "id": 8,
@@ -408,27 +244,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "Pulp Fiction — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Todd McCarthy",
-        "publication": "Variety",
-        "quote": "Pulp Fiction is a tour de force of intoxicating dialogue, non-linear swagger, and pop-culture brilliance that redefined American indie cinema.",
-        "rating": "Palme d'Or"
-      },
-      {
-        "critic": "Janet Maslin",
-        "publication": "The New York Times",
-        "quote": "Quentin Tarantino strikes pure cinematic gold. Hypnotic, wildly entertaining, and razor-sharp from first frame to last.",
-        "rating": "Critics Pick"
-      }
-    ],
-    "specs": {
-      "format": "35mm Vintage 1994 Theatrical Print",
-      "aspectRatio": "2.35:1 Panavision Scope",
-      "sound": "Dolby Digital 5.1 Discrete",
-      "color": "Deluxe Color Laboratory"
-    }
+    ]
   },
   {
     "id": 9,
@@ -448,27 +264,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "Fight Club — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "David Ansen",
-        "publication": "Newsweek",
-        "quote": "David Fincher directs with ferociously dark wit and breathtaking visual ingenuity. An unforgettable satirical sledgehammer.",
-        "rating": "Cult Icon"
-      },
-      {
-        "critic": "Peter Travers",
-        "publication": "Rolling Stone",
-        "quote": "Fight Club is a visionary adrenaline shot—bold, subversive, and undeniably brilliant filmmaking.",
-        "rating": "4/4 ★"
-      }
-    ],
-    "specs": {
-      "format": "35mm Special Midnight Exhibition",
-      "aspectRatio": "2.39:1 Super 35 Scope",
-      "sound": "5.1 Surround Sound Discrete",
-      "color": "Technicolor Enriched Bleach Bypass"
-    }
+    ]
   },
   {
     "id": 10,
@@ -488,27 +284,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "Gladiator — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Elvis Mitchell",
-        "publication": "The New York Times",
-        "quote": "Ridley Scott crafts a colossal, visceral sword-and-sandals epic anchored by Russell Crowe's towering, soulful authority.",
-        "rating": "Critics Pick"
-      },
-      {
-        "critic": "Roger Ebert",
-        "publication": "Chicago Sun-Times",
-        "quote": "Gladiator brings the Colosseum roaring back to life with sweeping operatic scale and heartfelt tragic power.",
-        "rating": "3.5/4 ★"
-      }
-    ],
-    "specs": {
-      "format": "70mm Large Format Exhibition",
-      "aspectRatio": "2.39:1 Panavision Scope",
-      "sound": "Dolby Atmos Discrete Array",
-      "color": "Deluxe Color Master"
-    }
+    ]
   },
   {
     "id": 11,
@@ -528,27 +304,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "Spider-Man: Across the Spider-Verse — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "David Ehrlich",
-        "publication": "IndieWire",
-        "quote": "Spider-Man: Across the Spider-Verse is an eye-popping visual miracle, reinventing what animation can achieve on the big screen.",
-        "rating": "A"
-      },
-      {
-        "critic": "A.O. Scott",
-        "publication": "The New York Times",
-        "quote": "Dazzling, exuberant, and emotionally rich. A kaleidoscopic superhero masterpiece.",
-        "rating": "Critics Pick"
-      }
-    ],
-    "specs": {
-      "format": "Dolby Vision Multiverse Digital Master",
-      "aspectRatio": "2.39:1 Anamorphic",
-      "sound": "Dolby Atmos 3D Immersive",
-      "color": "Sony Pictures Animation Color Pipeline"
-    }
+    ]
   },
   {
     "id": 12,
@@ -568,27 +324,7 @@ export const INITIAL_FILMS: CinemaFilm[] = [
         "caption": "Whiplash — Official Archival Exhibition Artwork",
         "aspectRatio": "2:3 Theatrical"
       }
-    ],
-    "reviews": [
-      {
-        "critic": "Peter Travers",
-        "publication": "Rolling Stone",
-        "quote": "Whiplash is a thrilling, blood-soaked musical collision between obsession and perfection. J.K. Simmons is terrifyingly brilliant.",
-        "rating": "4/4 ★"
-      },
-      {
-        "critic": "Manohla Dargis",
-        "publication": "The New York Times",
-        "quote": "Damien Chazelle conducts a fiercely electric, nerve-shredding duel that leaves you breathless.",
-        "rating": "Critics Pick"
-      }
-    ],
-    "specs": {
-      "format": "35mm Festival Archival Print",
-      "aspectRatio": "2.39:1 Scope",
-      "sound": "5.1 DTS Master Surround",
-      "color": "Arri Raw Color Master"
-    }
+    ]
   }
 ];
 

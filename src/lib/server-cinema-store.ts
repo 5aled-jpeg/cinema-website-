@@ -148,13 +148,6 @@ export async function upsertFilm(
     tagline: filmData.tagline || 'Exclusively in theatrical exhibition.',
     synopsis: filmData.synopsis || 'An extraordinary work of cinema presented in archival resolution.',
     stills: filmData.stills || [{ url: filmData.image || '', caption: filmData.title }],
-    reviews: filmData.reviews || [],
-    specs: filmData.specs || {
-      format: '35mm Archival Print',
-      aspectRatio: '2.39:1 Anamorphic',
-      sound: 'Dolby Atmos Restored',
-      color: 'Technicolor Dye-Transfer',
-    },
   };
 
   if (existingIndex >= 0) {
