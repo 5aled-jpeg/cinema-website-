@@ -1,58 +1,58 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { motion, AnimatePresence } from "motion/react"
-import {
-  ArrowLeft,
-  Calendar,
-  Film,
-  SlidersHorizontal,
-} from "lucide-react"
+import * as React from "react";
+import { ArrowLeft, Calendar, SlidersHorizontal } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import {
-  SuperHoverList,
-  type SuperHoverListItem,
-} from "@/registry/crafterui/ui/super-hover-list"
-import { ARCHIVE_FILMS, type ArchiveFilmItem } from "@/lib/archive-films"
-import { CinemaCursor } from "@/components/cinema-cursor"
-import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle"
-import { CinemaFooter } from "@/components/cinema-footer"
-import { useCinemaTransition } from "@/components/cinema-page-curtains"
-import { FilmModalView } from "@/components/film-modal-view"
-import { CinemaLogo } from "@/components/cinema-logo"
+import { cn } from "@/lib/utils";
+import { ARCHIVE_FILMS, type ArchiveFilmItem } from "@/lib/archive-films";
+import { CinemaCursor } from "@/components/cinema-cursor";
+import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle";
+import { CinemaFooter } from "@/components/cinema-footer";
+import { useCinemaTransition } from "@/components/cinema-page-curtains";
+import { FilmModalView } from "@/components/film-modal-view";
+import { CinemaLogo } from "@/components/cinema-logo";
+import { MagazineScroller, type Poster } from "@/components/ui/magazine-scroller";
 
 export default function MoviesArchivePage() {
-  const { navigate } = useCinemaTransition()
-  const mode: "super" | "native" = "native"
-  const autoplay = false
-  const [selectedCategory, setSelectedCategory] = React.useState<string>("all")
-  const [activeFilmForModal, setActiveFilmForModal] = React.useState<ArchiveFilmItem | null>(null)
-  const [archiveFilmsList, setArchiveFilmsList] = React.useState<ArchiveFilmItem[]>(ARCHIVE_FILMS)
+  const { navigate } = useCinemaTransition();
+  const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
+  const [activeFilmForModal, setActiveFilmForModal] = React.useState<ArchiveFilmItem | null>(null);
+  const [archiveFilmsList, setArchiveFilmsList] = React.useState<ArchiveFilmItem[]>(ARCHIVE_FILMS);
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile, { passive: true });
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Fetch live films from server store
   React.useEffect(() => {
-    fetch('/api/cinema-data')
+    fetch("/api/cinema-data")
       .then((r) => r.json())
       .then((json) => {
         if (json?.success && Array.isArray(json?.data?.films) && json.data.films.length > 0) {
           const mapped: ArchiveFilmItem[] = json.data.films.map((f: any) => ({
             id: f.id,
             title: f.title,
-            subtitle: `${f.director} · ${f.category}`,
-            meta: f.year ? f.year.toString() : '2026',
+            subtitle: `${f.director || "Archival Master"} · ${f.category || "Theatrical Exhibition"}`,
+            meta: f.year ? f.year.toString() : "2026",
             image: f.image,
-            category: f.category,
-            imdbRating: f.imdbRating || '8.5',
-            duration: f.duration || '2h 00m',
-            tagline: f.tagline || 'Exclusively in theatrical exhibition.',
-            synopsis: f.synopsis || '',
-          }))
-          setArchiveFilmsList(mapped)
+            category: f.category || "General",
+            imdbRating: f.imdbRating || "8.5",
+            duration: f.duration || "2h 00m",
+            tagline: f.tagline || "Exclusively in theatrical exhibition.",
+            synopsis: f.synopsis || "",
+            stills: f.stills || [{ url: f.image, caption: `${f.title} Poster` }],
+          }));
+          setArchiveFilmsList(mapped);
         }
       })
-      .catch(() => {})
-  }, [])
+      .catch(() => {});
+  }, []);
 
   const categories = React.useMemo(
     () => [
@@ -63,40 +63,55 @@ export default function MoviesArchivePage() {
       { id: "fantasy", label: "Fantasy & Animation" },
     ],
     []
-  )
+  );
 
   const filteredFilms = React.useMemo(() => {
-    if (selectedCategory === "all") return archiveFilmsList
+    if (selectedCategory === "all") return archiveFilmsList;
     return archiveFilmsList.filter((film) => {
-      const cat = (film.category + " " + film.subtitle).toLowerCase()
-      if (selectedCategory === "drama") return cat.includes("drama") || cat.includes("classic") || cat.includes("masterpiece")
-      if (selectedCategory === "crime") return cat.includes("crime") || cat.includes("thriller") || cat.includes("noir")
-      if (selectedCategory === "action") return cat.includes("action") || cat.includes("adventure")
-      if (selectedCategory === "fantasy") return cat.includes("fantasy") || cat.includes("animation")
-      return true
-    })
-  }, [selectedCategory, archiveFilmsList])
+      const cat = (film.category + " " + film.subtitle).toLowerCase();
+      if (selectedCategory === "drama") return cat.includes("drama") || cat.includes("classic") || cat.includes("masterpiece");
+      if (selectedCategory === "crime") return cat.includes("crime") || cat.includes("thriller") || cat.includes("noir");
+      if (selectedCategory === "action") return cat.includes("action") || cat.includes("adventure");
+      if (selectedCategory === "fantasy") return cat.includes("fantasy") || cat.includes("animation");
+      return true;
+    });
+  }, [selectedCategory, archiveFilmsList]);
 
-  const superHoverItems: SuperHoverListItem[] = React.useMemo(
-    () =>
-      filteredFilms.map((film, index) => ({
-        id: film.id,
-        title: film.title,
-        subtitle: film.subtitle,
-        meta: film.meta,
-        image: film.image,
-        onClick: () => setActiveFilmForModal(film),
-      })),
-    [filteredFilms]
-  )
+  const magazinePosters: Poster[] = React.useMemo(() => {
+    return filteredFilms.map((film) => ({
+      id: film.id,
+      src: film.image,
+      alt: `${film.title} Poster`,
+      title: film.title,
+      category: film.category,
+      imdbRating: film.imdbRating,
+      director: film.subtitle?.split("·")[0]?.trim() || "Archival Master",
+      year: film.meta,
+      duration: film.duration,
+      tagline: film.tagline,
+      synopsis: film.synopsis,
+      stills: (film as any).stills,
+    }));
+  }, [filteredFilms]);
+
+  // Handle ESC key to close modal
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveFilmForModal(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="relative w-full min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] antialiased transition-colors duration-300 flex flex-col justify-between">
       {/* Custom Spring Cursor */}
       <CinemaCursor attachToParent={false} />
 
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full backdrop-blur-2xl bg-[var(--color-bg-base)]/98 sm:bg-[var(--color-bg-base)]/85 border-b border-[var(--color-border)] px-4 sm:px-8 py-3 flex items-center justify-between transition-colors shadow-xs">
+      {/* Top Header - Zero Clutter */}
+      <header className="sticky top-0 z-40 w-full backdrop-blur-2xl bg-[var(--color-bg-base)]/98 sm:bg-[var(--color-bg-base)]/85 border-b border-[var(--color-border)] px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors shadow-xs">
         {/* Left: Home Navigation */}
         <div className="flex items-center gap-6">
           <button
@@ -109,16 +124,6 @@ export default function MoviesArchivePage() {
             <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
             <CinemaLogo size="md" />
           </button>
-
-          <span className="hidden md:inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-text-tertiary)] pl-4 border-l border-[var(--color-border)]">
-            Complete Archival Catalogue
-          </span>
-        </div>
-
-        {/* Center: Live Total Archive Counter */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-500 text-xs font-mono font-medium">
-          <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
-          <span>{ARCHIVE_FILMS.length} TITLES IN PERMANENT REPOSITORY</span>
         </div>
 
         {/* Right Actions: Schedule Shortcut & Theme Toggle */}
@@ -128,9 +133,9 @@ export default function MoviesArchivePage() {
             onClick={() => navigate("/schedule", "Exhibition Schedule")}
             data-cursor-interactive="true"
             data-cursor-label="Schedule"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-medium text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 transition-all bg-black/[0.02] dark:bg-white/[0.04] cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 transition-all bg-black/[0.02] dark:bg-white/[0.04] cursor-pointer"
           >
-            <Calendar className="size-3.5" />
+            <Calendar className="size-3.5 text-amber-500" />
             <span className="hidden sm:inline">Schedule</span>
           </button>
 
@@ -140,92 +145,88 @@ export default function MoviesArchivePage() {
         </div>
       </header>
 
-      {/* Main Archive Index Container */}
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-12 flex-1 flex flex-col space-y-6 sm:space-y-8 pb-20">
-        {/* Page Hero Title & Description */}
-        <div className="space-y-2 sm:space-y-3 pb-6 border-b border-[var(--color-border)]">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.25em] text-amber-500 font-semibold">
-            <Film className="size-3.5" />
-            <span>Full Repository</span>
+      {/* Main Content Area */}
+      <main className="w-full flex-1 flex flex-col pt-6 sm:pt-10 pb-16">
+        {/* Editorial Heading & Filter Strip */}
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--color-border)]">
+            <div>
+              <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase">
+                All Films
+              </h1>
+              <p className="mt-2 text-xs sm:text-base text-[var(--color-text-secondary)] font-serif leading-relaxed max-w-xl">
+                Drag or scroll to browse the 3D exhibition gallery. Tap any poster to explore archival stills and showtimes.
+              </p>
+            </div>
+
+            {/* Category Filter Controls */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)] mr-2 shrink-0 hidden sm:flex items-center gap-1">
+                <SlidersHorizontal className="size-3" />
+                <span>Filter:</span>
+              </span>
+
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  data-cursor-interactive="true"
+                  data-cursor-label="Filter"
+                  className={cn(
+                    "px-3.5 py-1.5 rounded-full text-xs font-mono font-medium transition-all shrink-0 cursor-pointer",
+                    selectedCategory === cat.id
+                      ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-xs scale-102"
+                      : "border border-[var(--color-border)] bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-text-secondary)]"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase">
-            All Available Films
-          </h1>
-          <p className="text-xs sm:text-base text-[var(--color-text-secondary)] font-serif leading-relaxed">
-            Browse our complete collection of films available for exhibition.
-          </p>
         </div>
 
-        {/* Category Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-          <span className="text-xs font-mono uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] mr-2 shrink-0 flex items-center gap-1">
-            <SlidersHorizontal className="size-3.5" />
-            <span>Category:</span>
-          </span>
-
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => setSelectedCategory(cat.id)}
-              data-cursor-interactive="true"
-              data-cursor-label="Filter"
-              className={cn(
-                "px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium transition-all shrink-0 cursor-pointer",
-                selectedCategory === cat.id
-                  ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-xs"
-                  : "border border-[var(--color-border)] bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/5 dark:hover:bg-white/10 text-[var(--color-text-secondary)]"
-              )}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Table Column Header Guide - Visible on tablet/desktop */}
-        <div className="w-full hidden sm:grid grid-cols-[3rem_minmax(0,42%)_minmax(0,1fr)_minmax(3.5rem,16%)_3.5rem] text-[11px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)] px-4 sm:px-8 border-b border-[var(--color-border)] pb-2 select-none">
-          <div>Index</div>
-          <div>Film Title</div>
-          <div>Director / Genre</div>
-          <div className="text-center">Art Reveal</div>
-          <div className="text-right">Year</div>
-        </div>
-        {/* Table Column Header Guide - Mobile */}
-        <div className="w-full flex sm:hidden items-center justify-between text-[11px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)] px-4 border-b border-[var(--color-border)] pb-2 select-none">
-          <div className="flex items-center gap-4">
-            <span>#</span>
-            <span>Film Title</span>
-          </div>
-          <div>Year</div>
-        </div>
-
-        {/* THE SUPER HOVER LIST (Core CrafterUI Component) */}
-        <div className="h-[580px] sm:h-[620px] w-full rounded-2xl border border-[var(--color-border)] bg-black/[0.015] dark:bg-white/[0.02] shadow-inner overflow-hidden">
-          <SuperHoverList
-            items={superHoverItems}
-            mode={mode}
-            autoplay={autoplay}
-            speed={0.4}
-            artworkSize={132}
-            className="h-full"
-            onItemClick={(item, index) => {
-              const fullFilm = ARCHIVE_FILMS.find((f) => f.id === item.id)
-              if (fullFilm) setActiveFilmForModal(fullFilm)
+        {/* 3D TACTILE MAGAZINE SCROLLER (Skecher UI Component) */}
+        <div className="w-full relative my-auto py-4 overflow-hidden">
+          <MagazineScroller
+            images={magazinePosters}
+            cardWidth={isMobile ? 210 : 260}
+            cardHeight={isMobile ? 315 : 390}
+            gap={isMobile ? 26 : 38}
+            slices={9}
+            height={isMobile ? 470 : 560}
+            wheelSpeed={1.15}
+            dragSpeed={1.2}
+            bendStrength={82}
+            maxBend={96}
+            lockWheel={false}
+            onItemClick={(poster) => {
+              const fullFilm = archiveFilmsList.find((f) => f.id === poster.id);
+              if (fullFilm) setActiveFilmForModal(fullFilm);
             }}
+            className="w-full"
           />
         </div>
       </main>
 
-      {/* Film Detail Modal when row is clicked */}
+      {/* Film Detail Modal when card is clicked */}
       {activeFilmForModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--color-bg-base)] border border-[var(--color-border)] shadow-2xl p-6 sm:p-8 space-y-6">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setActiveFilmForModal(null);
+            }
+          }}
+        >
+          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--color-bg-base)] border border-[var(--color-border)] shadow-2xl p-5 sm:p-8 space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)]">
               <div>
-                <span className="text-xs font-mono uppercase tracking-[0.2em] text-amber-500 font-semibold block">
-                  Archive Master File
+                <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-amber-500 font-semibold block">
+                  Theatrical Archive
                 </span>
-                <h3 className="text-2xl font-bold tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
                   {activeFilmForModal.title}
                 </h3>
               </div>
@@ -234,7 +235,7 @@ export default function MoviesArchivePage() {
                 onClick={() => setActiveFilmForModal(null)}
                 data-cursor-interactive="true"
                 data-cursor-label="Close"
-                className="p-2 rounded-full border border-[var(--color-border)] hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer font-mono text-xs"
+                className="px-3 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer font-mono text-xs"
               >
                 ✕ Close
               </button>
@@ -247,11 +248,12 @@ export default function MoviesArchivePage() {
                 image: activeFilmForModal.image,
                 category: activeFilmForModal.category,
                 imdbRating: activeFilmForModal.imdbRating,
-                director: activeFilmForModal.subtitle.split("·")[0]?.trim() || "Archival Master",
+                director: activeFilmForModal.subtitle?.split("·")[0]?.trim() || "Archival Master",
                 year: activeFilmForModal.meta,
                 duration: activeFilmForModal.duration,
                 tagline: activeFilmForModal.tagline,
                 synopsis: activeFilmForModal.synopsis,
+                stills: (activeFilmForModal as any).stills,
               }}
             />
           </div>
@@ -264,5 +266,5 @@ export default function MoviesArchivePage() {
         onNavigateSchedule={() => navigate("/schedule", "Exhibition Schedule")}
       />
     </div>
-  )
+  );
 }
