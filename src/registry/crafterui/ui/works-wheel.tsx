@@ -19,7 +19,7 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import MouseTiltCard, { DeviceOrientationManager } from "@/ui/components/cards/MouseTiltCard"
+import MouseTiltCard from "@/ui/components/cards/MouseTiltCard"
 import {
   Dialog,
   DialogClose,
@@ -784,7 +784,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                     ref={(node: HTMLElement | null) => {
                       cardRefs.current[i] = node
                     }}
-                    className="group absolute [backface-visibility:hidden] select-none [transform-style:preserve-3d]"
+                    className="group absolute [backface-visibility:hidden] select-none"
                     style={{
                       width: metrics.cardW,
                       height: metrics.cardH,
@@ -803,9 +803,9 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                       }}
                     >
                       <MouseTiltCard
-                        tiltIntensity={36}
-                        scale={1.05}
-                        glareIntensity={0.32}
+                        tiltIntensity={12}
+                        scale={1.03}
+                        glareIntensity={0.12}
                         className="size-full"
                         isActive={isFront}
                         enableGyroscope={true}
@@ -817,7 +817,6 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                           }}
                           className="relative block size-full overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] shadow-[0_16px_36px_-8px_rgba(0,0,0,0.45)] dark:shadow-[0_20px_48px_-10px_rgba(0,0,0,0.85)] transition-shadow duration-300 cursor-pointer"
                           onClick={(e) => {
-                            DeviceOrientationManager.getInstance().requestPermissionOnGesture()
                             if (isDraggingRef.current) {
                               e.preventDefault()
                               return
