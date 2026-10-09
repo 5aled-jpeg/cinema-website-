@@ -19,6 +19,7 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
 import MouseTiltCard from "@/ui/components/cards/MouseTiltCard"
 import { FilmModalView } from "@/components/film-modal-view"
 import { TextReveal } from "@/components/velora/text-reveal"
@@ -1095,95 +1096,127 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
           )}
         </div>
 
-        {/* Film Details Modal - Full Screen Portal Overlay */}
-        {activeModalItem && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-10 pointer-events-auto bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setActiveModalItem(null)
-              }
-            }}
-          >
-            <div className="relative flex flex-col w-[92%] sm:w-[90%] lg:w-[920px] max-h-[88vh] mx-auto overflow-hidden rounded-[24px] border border-black/10 dark:border-white/10 bg-[var(--color-bg-base)] text-[var(--color-text-primary)] shadow-2xl animate-in zoom-in-95 duration-200">
-              {/* Top Close Button with Esc Hint */}
-              <div className="absolute right-5 top-5 z-30 flex items-center gap-2">
-                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[11px] font-medium border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400">
-                  ESC
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setActiveModalItem(null)}
-                  data-cursor-interactive="true"
-                  data-cursor-label="Close"
-                  className="size-8.5 rounded-full border border-black/10 dark:border-white/15 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl text-neutral-800 dark:text-neutral-200 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer font-bold"
-                >
-                  ✕
-                </button>
-              </div>
+        {/* Film Details Modal - Full Screen Portal Overlay with Signature Spring Motion */}
+        <AnimatePresence>
+          {activeModalItem && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-10 pointer-events-auto"
+            >
+              {/* Backdrop blur & fade */}
+              <motion.div
+                key="wheel-modal-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                className="fixed inset-0 h-full w-full backdrop-blur-xl bg-black/80 dark:bg-black/85"
+                onClick={() => setActiveModalItem(null)}
+              />
 
-              {/* Scrollable Container */}
-              <div
-                data-dialog-scroll="true"
-                className="dialog-scroll-container overflow-y-auto overflow-x-hidden w-full h-full overscroll-contain focus:outline-none"
-                tabIndex={0}
+              {/* Signature Expanding Modal Card */}
+              <motion.div
+                key={`wheel-modal-card-${activeModalItem.id || activeModalItem.title}`}
+                initial={{ opacity: 0, scale: 0.88, y: 32 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 24 }}
+                transition={{
+                  type: "spring",
+                  damping: 26,
+                  stiffness: 280,
+                  mass: 0.65,
+                }}
+                className="relative z-10 flex flex-col w-[92%] sm:w-[90%] lg:w-[920px] max-h-[88vh] mx-auto overflow-hidden rounded-[24px] border border-black/10 dark:border-white/10 bg-[var(--color-bg-base)] text-[var(--color-text-primary)] shadow-2xl"
               >
-                {/* Modal Image Header */}
-                <div className="relative w-full h-72 sm:h-80 md:h-96 shrink-0 overflow-hidden bg-neutral-900">
-                  <img
-                    src={activeModalItem.image}
-                    alt={activeModalItem.title}
-                    className="w-full h-full object-cover object-center"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-transparent to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg-base)]/50 via-transparent to-transparent" />
-
-                  {/* Badges in top-left */}
-                  <div className="absolute top-5 left-5 z-10 flex flex-wrap items-center gap-2">
-                    {activeModalItem.category && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-black/50 dark:bg-white/10 backdrop-blur-md text-white border border-white/20">
-                        <Film className="size-3 text-amber-400" />
-                        {activeModalItem.category.split("·")[0].trim()}
-                      </span>
-                    )}
-                    {activeModalItem.imdbRating && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 backdrop-blur-md text-amber-400 border border-amber-500/30">
-                        <Star className="size-3 fill-amber-400" />
-                        IMDb {activeModalItem.imdbRating}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Bottom Title & Tagline in Hero Banner */}
-                  <div className="absolute bottom-5 left-6 right-6 z-10">
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[var(--color-text-primary)]">
-                      {activeModalItem.title}
-                    </h2>
-                    {activeModalItem.tagline && (
-                      <p className="mt-1.5 text-sm sm:text-base italic text-neutral-600 dark:text-neutral-400 font-serif">
-                        &ldquo;{activeModalItem.tagline}&rdquo;
-                      </p>
-                    )}
-                    <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono text-[var(--color-text-secondary)]">
-                      {activeModalItem.director && (
-                        <span>
-                          Directed by <strong className="text-[var(--color-text-primary)] font-semibold">{activeModalItem.director}</strong>
-                        </span>
-                      )}
-                      {activeModalItem.year && <span>· {activeModalItem.year}</span>}
-                      {activeModalItem.duration && <span>· {activeModalItem.duration}</span>}
-                    </div>
-                  </div>
+                {/* Top Close Button with Esc Hint */}
+                <div className="absolute right-5 top-5 z-30 flex items-center gap-2">
+                  <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[11px] font-medium border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400">
+                    ESC
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveModalItem(null)}
+                    data-cursor-interactive="true"
+                    data-cursor-label="Close"
+                    className="size-8.5 rounded-full border border-black/10 dark:border-white/15 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl text-neutral-800 dark:text-neutral-200 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer font-bold"
+                  >
+                    ✕
+                  </button>
                 </div>
 
-                {/* FilmModalView */}
-                <FilmModalView film={activeModalItem} />
-              </div>
+                {/* Scrollable Container */}
+                <div
+                  data-dialog-scroll="true"
+                  className="dialog-scroll-container overflow-y-auto overflow-x-hidden w-full h-full overscroll-contain focus:outline-none"
+                  tabIndex={0}
+                >
+                  {/* Modal Image Header with Zoom In Reveal */}
+                  <motion.div
+                    initial={{ scale: 1.05, opacity: 0.8 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative w-full h-72 sm:h-80 md:h-96 shrink-0 overflow-hidden bg-neutral-900"
+                  >
+                    <img
+                      src={activeModalItem.image}
+                      alt={activeModalItem.title}
+                      className="w-full h-full object-cover object-center"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg-base)]/50 via-transparent to-transparent" />
+
+                    {/* Badges in top-left */}
+                    <div className="absolute top-5 left-5 z-10 flex flex-wrap items-center gap-2">
+                      {activeModalItem.category && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-black/50 dark:bg-white/10 backdrop-blur-md text-white border border-white/20">
+                          <Film className="size-3 text-amber-400" />
+                          {activeModalItem.category.split("·")[0].trim()}
+                        </span>
+                      )}
+                      {activeModalItem.imdbRating && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 backdrop-blur-md text-amber-400 border border-amber-500/30">
+                          <Star className="size-3 fill-amber-400" />
+                          IMDb {activeModalItem.imdbRating}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Bottom Title & Tagline in Hero Banner */}
+                    <div className="absolute bottom-5 left-6 right-6 z-10">
+                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[var(--color-text-primary)]">
+                        {activeModalItem.title}
+                      </h2>
+                      {activeModalItem.tagline && (
+                        <p className="mt-1.5 text-sm sm:text-base italic text-neutral-600 dark:text-neutral-400 font-serif">
+                          &ldquo;{activeModalItem.tagline}&rdquo;
+                        </p>
+                      )}
+                      <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono text-[var(--color-text-secondary)]">
+                        {activeModalItem.director && (
+                          <span>
+                            Directed by <strong className="text-[var(--color-text-primary)] font-semibold">{activeModalItem.director}</strong>
+                          </span>
+                        )}
+                        {activeModalItem.year && <span>· {activeModalItem.year}</span>}
+                        {activeModalItem.duration && <span>· {activeModalItem.duration}</span>}
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* FilmModalView with Staggered Entrance */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.12, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <FilmModalView film={activeModalItem} />
+                  </motion.div>
+                </div>
+              </motion.div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </section>
     )
   }

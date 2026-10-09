@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ArrowLeft, Calendar, SlidersHorizontal } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { ARCHIVE_FILMS, type ArchiveFilmItem } from "@/lib/archive-films";
@@ -236,58 +237,85 @@ export default function MoviesArchivePage() {
         </div>
       </main>
 
-      {/* Film Detail Modal when card is clicked */}
-      {activeFilmForModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-10 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setActiveFilmForModal(null);
-            }
-          }}
-        >
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--color-bg-base)] border border-[var(--color-border)] shadow-2xl p-5 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)] sticky top-0 bg-[var(--color-bg-base)]/95 backdrop-blur-md z-30">
-              <div>
-                <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-amber-500 font-semibold block">
-                  Theatrical Archive
-                </span>
-                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-                  {activeFilmForModal.title}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveFilmForModal(null)}
-                data-cursor-interactive="true"
-                data-cursor-label="Close"
-                className="px-3.5 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--color-text-primary)] transition-all cursor-pointer font-mono text-xs font-semibold flex items-center gap-1.5"
-              >
-                <span>✕</span>
-                <span>Close</span>
-              </button>
-            </div>
-
-            <FilmModalView
-              film={{
-                id: activeFilmForModal.id,
-                title: activeFilmForModal.title,
-                image: activeFilmForModal.image,
-                category: activeFilmForModal.category,
-                imdbRating: activeFilmForModal.imdbRating,
-                director: activeFilmForModal.subtitle?.split("·")[0]?.trim() || "Archival Master",
-                year: activeFilmForModal.meta,
-                duration: activeFilmForModal.duration,
-                tagline: activeFilmForModal.tagline,
-                synopsis: activeFilmForModal.synopsis,
-                stills: (activeFilmForModal as any).stills,
-              }}
+      {/* Film Detail Modal when card is clicked with Signature Framer Motion Spring */}
+      <AnimatePresence>
+        {activeFilmForModal && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-10 pointer-events-auto"
+          >
+            {/* Backdrop blur & fade */}
+            <motion.div
+              key="archive-modal-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 h-full w-full backdrop-blur-xl bg-black/80 dark:bg-black/85"
+              onClick={() => setActiveFilmForModal(null)}
             />
+
+            {/* Signature Expanding Modal Card */}
+            <motion.div
+              key={`archive-modal-card-${activeFilmForModal.id}`}
+              initial={{ opacity: 0, scale: 0.88, y: 32 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 24 }}
+              transition={{
+                type: "spring",
+                damping: 26,
+                stiffness: 280,
+                mass: 0.65,
+              }}
+              className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--color-bg-base)] border border-[var(--color-border)] shadow-2xl p-5 sm:p-8 space-y-6"
+            >
+              <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)] sticky top-0 bg-[var(--color-bg-base)]/95 backdrop-blur-md z-30">
+                <div>
+                  <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-amber-500 font-semibold block">
+                    Theatrical Archive
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+                    {activeFilmForModal.title}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveFilmForModal(null)}
+                  data-cursor-interactive="true"
+                  data-cursor-label="Close"
+                  className="px-3.5 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--color-text-primary)] transition-all cursor-pointer font-mono text-xs font-semibold flex items-center gap-1.5"
+                >
+                  <span>✕</span>
+                  <span>Close</span>
+                </button>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <FilmModalView
+                  film={{
+                    id: activeFilmForModal.id,
+                    title: activeFilmForModal.title,
+                    image: activeFilmForModal.image,
+                    category: activeFilmForModal.category,
+                    imdbRating: activeFilmForModal.imdbRating,
+                    director: activeFilmForModal.subtitle?.split("·")[0]?.trim() || "Archival Master",
+                    year: activeFilmForModal.meta,
+                    duration: activeFilmForModal.duration,
+                    tagline: activeFilmForModal.tagline,
+                    synopsis: activeFilmForModal.synopsis,
+                    stills: (activeFilmForModal as any).stills,
+                  }}
+                />
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Footer */}
       <CinemaFooter
