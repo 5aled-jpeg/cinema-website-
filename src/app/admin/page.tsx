@@ -36,6 +36,16 @@ import {
   CINEMA_HALLS,
 } from '@/lib/cinema-data';
 
+// Helper to format date as "11 Oct 2026"
+function formatReadableDate(dateStr: string) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  if (!y || !m || !d) return dateStr;
+  const dateObj = new Date(y, m - 1, d);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${d} ${months[dateObj.getMonth()]} ${y}`;
+}
+
 export default function AdminDashboardPage() {
   const router = useRouter();
 
@@ -534,7 +544,7 @@ export default function AdminDashboardPage() {
     setMultiScreeningModalOpen(true);
   };
 
-  const handleAddSlotToMulti = (time = '20:30', hallId = 'screen-1', format = 'Theatrical 4K', tag: Screening['tag'] = 'Standard') => {
+  const handleAddSlotToMulti = (time = '20:30', hallId = 'screen-1') => {
     setMultiScreeningData((prev) => ({
       ...prev,
       slots: [
@@ -542,8 +552,8 @@ export default function AdminDashboardPage() {
         {
           time,
           hallId,
-          format,
-          tag,
+          format: '4K Laser Projection',
+          tag: 'Standard',
           availability: 'Available',
         },
       ],
@@ -1641,27 +1651,45 @@ export default function AdminDashboardPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-mono text-neutral-400 uppercase mb-1">
-                    Date (YYYY-MM-DD) *
+                    Date *
                   </label>
-                  <input
-                    type="date"
-                    required
-                    value={screeningFormData.date}
-                    onChange={(e) => setScreeningFormData({ ...screeningFormData, date: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
-                  />
+                  <div className="relative group">
+                    <div className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 group-hover:border-amber-400/50 text-white text-xs font-mono flex items-center justify-between transition-colors">
+                      <span className="text-amber-400 font-bold">
+                        {formatReadableDate(screeningFormData.date) || 'Select Date'}
+                      </span>
+                      <Calendar className="w-3.5 h-3.5 text-neutral-400 group-hover:text-amber-400" />
+                    </div>
+                    <input
+                      type="date"
+                      required
+                      value={screeningFormData.date}
+                      onChange={(e) => setScreeningFormData({ ...screeningFormData, date: e.target.value })}
+                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-mono text-neutral-400 uppercase mb-1">
-                    Showtime (HH:MM) *
+                    Showtime (24H Format) *
                   </label>
                   <input
-                    type="time"
+                    type="text"
                     required
+                    list="time-24h-options"
+                    pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                    maxLength={5}
+                    placeholder="14:00"
                     value={screeningFormData.time}
-                    onChange={(e) => setScreeningFormData({ ...screeningFormData, time: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
+                    onChange={(e) => {
+                      let val = e.target.value.trim();
+                      if (val.length === 2 && !val.includes(':') && screeningFormData.time.length < 2) {
+                        val = val + ':';
+                      }
+                      setScreeningFormData({ ...screeningFormData, time: val });
+                    }}
+                    className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400 placeholder:text-neutral-600"
                   />
                 </div>
               </div>
@@ -1835,65 +1863,28 @@ export default function AdminDashboardPage() {
                 {/* Screening Date */}
                 <div>
                   <label className="block text-[11px] font-mono text-neutral-400 uppercase mb-1.5 font-semibold">
-                    Programming Date (YYYY-MM-DD) *
+                    Programming Date *
                   </label>
-                  <input
-                    type="date"
-                    required
-                    value={multiScreeningData.date}
-                    onChange={(e) =>
-                      setMultiScreeningData({
-                        ...multiScreeningData,
-                        date: e.target.value,
-                      })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/70 border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-amber-400"
-                  />
-                </div>
-              </div>
-
-              {/* Quick Preset Buttons */}
-              <div className="space-y-2">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block font-semibold">
-                  Quick Add Presets:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleAddSlotToMulti('05:00', 'vip-salle', 'VIP Sunrise Array', 'VIP Salle')
-                    }
-                    className="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono transition-colors"
-                  >
-                    + 05:00 AM · VIP Salle
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleAddSlotToMulti('14:00', 'salle-5', '4K Laser Projection', 'Standard')
-                    }
-                    className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-mono transition-colors"
-                  >
-                    + 02:00 PM (14:00) · Salle 5
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleAddSlotToMulti('17:00', 'vip-salle', 'Dolby Atmos Salon', 'VIP Salle')
-                    }
-                    className="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono transition-colors"
-                  >
-                    + 05:00 PM (17:00) · VIP Salle
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleAddSlotToMulti('20:30', 'screen-1', '35mm Archival Print', 'Standard')
-                    }
-                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 text-xs font-mono transition-colors"
-                  >
-                    + 08:30 PM (20:30) · Screen 1
-                  </button>
+                  <div className="relative group">
+                    <div className="w-full px-3.5 py-2.5 rounded-xl bg-black/70 border border-white/15 group-hover:border-amber-400/50 text-white text-xs font-mono flex items-center justify-between transition-colors">
+                      <span className="text-amber-400 font-bold tracking-wide">
+                        {formatReadableDate(multiScreeningData.date) || 'Select Date'}
+                      </span>
+                      <Calendar className="w-4 h-4 text-neutral-400 group-hover:text-amber-400 transition-colors" />
+                    </div>
+                    <input
+                      type="date"
+                      required
+                      value={multiScreeningData.date}
+                      onChange={(e) =>
+                        setMultiScreeningData({
+                          ...multiScreeningData,
+                          date: e.target.value,
+                        })
+                      }
+                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1913,125 +1904,75 @@ export default function AdminDashboardPage() {
                   </button>
                 </div>
 
-                <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
                   {multiScreeningData.slots.map((slot, idx) => (
                     <div
                       key={idx}
-                      className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-3 hover:border-amber-500/25 transition-all"
+                      className="p-3.5 rounded-2xl bg-black/60 border border-white/10 hover:border-amber-500/25 transition-all flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
                     >
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-amber-300 font-bold">
+                      <div className="flex items-center justify-between sm:justify-start gap-2">
+                        <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 font-mono text-xs font-bold whitespace-nowrap">
                           Slot #{idx + 1}
                         </span>
-                        {multiScreeningData.slots.length > 1 && (
+                      </div>
+
+                      {/* Showtime (24H Format) */}
+                      <div className="flex-1 min-w-[130px]">
+                        <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
+                          Showtime (24H: e.g. 14:00, 05:00) *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          list="time-24h-options"
+                          pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                          placeholder="14:00"
+                          maxLength={5}
+                          value={slot.time}
+                          onChange={(e) => {
+                            let val = e.target.value.trim();
+                            if (val.length === 2 && !val.includes(':') && slot.time.length < 2) {
+                              val = val + ':';
+                            }
+                            handleUpdateSlotInMulti(idx, { time: val });
+                          }}
+                          className="w-full px-3.5 py-2 rounded-xl bg-black/80 border border-white/15 text-white font-mono text-xs tracking-wider focus:outline-none focus:border-amber-400 placeholder:text-neutral-600"
+                        />
+                      </div>
+
+                      {/* Auditorium */}
+                      <div className="flex-[1.5] min-w-[160px]">
+                        <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
+                          Auditorium *
+                        </label>
+                        <select
+                          value={slot.hallId}
+                          onChange={(e) =>
+                            handleUpdateSlotInMulti(idx, { hallId: e.target.value })
+                          }
+                          className="w-full px-3.5 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                        >
+                          {halls.map((h) => (
+                            <option key={h.id} value={h.id}>
+                              {h.name} ({h.capacity} seats)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Delete Slot Button */}
+                      {multiScreeningData.slots.length > 1 && (
+                        <div className="sm:self-end pb-0.5">
                           <button
                             type="button"
                             onClick={() => handleRemoveSlotFromMulti(idx)}
-                            className="text-neutral-500 hover:text-rose-400 transition-colors p-1"
+                            className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-neutral-400 hover:text-rose-400 border border-rose-500/20 transition-colors"
                             title="Remove Slot"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {/* Time */}
-                        <div>
-                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
-                            Showtime (HH:MM) *
-                          </label>
-                          <input
-                            type="time"
-                            required
-                            value={slot.time}
-                            onChange={(e) =>
-                              handleUpdateSlotInMulti(idx, { time: e.target.value })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-amber-400"
-                          />
                         </div>
-
-                        {/* Auditorium / Hall */}
-                        <div>
-                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
-                            Auditorium *
-                          </label>
-                          <select
-                            value={slot.hallId}
-                            onChange={(e) =>
-                              handleUpdateSlotInMulti(idx, { hallId: e.target.value })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
-                          >
-                            {halls.map((h) => (
-                              <option key={h.id} value={h.id}>
-                                {h.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Format */}
-                        <div>
-                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
-                            Format / Audio
-                          </label>
-                          <input
-                            type="text"
-                            value={slot.format}
-                            onChange={(e) =>
-                              handleUpdateSlotInMulti(idx, { format: e.target.value })
-                            }
-                            placeholder="e.g. 4K Laser, Dolby Atmos"
-                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3 pt-1">
-                        {/* Tag */}
-                        <div>
-                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
-                            Tag / Edition
-                          </label>
-                          <select
-                            value={slot.tag}
-                            onChange={(e) =>
-                              handleUpdateSlotInMulti(idx, {
-                                tag: e.target.value as Screening['tag'],
-                              })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
-                          >
-                            <option value="Standard">Standard</option>
-                            <option value="VIP Salle">VIP Salle</option>
-                            <option value="Director Q&A">Director Q&A</option>
-                            <option value="Midnight Special">Midnight Special</option>
-                            <option value="Kids Only">Kids Only</option>
-                          </select>
-                        </div>
-
-                        {/* Availability */}
-                        <div>
-                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
-                            Initial Availability
-                          </label>
-                          <select
-                            value={slot.availability}
-                            onChange={(e) =>
-                              handleUpdateSlotInMulti(idx, {
-                                availability: e.target.value as Screening['availability'],
-                              })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
-                          >
-                            <option value="Available">Available</option>
-                            <option value="Selling Fast">Selling Fast</option>
-                            <option value="Few Seats Left">Few Seats Left</option>
-                          </select>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -2059,6 +2000,24 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Global 24H Showtime Datalist */}
+      <datalist id="time-24h-options">
+        <option value="05:00" />
+        <option value="08:30" />
+        <option value="10:00" />
+        <option value="11:30" />
+        <option value="13:00" />
+        <option value="14:00" />
+        <option value="15:30" />
+        <option value="17:00" />
+        <option value="18:30" />
+        <option value="20:00" />
+        <option value="20:30" />
+        <option value="21:45" />
+        <option value="22:30" />
+        <option value="23:50" />
+      </datalist>
     </div>
   );
 }
