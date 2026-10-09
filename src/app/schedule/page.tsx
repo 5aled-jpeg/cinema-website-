@@ -19,6 +19,7 @@ import {
   getFilms,
   getScreenings,
   type CinemaFilm,
+  type CinemaHall,
   type Screening,
 } from "@/lib/cinema-data"
 import { cn } from "@/lib/utils"
@@ -55,6 +56,7 @@ export default function SchedulePage() {
   const { navigate } = useCinemaTransition()
   const [films, setFilms] = React.useState<CinemaFilm[]>(INITIAL_FILMS)
   const [screenings, setScreenings] = React.useState<Screening[]>(INITIAL_SCREENINGS)
+  const [halls, setHalls] = React.useState<CinemaHall[]>(CINEMA_HALLS)
   const [selectedDate, setSelectedDate] = React.useState<string>("2026-09-28")
   const [selectedExperience, setSelectedExperience] = React.useState<string>("all")
   const [activeFilmForModal, setActiveFilmForModal] = React.useState<CinemaFilm | null>(null)
@@ -70,6 +72,9 @@ export default function SchedulePage() {
           if (json?.success && json?.data) {
             if (Array.isArray(json.data.films) && json.data.films.length > 0) {
               setFilms(json.data.films)
+            }
+            if (Array.isArray(json.data.halls) && json.data.halls.length > 0) {
+              setHalls(json.data.halls)
             }
             if (Array.isArray(json.data.screenings) && json.data.screenings.length > 0) {
               setScreenings(json.data.screenings)
@@ -105,6 +110,7 @@ export default function SchedulePage() {
       if (selectedExperience === "all") return true
       if (selectedExperience === "screen-1") return s.hallId === "screen-1"
       if (selectedExperience === "vip") return s.tag === "VIP Salle" || s.hallId === "vip-salle"
+      if (selectedExperience === "salle-5") return s.hallId === "salle-5"
       if (selectedExperience === "auditorium-2") return s.hallId === "auditorium-2"
       if (selectedExperience === "kids") return s.tag === "Kids Only" || s.hallId === "kids-arena"
       return true
@@ -305,6 +311,7 @@ export default function SchedulePage() {
               { id: "all", label: "All Screenings" },
               { id: "screen-1", label: "Screen 1" },
               { id: "vip", label: "VIP Salle" },
+              { id: "salle-5", label: "Salle 5" },
               { id: "auditorium-2", label: "Auditorium 2" },
               { id: "kids", label: "Kids Arena" },
             ].map((item) => {
@@ -417,7 +424,7 @@ export default function SchedulePage() {
 
                       <div className="flex flex-wrap items-center lg:justify-end gap-2 sm:gap-2.5">
                         {screenings.map((s) => {
-                          const hall = CINEMA_HALLS.find((h) => h.id === s.hallId)
+                          const hall = halls.find((h) => h.id === s.hallId) || CINEMA_HALLS.find((h) => h.id === s.hallId)
                           const isVip = s.tag === "VIP Salle"
                           const isKids = s.tag === "Kids Only"
                           const isMidnight = s.tag === "Midnight Special"

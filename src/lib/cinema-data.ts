@@ -74,6 +74,16 @@ export const CINEMA_HALLS: CinemaHall[] = [
     description: 'Reference black levels and spatial audio precision.',
   },
   {
+    id: 'salle-5',
+    name: 'Salle 5 — Main Projection Hall',
+    shortName: 'Salle 5',
+    type: 'standard',
+    capacity: 190,
+    sound: 'Dolby Surround 7.1 Studio Audio',
+    projection: '4K Laser Projection',
+    description: 'Crisp high-frame-rate presentation with expansive tiered seating.',
+  },
+  {
     id: 'kids-arena',
     name: 'Kids Arena — Hall 3',
     shortName: 'Kids Arena',

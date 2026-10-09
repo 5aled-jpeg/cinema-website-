@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   getAllScreenings,
   upsertScreening,
+  upsertMultipleScreenings,
   deleteScreeningById,
 } from '@/lib/server-cinema-store';
 
@@ -22,6 +23,27 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    // Support batch multiple showtimes in a day: { slots: [...] } or array [...]
+    if (Array.isArray(body?.slots) || Array.isArray(body)) {
+      const list = Array.isArray(body?.slots) ? body.slots : body;
+      const valid = list.filter(
+        (item: any) => item?.filmId && item?.date && item?.time && item?.hallId
+      );
+      if (valid.length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'At least one valid screening slot with filmId, date, time, and hallId is required',
+          },
+          { status: 400 }
+        );
+      }
+      const saved = await upsertMultipleScreenings(valid);
+      return NextResponse.json({ success: true, screenings: saved });
+    }
+
     if (!body?.filmId || !body?.date || !body?.time || !body?.hallId) {
       return NextResponse.json(
         { success: false, error: 'filmId, date, time, and hallId are required' },

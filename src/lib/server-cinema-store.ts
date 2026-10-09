@@ -233,9 +233,45 @@ export async function upsertScreening(
   return cleanScreening;
 }
 
+export async function upsertMultipleScreenings(
+  slots: (Partial<Screening> & { filmId: number; date: string; time: string; hallId: string })[]
+): Promise<Screening[]> {
+  const store = await getCinemaStore();
+  let screenings = [...store.screenings];
+  const savedList: Screening[] = [];
+
+  for (let i = 0; i < slots.length; i++) {
+    const slot = slots[i];
+    const slotId = slot.id || `scr-${Date.now()}-${i}-${Math.floor(Math.random() * 1000)}`;
+    const cleanScreening: Screening = {
+      id: slotId,
+      filmId: Number(slot.filmId),
+      date: slot.date,
+      time: slot.time,
+      hallId: slot.hallId,
+      tag: slot.tag || 'Standard',
+      format: slot.format || 'Theatrical 4K',
+      availability: slot.availability || 'Available',
+      notes: slot.notes || '',
+    };
+
+    const existingIndex = screenings.findIndex((s) => s.id === slotId);
+    if (existingIndex >= 0) {
+      screenings[existingIndex] = cleanScreening;
+    } else {
+      screenings.push(cleanScreening);
+    }
+    savedList.push(cleanScreening);
+  }
+
+  await saveCinemaStore({ screenings });
+  return savedList;
+}
+
 export async function deleteScreeningById(id: string): Promise<boolean> {
   const store = await getCinemaStore();
   const screenings = store.screenings.filter((s) => s.id !== id);
   await saveCinemaStore({ screenings });
   return true;
 }
+

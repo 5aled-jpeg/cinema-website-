@@ -96,6 +96,41 @@ export default function AdminDashboardPage() {
     notes: '',
   });
 
+  // Multi-Showtime Program Modal state (Schedule film multiple times in a day)
+  const [screeningViewMode, setScreeningViewMode] = useState<'grouped' | 'list'>('grouped');
+  const [multiScreeningModalOpen, setMultiScreeningModalOpen] = useState(false);
+  const [multiScreeningData, setMultiScreeningData] = useState<{
+    filmId: number;
+    date: string;
+    slots: Array<{
+      time: string;
+      hallId: string;
+      format: string;
+      tag: Screening['tag'];
+      availability: Screening['availability'];
+      notes?: string;
+    }>;
+  }>({
+    filmId: 1,
+    date: new Date().toISOString().split('T')[0],
+    slots: [
+      {
+        time: '14:00',
+        hallId: 'salle-5',
+        format: '4K Laser Projection',
+        tag: 'Standard',
+        availability: 'Available',
+      },
+      {
+        time: '17:00',
+        hallId: 'vip-salle',
+        format: 'Dolby Atmos Private Array',
+        tag: 'VIP Salle',
+        availability: 'Available',
+      },
+    ],
+  });
+
   // Fetch initial cinema data from server
   const loadCinemaData = async () => {
     try {
@@ -472,6 +507,121 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // -------------------------------------------------------------
+  // MULTI-SHOWTIME PROGRAMMER (Multiple times in a day)
+  // -------------------------------------------------------------
+  const handleOpenMultiScreening = (initialFilmId?: number, initialDate?: string) => {
+    setMultiScreeningData({
+      filmId: initialFilmId || films[0]?.id || 1,
+      date: initialDate || (selectedDate !== 'all' ? selectedDate : new Date().toISOString().split('T')[0]),
+      slots: [
+        {
+          time: '14:00',
+          hallId: 'salle-5',
+          format: '4K Laser Projection',
+          tag: 'Standard',
+          availability: 'Available',
+        },
+        {
+          time: '17:00',
+          hallId: 'vip-salle',
+          format: 'Dolby Atmos Private Array',
+          tag: 'VIP Salle',
+          availability: 'Available',
+        },
+      ],
+    });
+    setMultiScreeningModalOpen(true);
+  };
+
+  const handleAddSlotToMulti = (time = '20:30', hallId = 'screen-1', format = 'Theatrical 4K', tag: Screening['tag'] = 'Standard') => {
+    setMultiScreeningData((prev) => ({
+      ...prev,
+      slots: [
+        ...prev.slots,
+        {
+          time,
+          hallId,
+          format,
+          tag,
+          availability: 'Available',
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveSlotFromMulti = (index: number) => {
+    setMultiScreeningData((prev) => ({
+      ...prev,
+      slots: prev.slots.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleUpdateSlotInMulti = (index: number, updates: Partial<(typeof multiScreeningData.slots)[0]>) => {
+    setMultiScreeningData((prev) => {
+      const nextSlots = [...prev.slots];
+      nextSlots[index] = { ...nextSlots[index], ...updates };
+      return { ...prev, slots: nextSlots };
+    });
+  };
+
+  const handleSaveMultiScreening = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (multiScreeningData.slots.length === 0) {
+      showToast('error', 'Please add at least one showtime slot.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const payload = {
+        slots: multiScreeningData.slots.map((s) => ({
+          filmId: Number(multiScreeningData.filmId),
+          date: multiScreeningData.date,
+          time: s.time,
+          hallId: s.hallId,
+          format: s.format,
+          tag: s.tag,
+          availability: s.availability,
+          notes: s.notes || '',
+        })),
+      };
+
+      const res = await fetch('/api/admin/screenings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save multiple showtimes');
+      }
+
+      const savedList: Screening[] = data.screenings;
+
+      setScreenings((prev) => {
+        const copy = [...prev];
+        savedList.forEach((saved) => {
+          const idx = copy.findIndex((s) => s.id === saved.id);
+          if (idx >= 0) copy[idx] = saved;
+          else copy.push(saved);
+        });
+        return copy;
+      });
+
+      setMultiScreeningModalOpen(false);
+      showToast(
+        'success',
+        `✨ Programmed ${savedList.length} showtimes for this film on ${multiScreeningData.date}!`
+      );
+    } catch (err: any) {
+      showToast('error', err.message || 'Error saving multiple screenings.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Filtered catalogue films
   const filteredFilms = useMemo(() => {
     if (!searchQuery.trim()) return films;
@@ -504,6 +654,30 @@ export default function AdminDashboardPage() {
       return a.time.localeCompare(b.time);
     });
   }, [screenings, selectedDate]);
+
+  // Group screenings by Film and Date for multi-showtime management
+  const groupedScreenings = useMemo(() => {
+    const map = new Map<string, { key: string; filmId: number; date: string; film?: CinemaFilm; slots: Screening[] }>();
+
+    filteredScreenings.forEach((slot) => {
+      const key = `${slot.filmId}-${slot.date}`;
+      if (!map.has(key)) {
+        const film = films.find((f) => f.id === slot.filmId);
+        map.set(key, { key, filmId: slot.filmId, date: slot.date, film, slots: [] });
+      }
+      map.get(key)!.slots.push(slot);
+    });
+
+    map.forEach((item) => {
+      item.slots.sort((a, b) => a.time.localeCompare(b.time));
+    });
+
+    return Array.from(map.values()).sort((a, b) => {
+      const dateCompare = a.date.localeCompare(b.date);
+      if (dateCompare !== 0) return dateCompare;
+      return (a.film?.title || '').localeCompare(b.film?.title || '');
+    });
+  }, [filteredScreenings, films]);
 
   return (
     <div data-admin-portal="true" className="admin-portal min-h-screen bg-[#07080a] text-neutral-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
@@ -892,14 +1066,15 @@ export default function AdminDashboardPage() {
             {/* ------------------------------------------------------------- */}
             {activeTab === 'screenings' && (
               <div className="space-y-6 animate-in fade-in duration-300">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  {/* Date Filter Tabs */}
+                {/* Top Action & Filter Bar */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-2xl bg-[#0e1015] border border-white/10">
+                  {/* Left: Date Filter Tabs */}
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setSelectedDate('all')}
                       className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all ${
                         selectedDate === 'all'
-                          ? 'bg-amber-500 text-black font-bold'
+                          ? 'bg-amber-500 text-black font-bold shadow-sm'
                           : 'bg-white/5 text-neutral-400 hover:text-white border border-white/10'
                       }`}
                     >
@@ -911,7 +1086,7 @@ export default function AdminDashboardPage() {
                         onClick={() => setSelectedDate(dateStr)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all ${
                           selectedDate === dateStr
-                            ? 'bg-amber-500 text-black font-bold'
+                            ? 'bg-amber-500 text-black font-bold shadow-sm'
                             : 'bg-white/5 text-neutral-400 hover:text-white border border-white/10'
                         }`}
                       >
@@ -920,101 +1095,275 @@ export default function AdminDashboardPage() {
                     ))}
                   </div>
 
-                  <button
-                    onClick={handleOpenAddScreening}
-                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-semibold text-xs font-mono uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Schedule Show
-                  </button>
-                </div>
-
-                {/* Screenings Table / Cards */}
-                <div className="space-y-3">
-                  {filteredScreenings.length === 0 ? (
-                    <div className="p-12 text-center text-neutral-500 font-mono text-xs">
-                      No screenings scheduled for the selected date. Click &quot;Schedule Show&quot; to add one.
+                  {/* Right: View Mode Toggle & Primary Actions */}
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {/* View Switcher */}
+                    <div className="inline-flex p-1 rounded-xl bg-black/60 border border-white/10 text-xs font-mono">
+                      <button
+                        type="button"
+                        onClick={() => setScreeningViewMode('grouped')}
+                        className={`px-3 py-1 rounded-lg transition-all ${
+                          screeningViewMode === 'grouped'
+                            ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30'
+                            : 'text-neutral-400 hover:text-white'
+                        }`}
+                      >
+                        By Film ({groupedScreenings.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setScreeningViewMode('list')}
+                        className={`px-3 py-1 rounded-lg transition-all ${
+                          screeningViewMode === 'list'
+                            ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30'
+                            : 'text-neutral-400 hover:text-white'
+                        }`}
+                      >
+                        All Slots ({filteredScreenings.length})
+                      </button>
                     </div>
-                  ) : (
-                    filteredScreenings.map((slot) => {
-                      const film = films.find((f) => f.id === slot.filmId);
-                      const hall = halls.find((h) => h.id === slot.hallId);
 
-                      return (
-                        <div
-                          key={slot.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#0e1015] border border-white/10 hover:border-amber-500/30 transition-all shadow-sm"
-                        >
-                          <div className="flex items-center gap-4">
-                            {/* Film Thumbnail */}
-                            <div className="w-12 h-16 rounded-lg bg-neutral-900 overflow-hidden shrink-0 border border-white/10">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={film?.image || ''}
-                                alt={film?.title || ''}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
+                    {/* ⚡ Multi-Showtime Programmer Button */}
+                    <button
+                      onClick={() => handleOpenMultiScreening()}
+                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-bold text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+                    >
+                      <Zap className="w-4 h-4 fill-black" />
+                      Program Film (Multi-Times)
+                    </button>
 
-                            {/* Details */}
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                                  {slot.time}
-                                </span>
-                                <span className="text-xs font-mono text-neutral-400">{slot.date}</span>
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-300">
-                                  {hall?.shortName || slot.hallId}
-                                </span>
-                              </div>
-                              <h4 className="font-bold text-white text-base mt-1">
-                                {film?.title || `Film #${slot.filmId}`}
-                              </h4>
-                              <p className="text-xs text-neutral-400 flex items-center gap-2 mt-0.5">
-                                <span>{slot.format}</span>
-                                &bull;
-                                <span
-                                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                                    slot.availability === 'Available'
-                                      ? 'text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
-                                      : slot.availability === 'Selling Fast'
-                                      ? 'text-amber-300 bg-amber-500/10 border border-amber-500/20'
-                                      : 'text-rose-300 bg-rose-500/10 border border-rose-500/20'
-                                  }`}
-                                >
-                                  {slot.availability}
-                                </span>
-                                {slot.notes && (
-                                  <span className="text-neutral-500 text-[11px] italic">
-                                    &bull; {slot.notes}
-                                  </span>
-                                )}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Actions */}
-                          <div className="flex items-center gap-2 self-end sm:self-center">
-                            <button
-                              onClick={() => handleOpenEditScreening(slot)}
-                              className="p-2 rounded-lg bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white transition-colors"
-                              title="Edit Show"
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteScreening(slot.id)}
-                              className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
-                              title="Delete Show"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
+                    {/* Single Show Button */}
+                    <button
+                      onClick={handleOpenAddScreening}
+                      className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white font-mono text-xs uppercase tracking-wider transition-all"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Single Slot
+                    </button>
+                  </div>
                 </div>
+
+                {/* VIEW MODE 1: GROUPED BY FILM (Displays multiple showtimes per day) */}
+                {screeningViewMode === 'grouped' ? (
+                  <div className="space-y-4">
+                    {groupedScreenings.length === 0 ? (
+                      <div className="p-12 text-center text-neutral-500 font-mono text-xs rounded-2xl bg-[#0e1015] border border-white/5">
+                        No screenings scheduled for the selected date. Click &quot;Program Film (Multi-Times)&quot; to schedule.
+                      </div>
+                    ) : (
+                      groupedScreenings.map((group) => {
+                        const { film, date, slots } = group;
+
+                        return (
+                          <div
+                            key={group.key}
+                            className="p-5 rounded-2xl bg-[#0e1015] border border-white/10 hover:border-amber-500/30 transition-all shadow-md space-y-4"
+                          >
+                            {/* Film Header Row */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-white/5">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-16 rounded-xl bg-neutral-900 overflow-hidden shrink-0 border border-white/10">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={film?.image || ''}
+                                    alt={film?.title || ''}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-mono text-amber-400 font-semibold bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                                      {date}
+                                    </span>
+                                    <span className="text-[11px] font-mono text-neutral-400">
+                                      {slots.length} {slots.length === 1 ? 'Showtime' : 'Showtimes Programmed'}
+                                    </span>
+                                  </div>
+                                  <h3 className="font-bold text-white text-lg tracking-tight mt-1">
+                                    {film?.title || `Film #${group.filmId}`}
+                                  </h3>
+                                  <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                                    Dir. {film?.director || 'Archive'} &bull; {film?.duration || '2h'} &bull; {film?.category}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Action to add another showtime for this film on this date */}
+                              <div className="self-end sm:self-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenMultiScreening(group.filmId, date)}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono transition-colors"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  Add Showtime
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Multiple Showtimes Chips */}
+                            <div className="space-y-1.5">
+                              <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
+                                Scheduled Times on {date}:
+                              </span>
+                              <div className="flex flex-wrap items-center gap-2.5">
+                                {slots.map((slot) => {
+                                  const hall = halls.find((h) => h.id === slot.hallId);
+                                  const isVip = slot.tag === 'VIP Salle' || slot.hallId === 'vip-salle';
+                                  const isSalle5 = slot.hallId === 'salle-5';
+
+                                  return (
+                                    <div
+                                      key={slot.id}
+                                      className={`group relative flex items-center gap-3 px-3.5 py-2 rounded-xl border transition-all ${
+                                        isVip
+                                          ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
+                                          : isSalle5
+                                          ? 'bg-blue-500/10 border-blue-500/40 text-blue-300'
+                                          : 'bg-white/5 border-white/10 text-neutral-200'
+                                      }`}
+                                    >
+                                      {/* Time & Hall */}
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-mono font-bold text-sm tracking-tight">
+                                          {slot.time}
+                                        </span>
+                                        <span className="text-xs opacity-90 font-medium">
+                                          {hall?.shortName || slot.hallId}
+                                        </span>
+                                      </div>
+
+                                      {/* Tag & Availability */}
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/40 border border-white/10 opacity-80">
+                                          {slot.format || '4K'}
+                                        </span>
+                                        <span
+                                          className={`size-2 rounded-full shrink-0 ${
+                                            slot.availability === 'Available'
+                                              ? 'bg-emerald-400'
+                                              : slot.availability === 'Selling Fast'
+                                              ? 'bg-amber-400'
+                                              : 'bg-rose-400'
+                                          }`}
+                                          title={slot.availability}
+                                        />
+                                      </div>
+
+                                      {/* Quick Hover Controls */}
+                                      <div className="flex items-center gap-1 pl-1 border-l border-white/10">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenEditScreening(slot)}
+                                          className="p-1 hover:text-white text-neutral-400 transition-colors"
+                                          title="Edit Show"
+                                        >
+                                          <Edit className="w-3 h-3" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteScreening(slot.id)}
+                                          className="p-1 hover:text-rose-400 text-neutral-400 transition-colors"
+                                          title="Delete Show"
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                ) : (
+                  /* VIEW MODE 2: FLAT LIST OF ALL SLOTS */
+                  <div className="space-y-3">
+                    {filteredScreenings.length === 0 ? (
+                      <div className="p-12 text-center text-neutral-500 font-mono text-xs rounded-2xl bg-[#0e1015] border border-white/5">
+                        No screenings scheduled for the selected date. Click &quot;Program Film&quot; to add one.
+                      </div>
+                    ) : (
+                      filteredScreenings.map((slot) => {
+                        const film = films.find((f) => f.id === slot.filmId);
+                        const hall = halls.find((h) => h.id === slot.hallId);
+
+                        return (
+                          <div
+                            key={slot.id}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#0e1015] border border-white/10 hover:border-amber-500/30 transition-all shadow-sm"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-16 rounded-lg bg-neutral-900 overflow-hidden shrink-0 border border-white/10">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={film?.image || ''}
+                                  alt={film?.title || ''}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-bold font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                                    {slot.time}
+                                  </span>
+                                  <span className="text-xs font-mono text-neutral-400">{slot.date}</span>
+                                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-300">
+                                    {hall?.shortName || slot.hallId}
+                                  </span>
+                                </div>
+                                <h4 className="font-bold text-white text-base mt-1">
+                                  {film?.title || `Film #${slot.filmId}`}
+                                </h4>
+                                <p className="text-xs text-neutral-400 flex items-center gap-2 mt-0.5">
+                                  <span>{slot.format}</span>
+                                  &bull;
+                                  <span
+                                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                                      slot.availability === 'Available'
+                                        ? 'text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
+                                        : slot.availability === 'Selling Fast'
+                                        ? 'text-amber-300 bg-amber-500/10 border border-amber-500/20'
+                                        : 'text-rose-300 bg-rose-500/10 border border-rose-500/20'
+                                    }`}
+                                  >
+                                    {slot.availability}
+                                  </span>
+                                  {slot.notes && (
+                                    <span className="text-neutral-500 text-[11px] italic">
+                                      &bull; {slot.notes}
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 self-end sm:self-center">
+                              <button
+                                onClick={() => handleOpenEditScreening(slot)}
+                                className="p-2 rounded-lg bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white transition-colors"
+                                title="Edit Show"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteScreening(slot.id)}
+                                className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                                title="Delete Show"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </>
@@ -1421,6 +1770,289 @@ export default function AdminDashboardPage() {
                 >
                   {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Save Screening Show
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: PROGRAM MULTIPLE SHOWTIMES (SAME DAY) */}
+      {/* ------------------------------------------------------------- */}
+      {multiScreeningModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[#0d0f14] border border-amber-500/30 p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-white/10 mb-6">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-400 font-bold mb-1">
+                  <Zap className="w-3.5 h-3.5 fill-amber-400" />
+                  Multi-Showtime Programmer
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold font-serif text-white">
+                  Schedule Film Multiple Times (Same Day)
+                </h3>
+                <p className="text-xs text-neutral-400 font-mono mt-1">
+                  Program a film across different auditoriums and hours in a single day (e.g. VIP at 5:00, Salle 5 at 14:00, Screen 1 at 20:30).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMultiScreeningModalOpen(false)}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/15 text-neutral-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveMultiScreening} className="space-y-6">
+              {/* Film Selection & Date Header */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-black/50 border border-white/10">
+                {/* Film Selector */}
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-400 uppercase mb-1.5 font-semibold">
+                    Exhibited Film *
+                  </label>
+                  <select
+                    value={multiScreeningData.filmId}
+                    onChange={(e) =>
+                      setMultiScreeningData({
+                        ...multiScreeningData,
+                        filmId: Number(e.target.value),
+                      })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/70 border border-white/15 text-white text-xs font-medium focus:outline-none focus:border-amber-400"
+                  >
+                    {films.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.title} ({f.year})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Screening Date */}
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-400 uppercase mb-1.5 font-semibold">
+                    Programming Date (YYYY-MM-DD) *
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={multiScreeningData.date}
+                    onChange={(e) =>
+                      setMultiScreeningData({
+                        ...multiScreeningData,
+                        date: e.target.value,
+                      })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/70 border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* Quick Preset Buttons */}
+              <div className="space-y-2">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block font-semibold">
+                  Quick Add Presets:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleAddSlotToMulti('05:00', 'vip-salle', 'VIP Sunrise Array', 'VIP Salle')
+                    }
+                    className="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono transition-colors"
+                  >
+                    + 05:00 AM · VIP Salle
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleAddSlotToMulti('14:00', 'salle-5', '4K Laser Projection', 'Standard')
+                    }
+                    className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-mono transition-colors"
+                  >
+                    + 02:00 PM (14:00) · Salle 5
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleAddSlotToMulti('17:00', 'vip-salle', 'Dolby Atmos Salon', 'VIP Salle')
+                    }
+                    className="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono transition-colors"
+                  >
+                    + 05:00 PM (17:00) · VIP Salle
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleAddSlotToMulti('20:30', 'screen-1', '35mm Archival Print', 'Standard')
+                    }
+                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 text-xs font-mono transition-colors"
+                  >
+                    + 08:30 PM (20:30) · Screen 1
+                  </button>
+                </div>
+              </div>
+
+              {/* Slots List */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-bold">
+                    Programmed Showtimes ({multiScreeningData.slots.length} Slots):
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleAddSlotToMulti()}
+                    className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-amber-400 hover:text-amber-300 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add Another Slot
+                  </button>
+                </div>
+
+                <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                  {multiScreeningData.slots.map((slot, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-3 hover:border-amber-500/25 transition-all"
+                    >
+                      <div className="flex items-center justify-between text-xs font-mono">
+                        <span className="text-amber-300 font-bold">
+                          Slot #{idx + 1}
+                        </span>
+                        {multiScreeningData.slots.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSlotFromMulti(idx)}
+                            className="text-neutral-500 hover:text-rose-400 transition-colors p-1"
+                            title="Remove Slot"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* Time */}
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
+                            Showtime (HH:MM) *
+                          </label>
+                          <input
+                            type="time"
+                            required
+                            value={slot.time}
+                            onChange={(e) =>
+                              handleUpdateSlotInMulti(idx, { time: e.target.value })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-amber-400"
+                          />
+                        </div>
+
+                        {/* Auditorium / Hall */}
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
+                            Auditorium *
+                          </label>
+                          <select
+                            value={slot.hallId}
+                            onChange={(e) =>
+                              handleUpdateSlotInMulti(idx, { hallId: e.target.value })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                          >
+                            {halls.map((h) => (
+                              <option key={h.id} value={h.id}>
+                                {h.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Format */}
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
+                            Format / Audio
+                          </label>
+                          <input
+                            type="text"
+                            value={slot.format}
+                            onChange={(e) =>
+                              handleUpdateSlotInMulti(idx, { format: e.target.value })
+                            }
+                            placeholder="e.g. 4K Laser, Dolby Atmos"
+                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-1">
+                        {/* Tag */}
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
+                            Tag / Edition
+                          </label>
+                          <select
+                            value={slot.tag}
+                            onChange={(e) =>
+                              handleUpdateSlotInMulti(idx, {
+                                tag: e.target.value as Screening['tag'],
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                          >
+                            <option value="Standard">Standard</option>
+                            <option value="VIP Salle">VIP Salle</option>
+                            <option value="Director Q&A">Director Q&A</option>
+                            <option value="Midnight Special">Midnight Special</option>
+                            <option value="Kids Only">Kids Only</option>
+                          </select>
+                        </div>
+
+                        {/* Availability */}
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
+                            Initial Availability
+                          </label>
+                          <select
+                            value={slot.availability}
+                            onChange={(e) =>
+                              handleUpdateSlotInMulti(idx, {
+                                availability: e.target.value as Screening['availability'],
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-black/80 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
+                          >
+                            <option value="Available">Available</option>
+                            <option value="Selling Fast">Selling Fast</option>
+                            <option value="Few Seats Left">Few Seats Left</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Form Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setMultiScreeningModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 text-xs font-mono uppercase tracking-wider transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving || multiScreeningData.slots.length === 0}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-bold text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  Save All Programmed Showtimes ({multiScreeningData.slots.length} Slots)
                 </button>
               </div>
             </form>
