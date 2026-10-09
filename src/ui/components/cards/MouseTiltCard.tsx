@@ -149,11 +149,11 @@ class DeviceOrientationManager {
       this.calibratedGamma += (gamma - this.calibratedGamma) * 0.001;
     }
 
-    // High sensitivity mapping: ±18 degrees phone tilt reaches full 3D card tilt
-    const maxRoll = 18;
+    // Ultra-high sensitivity mapping: gentle ±8 degrees phone tilt drives full 3D range
+    const maxRoll = 8;
     const deltaX = Math.min(0.5, Math.max(-0.5, ((gamma - this.calibratedGamma) / maxRoll) * 0.5));
 
-    const maxPitch = 18;
+    const maxPitch = 8;
     const deltaBeta = beta - this.calibratedBeta;
     const deltaY = Math.min(0.5, Math.max(-0.5, -(deltaBeta / maxPitch) * 0.5));
 
@@ -170,9 +170,9 @@ class DeviceOrientationManager {
     const acc = e.accelerationIncludingGravity;
     if (!acc || acc.x === null || acc.y === null) return;
 
-    // Earth's gravity vector: ±5 m/s² reaches full range
-    const rawX = Math.min(0.5, Math.max(-0.5, (acc.x / 5.0) * 0.5));
-    const rawY = Math.min(0.5, Math.max(-0.5, ((acc.y - 6.5) / 5.0) * 0.5));
+    // High sensitivity accelerometer: ±2.2 m/s² reaches full range
+    const rawX = Math.min(0.5, Math.max(-0.5, (acc.x / 2.2) * 0.5));
+    const rawY = Math.min(0.5, Math.max(-0.5, ((acc.y - 6.5) / 2.2) * 0.5));
 
     this.currentX = rawX;
     this.currentY = rawY;
@@ -217,11 +217,11 @@ export interface MouseTiltCardProps extends React.HTMLAttributes<HTMLDivElement>
 export default function MouseTiltCard({
   children,
   className,
-  tiltIntensity = 22,
-  perspective = 1100,
+  tiltIntensity = 36,
+  perspective = 1000,
   glareEffect = true,
-  glareIntensity = 0.22,
-  scale = 1.04,
+  glareIntensity = 0.32,
+  scale = 1.05,
   isActive = true,
   enableGyroscope = true,
   style,
@@ -272,22 +272,22 @@ export default function MouseTiltCard({
     };
   }, [enableGyroscope, isActive, isHovered, mouseX, mouseY]);
 
-  // Spring physics
-  const springConfig = { damping: 20, stiffness: 220, mass: 0.3 };
+  // Ultra-responsive spring physics
+  const springConfig = { damping: 16, stiffness: 340, mass: 0.2 };
   const smoothMouseX = useSpring(mouseX, springConfig);
   const smoothMouseY = useSpring(mouseY, springConfig);
 
-  // 3D rotation: tilts up to ±22 degrees!
+  // 3D rotation: tilts up to ±36 degrees for unmistakable, bold 3D reaction!
   const rotateX = useTransform(smoothMouseY, [-0.5, 0.5], [tiltIntensity, -tiltIntensity]);
   const rotateY = useTransform(smoothMouseX, [-0.5, 0.5], [-tiltIntensity, tiltIntensity]);
 
-  // Parallax displacement: translates up to ±14px in depth!
-  const translateX = useTransform(smoothMouseX, [-0.5, 0.5], [-14, 14]);
-  const translateY = useTransform(smoothMouseY, [-0.5, 0.5], [-14, 14]);
+  // Dramatic 3D parallax displacement: translates up to ±28px in depth!
+  const translateX = useTransform(smoothMouseX, [-0.5, 0.5], [-28, 28]);
+  const translateY = useTransform(smoothMouseY, [-0.5, 0.5], [-28, 28]);
 
   // Specular glare position
-  const glareX = useTransform(smoothMouseX, [-0.5, 0.5], [5, 95]);
-  const glareY = useTransform(smoothMouseY, [-0.5, 0.5], [5, 95]);
+  const glareX = useTransform(smoothMouseX, [-0.5, 0.5], [0, 100]);
+  const glareY = useTransform(smoothMouseY, [-0.5, 0.5], [0, 100]);
 
   const glareBackground = useTransform(
     [glareX, glareY],

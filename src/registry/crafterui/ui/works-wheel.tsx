@@ -803,9 +803,9 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                       }}
                     >
                       <MouseTiltCard
-                        tiltIntensity={22}
-                        scale={1.04}
-                        glareIntensity={0.22}
+                        tiltIntensity={36}
+                        scale={1.05}
+                        glareIntensity={0.32}
                         className="size-full"
                         isActive={isFront}
                         enableGyroscope={true}
