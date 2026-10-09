@@ -774,7 +774,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               className="absolute top-1/2 left-1/2 [transform-style:preserve-3d]"
             >
               {items.map((item, i) => {
-                const isFront = isLanded && i === active
+                const isFront = i === active
                 return (
                   <div
                     key={item.title}
