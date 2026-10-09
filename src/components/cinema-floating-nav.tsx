@@ -12,26 +12,34 @@ const glyph = "size-3.5 opacity-80"
 export function CinemaFloatingNav() {
   const pathname = usePathname()
   const { navigate } = useCinemaTransition()
-  const [turn, setTurn] = React.useState<number>(0)
+  const [isWheelVisible, setIsWheelVisible] = React.useState<boolean>(false)
+  const isWheelVisibleRef = React.useRef<boolean>(false)
   const [footerInView, setFooterInView] = React.useState<boolean>(false)
 
   const isHome = pathname === "/"
   const isMovies = pathname === "/movies"
   const isSchedule = pathname === "/schedule"
 
-  // Reset turn position on route changes
+  // Reset visibility on route changes
   React.useEffect(() => {
     if (!isHome) {
-      setTurn(0)
+      setIsWheelVisible(false)
+      isWheelVisibleRef.current = false
     }
   }, [pathname, isHome])
 
   // Listen to timeline position updates from the Home Page 3D works wheel
   React.useEffect(() => {
+    if (!isHome) return
+
     const handleTurnChange = (e: Event) => {
       const customEvent = e as CustomEvent<{ turn: number; active: number }>
-      const { turn: t } = customEvent.detail || { turn: 0 }
-      setTurn(t)
+      const t = customEvent.detail?.turn ?? 0
+      const nextVisible = t >= 0.45 && t <= 10.35
+      if (nextVisible !== isWheelVisibleRef.current) {
+        isWheelVisibleRef.current = nextVisible
+        setIsWheelVisible(nextVisible)
+      }
     }
 
     window.addEventListener(
@@ -44,7 +52,7 @@ export function CinemaFloatingNav() {
         handleTurnChange as EventListener
       )
     }
-  }, [])
+  }, [isHome])
 
   // Detect when user reaches the footer on other tabs (/movies, /schedule)
   // On Home Page (isHome), footer detection is strictly governed by wheel `turn > 10.35`
@@ -108,7 +116,7 @@ export function CinemaFloatingNav() {
   //    - Visible while browsing
   //    - Disappeared when reaching the Footer (!footerInView)
   const isVisible = isHome
-    ? turn >= 0.45 && turn <= 10.35
+    ? isWheelVisible
     : !footerInView
 
   const menuItems: MercuryMenuItem[] = React.useMemo(() => {

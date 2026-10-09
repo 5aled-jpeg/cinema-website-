@@ -118,7 +118,12 @@ export const Component = ({ onExplore, active: activeProp = true }: ExperienceHe
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<SiteTheme>('dark');
   const [active, setActive] = useState(activeProp);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768 || !window.matchMedia('(pointer: fine)').matches;
+    }
+    return false;
+  });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -180,8 +185,8 @@ export const Component = ({ onExplore, active: activeProp = true }: ExperienceHe
       if (revealRef.current) {
         gsap.fromTo(
           revealRef.current,
-          { filter: "blur(14px)", opacity: 0, scale: 1.01 },
-          { filter: "blur(0px)", opacity: 1, scale: 1, duration: 1.4, ease: "power3.out" }
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }
         );
       }
 
@@ -209,11 +214,11 @@ export const Component = ({ onExplore, active: activeProp = true }: ExperienceHe
             e.clientX - (cachedRect.left + cachedRect.width / 2),
             e.clientY - (cachedRect.top + cachedRect.height / 2)
           );
-          if (dist < 130) {
+          if (dist < 110) {
             gsap.to(ctaRef.current, {
-              x: (e.clientX - (cachedRect.left + cachedRect.width / 2)) * 0.28,
-              y: (e.clientY - (cachedRect.top + cachedRect.height / 2)) * 0.28,
-              duration: 0.35,
+              x: (e.clientX - (cachedRect.left + cachedRect.width / 2)) * 0.22,
+              y: (e.clientY - (cachedRect.top + cachedRect.height / 2)) * 0.22,
+              duration: 0.3,
               overwrite: 'auto',
             });
           } else {
@@ -221,7 +226,7 @@ export const Component = ({ onExplore, active: activeProp = true }: ExperienceHe
             gsap.to(ctaRef.current, {
               x: 0,
               y: 0,
-              duration: 0.5,
+              duration: 0.4,
               ease: "power2.out",
               overwrite: 'auto',
             });
@@ -253,10 +258,10 @@ export const Component = ({ onExplore, active: activeProp = true }: ExperienceHe
       aria-label="Cinema Premiere Hero"
       className="relative h-screen w-full bg-[var(--color-bg-base)] text-[var(--color-text-primary)] flex flex-col overflow-hidden select-none transition-colors duration-300"
     >
-      {/* Film Grain Noise Effect — Exclusive to Hero Page Section */}
+      {/* Film Grain Noise Effect — Ultra-lightweight vector grain */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-20 w-full h-full bg-[url('/noise.gif')] bg-repeat opacity-[0.055] dark:opacity-[0.065]"
+        className="pointer-events-none absolute inset-0 z-20 w-full h-full cinema-grain opacity-[0.05] dark:opacity-[0.06]"
       />
 
       {/* Atmospheric Background Layer:

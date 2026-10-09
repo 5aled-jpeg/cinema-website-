@@ -261,8 +261,8 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
         setIsLanded(landed)
       }
 
-      // Throttle hero Three.js when scrolling past 0.2 to dedicate full GPU to transition
-      const isHeroVisible = t < 0.2
+      // Throttle hero Three.js when scrolling past 0.05 to dedicate full GPU to transition
+      const isHeroVisible = t < 0.05
       if (isHeroVisible !== heroActiveRef.current) {
         heroActiveRef.current = isHeroVisible
         if (typeof window !== "undefined") {
@@ -284,7 +284,8 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
         const d = i - pos
         const card = cardRefs.current[i]
         if (card) {
-          const isHidden = m > 0.5 && Math.abs(d) > CULL
+          // Card culling: during hero transition (m < 0.7), render at most first 2 cards to save 80% 3D GPU load
+          const isHidden = (m < 0.7 && i > 1) || (m >= 0.7 && Math.abs(d) > CULL)
           if (isHidden) {
             card.style.display = "none"
           } else {
@@ -322,7 +323,22 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
 
       // 1. Hardware-Accelerated Perspective Stacking Transition between Hero and Works Wheel (t: 0 -> 1)
       if (heroRef.current && mainStageRef.current) {
-        if (t < 1) {
+        if (t < 0.01) {
+          // Hero rest state: hide stage completely from browser compositor to eliminate 100% background GPU/CPU overhead
+          mainStageRef.current.style.visibility = "hidden"
+          mainStageRef.current.style.transform = "translate3d(0, 100%, 0)"
+
+          heroRef.current.style.transform = "scale3d(1, 1, 1)"
+          heroRef.current.style.opacity = "1"
+          heroRef.current.style.visibility = "visible"
+          heroRef.current.style.pointerEvents = "auto"
+
+          if (footerRef.current) {
+            footerRef.current.style.pointerEvents = "none"
+            footerRef.current.style.visibility = "hidden"
+          }
+        } else if (t < 1) {
+          mainStageRef.current.style.visibility = "visible"
           const p = clamp(t, 0, 1)
 
           // Section 1 (Hero): scale [1 -> 0.92], fade [1 -> 0.35] (Pure GPU composite, zero main-thread repaint)
@@ -343,6 +359,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             footerRef.current.style.visibility = "hidden"
           }
         } else {
+          mainStageRef.current.style.visibility = "visible"
           // Once t >= 1, Hero is hidden behind the stage
           heroRef.current.style.visibility = "hidden"
           heroRef.current.style.pointerEvents = "none"
@@ -522,6 +539,93 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
       return () => window.removeEventListener("keydown", onKeyDown)
     }, [to])
 
+    // Global mobile touch gesture handling across the unified timeline (Hero, Wheel, Footer)
+    React.useEffect(() => {
+      let touchStartY = 0
+      let touchStartX = 0
+      let isTouching = false
+
+      const onTouchStart = (e: TouchEvent) => {
+        const targetEl = e.target as HTMLElement | null
+        const isOverModal = Boolean(
+          targetEl?.closest('[role="dialog"]') ||
+          targetEl?.closest('.dialog-scroll-container') ||
+          targetEl?.closest('[data-dialog-scroll="true"]') ||
+          targetEl?.closest('[data-dialog-container]')
+        )
+        const isModalActive =
+          isModalOpenRef.current ||
+          document.body.getAttribute('data-dialog-open') === 'true' ||
+          Boolean(document.querySelector('[role="dialog"]'))
+
+        if (isOverModal || isModalActive) return
+
+        if (e.touches.length === 1) {
+          touchStartY = e.touches[0].clientY
+          touchStartX = e.touches[0].clientX
+          isTouching = true
+        }
+      }
+
+      const onTouchMove = (e: TouchEvent) => {
+        if (!isTouching || e.touches.length !== 1) return
+
+        const targetEl = e.target as HTMLElement | null
+        const isOverModal = Boolean(
+          targetEl?.closest('[role="dialog"]') ||
+          targetEl?.closest('.dialog-scroll-container') ||
+          targetEl?.closest('[data-dialog-scroll="true"]') ||
+          targetEl?.closest('[data-dialog-container]')
+        )
+        const isModalActive =
+          isModalOpenRef.current ||
+          document.body.getAttribute('data-dialog-open') === 'true' ||
+          Boolean(document.querySelector('[role="dialog"]'))
+
+        if (isOverModal || isModalActive) return
+
+        const currentY = e.touches[0].clientY
+        const currentX = e.touches[0].clientX
+        const deltaY = touchStartY - currentY
+        const deltaX = touchStartX - currentX
+
+        const delta = Math.abs(deltaY) > Math.abs(deltaX) ? deltaY : deltaX
+
+        if (Math.abs(delta) > 5) {
+          isDraggingRef.current = true
+          if (e.cancelable) e.preventDefault()
+          const step = delta / DRAG_UNITS
+          to(target.current + step)
+          touchStartY = currentY
+          touchStartX = currentX
+        }
+      }
+
+      const onTouchEnd = () => {
+        if (isTouching) {
+          isTouching = false
+          if (isDraggingRef.current) {
+            to(Math.round(target.current))
+            setTimeout(() => {
+              isDraggingRef.current = false
+            }, 80)
+          }
+        }
+      }
+
+      window.addEventListener("touchstart", onTouchStart, { passive: true })
+      window.addEventListener("touchmove", onTouchMove, { passive: false })
+      window.addEventListener("touchend", onTouchEnd, { passive: true })
+      window.addEventListener("touchcancel", onTouchEnd, { passive: true })
+
+      return () => {
+        window.removeEventListener("touchstart", onTouchStart)
+        window.removeEventListener("touchmove", onTouchMove)
+        window.removeEventListener("touchend", onTouchEnd)
+        window.removeEventListener("touchcancel", onTouchEnd)
+      }
+    }, [to])
+
     const activeItem = items[active]
 
     return (
@@ -563,6 +667,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
           ref={mainStageRef}
           className="relative z-20 w-full h-full bg-[var(--color-bg-base)] border-t border-white/10 dark:border-white/10 shadow-[0_-16px_40px_rgba(0,0,0,0.45)] will-change-transform origin-center overflow-hidden"
           style={{
+            visibility: hasHero ? "hidden" : "visible",
             transform: hasHero
               ? "translate3d(0, 100%, 0)"
               : "translate3d(0, 0px, 0)",
@@ -577,6 +682,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             className="focus-visible:outline-[var(--color-text-primary)] absolute inset-0 cursor-grab touch-pan-x outline-none focus-visible:outline-2 focus-visible:-outline-offset-4 active:cursor-grabbing"
             style={{ perspective: `${metrics.depth}px` }}
             onPointerDown={(event) => {
+              if (event.pointerType === "touch") return
               pointerStartRef.current = {
                 x: event.clientX,
                 y: event.clientY,
@@ -586,6 +692,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               isDraggingRef.current = false
             }}
             onPointerMove={(event) => {
+              if (event.pointerType === "touch") return
               if (drag.current === null || !pointerStartRef.current) return
 
               const dx = Math.abs(event.clientX - pointerStartRef.current.x)
@@ -612,6 +719,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               }
             }}
             onPointerUp={(event) => {
+              if (event.pointerType === "touch") return
               if (isDraggingRef.current) {
                 if (
                   pointerStartRef.current &&
@@ -632,6 +740,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               }, 50)
             }}
             onPointerCancel={(event) => {
+              if (event.pointerType === "touch") return
               if (
                 pointerStartRef.current &&
                 event.currentTarget.hasPointerCapture(pointerStartRef.current.id)

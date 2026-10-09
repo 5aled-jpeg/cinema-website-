@@ -229,7 +229,7 @@ export function Schedule3DStage({ children, className }: Schedule3DStageProps) {
       {/* Film Grain Texture Layer */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10 w-full h-full bg-[url('/noise.gif')] bg-repeat opacity-[0.04] dark:opacity-[0.05]"
+        className="pointer-events-none absolute inset-0 z-10 w-full h-full cinema-grain opacity-[0.04] dark:opacity-[0.05]"
       />
 
       {/* Content Stage (Clean, crisp 2D cards on top of 3D background) */}
