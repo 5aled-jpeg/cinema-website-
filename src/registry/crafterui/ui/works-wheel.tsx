@@ -774,6 +774,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               className="absolute top-1/2 left-1/2 [transform-style:preserve-3d]"
             >
               {items.map((item, i) => {
+                const isFront = isLanded && i === active
                 return (
                   <div
                     key={item.title}
@@ -802,10 +803,12 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                       }}
                     >
                       <MouseTiltCard
-                        tiltIntensity={12}
+                        tiltIntensity={14}
                         scale={1.03}
-                        glareIntensity={0.12}
+                        glareIntensity={0.15}
                         className="size-full"
+                        isActive={isFront}
+                        enableGyroscope={true}
                       >
                         <DialogTrigger
                           id={`works-wheel-trigger-${i}`}
