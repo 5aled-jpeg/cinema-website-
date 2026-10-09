@@ -19,7 +19,6 @@ class DeviceOrientationManager {
   private static instance: DeviceOrientationManager;
   private listeners: Set<OrientationCallback> = new Set();
   private isListening = false;
-  private permissionRequested = false;
   private calibratedBeta = 45;
   private calibratedGamma = 0;
   private hasCalibrated = false;
@@ -39,7 +38,6 @@ class DeviceOrientationManager {
     if (!this.isListening && typeof window !== 'undefined') {
       this.init();
     }
-    // Deliver latest values immediately
     cb(this.currentX, this.currentY);
     return () => {
       this.listeners.delete(cb);
@@ -49,9 +47,8 @@ class DeviceOrientationManager {
     };
   }
 
-  public requestPermissionOnGesture() {
-    if (this.permissionRequested || typeof window === 'undefined') return;
-    this.permissionRequested = true;
+  public requestPermissionOnGesture = () => {
+    if (typeof window === 'undefined') return;
 
     // iOS 13+ DeviceOrientationEvent permission
     if (
@@ -63,6 +60,7 @@ class DeviceOrientationManager {
           .requestPermission()
           .then((state) => {
             if (state === 'granted') {
+              this.stop();
               this.startListening();
             }
           })
@@ -82,6 +80,7 @@ class DeviceOrientationManager {
           .requestPermission()
           .then((state) => {
             if (state === 'granted') {
+              this.stop();
               this.startListening();
             }
           })
@@ -90,25 +89,21 @@ class DeviceOrientationManager {
         // Ignore
       }
     }
-  }
+  };
 
   private init() {
     if (typeof window === 'undefined') return;
 
-    // Start listening immediately for standard modern mobile browsers (Android, Chrome, Firefox)
     this.startListening();
 
-    // Hook user gesture for iOS 13+ permission prompts
-    const onUserInteraction = () => {
+    // Hook touch & click to trigger permission request on iOS Safari
+    const onGesture = () => {
       this.requestPermissionOnGesture();
-      window.removeEventListener('click', onUserInteraction);
-      window.removeEventListener('touchend', onUserInteraction);
-      window.removeEventListener('pointerup', onUserInteraction);
     };
 
-    window.addEventListener('click', onUserInteraction, { once: true });
-    window.addEventListener('touchend', onUserInteraction, { once: true });
-    window.addEventListener('pointerup', onUserInteraction, { once: true });
+    window.addEventListener('click', onGesture, { passive: true });
+    window.addEventListener('touchend', onGesture, { passive: true });
+    window.addEventListener('pointerup', onGesture, { passive: true });
 
     // Power saving on tab hide
     const onVisibilityChange = () => {
@@ -150,17 +145,15 @@ class DeviceOrientationManager {
       this.calibratedGamma = Math.min(20, Math.max(-20, gamma));
       this.hasCalibrated = true;
     } else {
-      // Subtle adaptive drift cancellation (0.1% per tick)
       this.calibratedBeta += (beta - this.calibratedBeta) * 0.001;
       this.calibratedGamma += (gamma - this.calibratedGamma) * 0.001;
     }
 
-    // Roll (gamma): ±22 degrees mapped to ±0.5
-    const maxRoll = 22;
+    // High sensitivity mapping: ±18 degrees phone tilt reaches full 3D card tilt
+    const maxRoll = 18;
     const deltaX = Math.min(0.5, Math.max(-0.5, ((gamma - this.calibratedGamma) / maxRoll) * 0.5));
 
-    // Pitch (beta): ±22 degrees relative to posture mapped to ±0.5
-    const maxPitch = 22;
+    const maxPitch = 18;
     const deltaBeta = beta - this.calibratedBeta;
     const deltaY = Math.min(0.5, Math.max(-0.5, -(deltaBeta / maxPitch) * 0.5));
 
@@ -171,17 +164,15 @@ class DeviceOrientationManager {
   };
 
   private handleMotion = (e: DeviceMotionEvent) => {
-    // If deviceorientation is actively firing, prefer it
+    // If orientation already updated in the last 400ms, orientation is cleaner
     if (Date.now() - this.lastOrientationTime < 400) return;
 
     const acc = e.accelerationIncludingGravity;
     if (!acc || acc.x === null || acc.y === null) return;
 
-    // acc.x is lateral tilt: ranges from ~ -9.8 to +9.8 m/s²
-    // Normalized to ±0.5
-    const rawX = Math.min(0.5, Math.max(-0.5, (acc.x / 9.8) * 0.75));
-    // acc.y is vertical tilt: in resting position ~ 6 to 8 m/s²
-    const rawY = Math.min(0.5, Math.max(-0.5, ((acc.y - 6.5) / 9.8) * 0.75));
+    // Earth's gravity vector: ±5 m/s² reaches full range
+    const rawX = Math.min(0.5, Math.max(-0.5, (acc.x / 5.0) * 0.5));
+    const rawY = Math.min(0.5, Math.max(-0.5, ((acc.y - 6.5) / 5.0) * 0.5));
 
     this.currentX = rawX;
     this.currentY = rawY;
@@ -198,7 +189,7 @@ class DeviceOrientationManager {
     window.addEventListener('devicemotion', this.handleMotion, { passive: true });
   }
 
-  private stop() {
+  public stop() {
     if (!this.isListening || typeof window === 'undefined') return;
     this.isListening = false;
     window.removeEventListener('deviceorientation', this.handleOrientation);
@@ -226,11 +217,11 @@ export interface MouseTiltCardProps extends React.HTMLAttributes<HTMLDivElement>
 export default function MouseTiltCard({
   children,
   className,
-  tiltIntensity = 14,
-  perspective = 1000,
+  tiltIntensity = 22,
+  perspective = 1100,
   glareEffect = true,
-  glareIntensity = 0.15,
-  scale = 1.03,
+  glareIntensity = 0.22,
+  scale = 1.04,
   isActive = true,
   enableGyroscope = true,
   style,
@@ -251,18 +242,13 @@ export default function MouseTiltCard({
     }
   }, []);
 
-  // Normalized coords (-0.5 to 0.5)
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Active effect condition:
-  // - On desktop: active when mouse hovers card
-  // - On mobile: active when this card is the front item
   const isEffectActive = hasFinePointer ? isHovered : Boolean(isActive);
 
-  // Gyroscope / Device Motion subscription
+  // Sensor subscription
   useEffect(() => {
-    // If user is currently hovering with a mouse, mouse controls coordinates
     if (isHovered) return;
 
     if (!enableGyroscope || !isActive) {
@@ -273,7 +259,6 @@ export default function MouseTiltCard({
 
     const orientationManager = DeviceOrientationManager.getInstance();
     const unsubscribe = orientationManager.subscribe((x, y) => {
-      // Only apply gyroscope if user is not actively mouse hovering
       if (!isHovered) {
         mouseX.set(x);
         mouseY.set(y);
@@ -287,24 +272,27 @@ export default function MouseTiltCard({
     };
   }, [enableGyroscope, isActive, isHovered, mouseX, mouseY]);
 
-  // Spring physics tuned for smooth tracking without jitter or feedback loop
-  const springConfig = { damping: 24, stiffness: 260, mass: 0.35 };
+  // Spring physics
+  const springConfig = { damping: 20, stiffness: 220, mass: 0.3 };
   const smoothMouseX = useSpring(mouseX, springConfig);
   const smoothMouseY = useSpring(mouseY, springConfig);
 
-  // 3D rotation: tilts towards cursor on PC or towards device rotation on mobile
+  // 3D rotation: tilts up to ±22 degrees!
   const rotateX = useTransform(smoothMouseY, [-0.5, 0.5], [tiltIntensity, -tiltIntensity]);
   const rotateY = useTransform(smoothMouseX, [-0.5, 0.5], [-tiltIntensity, tiltIntensity]);
 
-  // Specular glare position (percentage 0 to 100)
-  const glareX = useTransform(smoothMouseX, [-0.5, 0.5], [0, 100]);
-  const glareY = useTransform(smoothMouseY, [-0.5, 0.5], [0, 100]);
+  // Parallax displacement: translates up to ±14px in depth!
+  const translateX = useTransform(smoothMouseX, [-0.5, 0.5], [-14, 14]);
+  const translateY = useTransform(smoothMouseY, [-0.5, 0.5], [-14, 14]);
 
-  // Specular glare dynamic gradient
+  // Specular glare position
+  const glareX = useTransform(smoothMouseX, [-0.5, 0.5], [5, 95]);
+  const glareY = useTransform(smoothMouseY, [-0.5, 0.5], [5, 95]);
+
   const glareBackground = useTransform(
     [glareX, glareY],
     ([gx, gy]) =>
-      `radial-gradient(circle at ${gx}% ${gy}%, rgba(255, 255, 255, ${glareIntensity}) 0%, rgba(255, 255, 255, 0.04) 42%, transparent 72%)`
+      `radial-gradient(circle at ${gx}% ${gy}%, rgba(255, 255, 255, ${glareIntensity}) 0%, rgba(255, 255, 255, 0.05) 38%, transparent 70%)`
   );
 
   const handlePointerEnter = useCallback(() => {
@@ -360,34 +348,32 @@ export default function MouseTiltCard({
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
       onTouchMove={handleTouchMove}
-      className={cn('relative select-none', className)}
+      className={cn('relative select-none [transform-style:preserve-3d]', className)}
       style={{
         perspective: `${perspective}px`,
         ...style,
       }}
       {...props}
     >
-      {/* 
-        CRITICAL: Never put `overflow-hidden` on this container! 
-        CSS 3D Transforms specification strictly flattens preserve-3d whenever overflow != visible.
-      */}
       <motion.div
         className="relative size-full rounded-2xl [transform-style:preserve-3d]"
         style={{
           rotateX,
           rotateY,
+          x: translateX,
+          y: translateY,
           willChange: 'transform',
         }}
         animate={{
           scale: isEffectActive ? scale : 1,
         }}
         transition={{
-          scale: { type: 'spring', damping: 22, stiffness: 300, mass: 0.4 },
+          scale: { type: 'spring', damping: 20, stiffness: 260, mass: 0.35 },
         }}
       >
         {children}
 
-        {/* Dynamic Specular Glare Overlay - active on mouse hover (PC) and phone rotation/touch (mobile) */}
+        {/* Dynamic Specular Glare Overlay */}
         {glareEffect && (
           <motion.div
             className="pointer-events-none absolute inset-0 z-30 rounded-2xl overflow-hidden"
@@ -409,4 +395,4 @@ export default function MouseTiltCard({
   );
 }
 
-export { MouseTiltCard };
+export { MouseTiltCard, DeviceOrientationManager };
