@@ -217,7 +217,7 @@ export function FilmModalView({ film }: FilmModalViewProps) {
                 Available Screenings
               </h3>
               <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] mt-1">
-                Seating is open admission upon door opening. Choose your preferred screening time.
+                Choose your preferred auditorium and screening time.
               </p>
             </div>
 
@@ -286,7 +286,7 @@ export function FilmModalView({ film }: FilmModalViewProps) {
                         {screening}
                       </span>
                       <p className="text-xs text-[var(--color-text-secondary)] font-mono">
-                        Main Auditorium · Open Admission
+                        Main Auditorium
                       </p>
                     </div>
                     <div className="w-full py-1.5 px-3 rounded-xl text-center text-[11px] font-mono border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-[var(--color-text-secondary)]">

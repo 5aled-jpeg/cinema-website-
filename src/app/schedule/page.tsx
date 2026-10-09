@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Sparkles,
   SlidersHorizontal,
-  Info,
   ArrowLeft,
 } from "lucide-react"
 
@@ -367,14 +366,20 @@ export default function SchedulePage() {
                     {/* Film Thumbnail & Info */}
                     <div className="flex flex-row items-center sm:items-center gap-4 sm:gap-6 min-w-0 w-full lg:w-auto flex-1">
                       {/* Cinematic Poster Image */}
-                      <div className="relative w-20 sm:w-28 md:w-32 h-28 sm:h-40 md:h-46 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 border border-black/10 dark:border-white/10 shrink-0 shadow-md group">
+                      <button
+                        type="button"
+                        onClick={() => setActiveFilmForModal(film)}
+                        data-cursor-interactive="true"
+                        data-cursor-label="Details"
+                        className="relative w-20 sm:w-28 md:w-32 h-28 sm:h-40 md:h-46 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 border border-black/10 dark:border-white/10 shrink-0 shadow-md group cursor-pointer text-left"
+                      >
                         <img
                           src={film.image}
                           alt={film.title}
                           className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
-                      </div>
+                      </button>
 
                       {/* Film Meta details */}
                       <div className="space-y-1 sm:space-y-2 min-w-0 flex-1">
@@ -390,7 +395,12 @@ export default function SchedulePage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-base sm:text-2xl md:text-3xl font-bold tracking-tight text-[var(--color-text-primary)] leading-snug">
+                        <h3
+                          onClick={() => setActiveFilmForModal(film)}
+                          data-cursor-interactive="true"
+                          data-cursor-label="Details"
+                          className="text-base sm:text-2xl md:text-3xl font-bold tracking-tight text-[var(--color-text-primary)] leading-snug cursor-pointer hover:text-amber-400 transition-colors"
+                        >
                           {film.title}
                         </h3>
 
@@ -398,20 +408,6 @@ export default function SchedulePage() {
                         <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed line-clamp-1">
                           Dir. {film.director} · <span className="text-[var(--color-text-tertiary)]">{film.category}</span>
                         </p>
-
-                        {/* Curator Notes link */}
-                        <div className="pt-0.5">
-                          <button
-                            type="button"
-                            onClick={() => setActiveFilmForModal(film)}
-                            data-cursor-interactive="true"
-                            data-cursor-label="Details"
-                            className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-amber-500 hover:text-amber-400 transition-colors cursor-pointer"
-                          >
-                            <Info className="size-3.5" />
-                            <span>Curator Notes &amp; Specs</span>
-                          </button>
-                        </div>
                       </div>
                     </div>
 
@@ -419,7 +415,6 @@ export default function SchedulePage() {
                     <div className="w-full lg:w-auto lg:max-w-xl flex flex-col lg:items-end gap-2.5 pt-4 lg:pt-0 border-t lg:border-t-0 border-[var(--color-border)]/50 shrink-0">
                       <div className="flex items-center justify-between lg:justify-end gap-3 text-xs font-mono text-[var(--color-text-tertiary)] uppercase tracking-[0.15em] w-full">
                         <span>Showtimes ({screenings.length})</span>
-                        <span className="normal-case tracking-normal opacity-70">Open Admission</span>
                       </div>
 
                       <div className="flex flex-wrap items-center lg:justify-end gap-2 sm:gap-2.5">
