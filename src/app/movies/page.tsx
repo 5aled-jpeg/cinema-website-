@@ -194,7 +194,7 @@ export default function MoviesArchivePage() {
             cardWidth={isMobile ? 210 : 260}
             cardHeight={isMobile ? 315 : 390}
             gap={isMobile ? 26 : 38}
-            slices={9}
+            slices={1}
             height={isMobile ? 470 : 560}
             wheelSpeed={1.15}
             dragSpeed={1.2}

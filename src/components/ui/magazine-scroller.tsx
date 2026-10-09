@@ -12,8 +12,6 @@ import {
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { ProgressiveBlur } from "./progressive-blur";
-
 export type Poster = {
   id?: string | number;
   src: string;
@@ -87,7 +85,7 @@ export function MagazineScroller({
   cardWidth = 250,
   cardHeight = 375,
   gap = 36,
-  slices = 9,
+  slices = 1,
   height = "68vh",
   wheelSpeed = 1.15,
   dragSpeed = 1.15,
@@ -119,7 +117,7 @@ export function MagazineScroller({
 
   const safeSlices = Math.max(1, Math.floor(slices));
   const itemStep = cardWidth + gap;
-  const loopWidth = Math.max(1, safeImages.length * itemStep);
+  const loopWidth = safeImages.length * itemStep;
 
   const loopX = useTransform(x, (latest) => {
     return wrap(-loopWidth, 0, latest);
@@ -148,26 +146,19 @@ export function MagazineScroller({
     return () => observer.disconnect();
   }, []);
 
-  // Wheel handling: support trackpad horizontal swipes, shift-scroll, or locked wheel
   useEffect(() => {
     const node = rootRef.current;
-    if (!node) return;
+    if (!node || !lockWheel) return;
 
     const handleWheel = (event: WheelEvent) => {
-      const isHorizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.shiftKey;
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (!delta) return;
 
-      if (lockWheel) {
-        event.preventDefault();
-        const delta = isHorizontal ? event.deltaX : event.deltaY;
-        targetX.set(targetX.get() - delta * wheelSpeed);
-      } else if (isHorizontal && Math.abs(event.deltaX) > 4) {
-        event.preventDefault();
-        targetX.set(targetX.get() - event.deltaX * wheelSpeed);
-      }
+      event.preventDefault();
+      targetX.set(targetX.get() - delta * wheelSpeed);
     };
 
-    node.addEventListener("wheel", handleWheel, { passive: !lockWheel });
-
+    node.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
       node.removeEventListener("wheel", handleWheel);
     };
@@ -183,57 +174,44 @@ export function MagazineScroller({
 
     isDraggingRef.current = true;
     hasMovedRef.current = false;
+    setIsDragging(true);
 
     dragStartXRef.current = event.clientX;
     dragStartYRef.current = event.clientY;
     dragStartValueRef.current = targetX.get();
+
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Ignored
+    }
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
     if (!isDraggingRef.current) return;
 
-    const dx = event.clientX - dragStartXRef.current;
-    const dy = event.clientY - dragStartYRef.current;
+    const distanceX = event.clientX - dragStartXRef.current;
+    const distanceY = event.clientY - dragStartYRef.current;
 
-    if (!hasMovedRef.current) {
-      if (Math.hypot(dx, dy) > 6) {
-        hasMovedRef.current = true;
-        setIsDragging(true);
-        try {
-          event.currentTarget.setPointerCapture(event.pointerId);
-        } catch {
-          // Ignore
-        }
-      }
+    if (Math.hypot(distanceX, distanceY) > 8) {
+      hasMovedRef.current = true;
     }
 
-    if (hasMovedRef.current) {
-      targetX.set(dragStartValueRef.current + dx * dragSpeed);
-    }
+    targetX.set(dragStartValueRef.current + distanceX * dragSpeed);
   };
 
   const stopDragging = (event: ReactPointerEvent<HTMLElement>) => {
     if (!isDraggingRef.current) return;
 
-    if (hasMovedRef.current) {
-      try {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      } catch {
-        // Pointer may already be released
-      }
-      setTimeout(() => {
-        isDraggingRef.current = false;
-        hasMovedRef.current = false;
-        setIsDragging(false);
-      }, 50);
-    } else {
-      isDraggingRef.current = false;
-      hasMovedRef.current = false;
-      setIsDragging(false);
+    isDraggingRef.current = false;
+    setIsDragging(false);
+
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // Pointer may already be released
     }
   };
-
-  if (!safeImages.length) return null;
 
   return (
     <section
@@ -256,20 +234,10 @@ export function MagazineScroller({
         perspective: 1400,
       }}
     >
-      {/* LEFT progressive blur */}
+      {/* LEFT cinematic edge fade */}
       <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: 80,
-          height: "100%",
-          zIndex: 10,
-          pointerEvents: "none",
-        }}
-      >
-        <ProgressiveBlur position="right" width="100%" height="100%" blurMax={18} />
-      </div>
+        className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 z-10 bg-gradient-to-r from-[var(--color-bg-base)] via-[var(--color-bg-base)]/50 to-transparent"
+      />
 
       <motion.div
         style={{
@@ -308,20 +276,10 @@ export function MagazineScroller({
         )}
       </motion.div>
 
-      {/* RIGHT progressive blur */}
+      {/* RIGHT cinematic edge fade */}
       <div
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: 80,
-          height: "100%",
-          zIndex: 10,
-          pointerEvents: "none",
-        }}
-      >
-        <ProgressiveBlur position="left" width="100%" height="100%" blurMax={18} />
-      </div>
+        className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 z-10 bg-gradient-to-l from-[var(--color-bg-base)] via-[var(--color-bg-base)]/50 to-transparent"
+      />
     </section>
   );
 }
@@ -361,7 +319,7 @@ function PosterCard({
     const viewportCenter = containerWidth / 2;
     const distance = (center - viewportCenter) / viewportCenter;
 
-    return clamp(distance * -62, -76, 76);
+    return clamp(distance * -48, -60, 60);
   });
 
   const scale = useTransform(cardCenter, (center) => {
@@ -370,16 +328,17 @@ function PosterCard({
     const viewportCenter = containerWidth / 2;
     const distance = Math.abs(center - viewportCenter) / viewportCenter;
 
-    return clamp(1 - distance * 0.15, 0.82, 1);
+    return clamp(1 - distance * 0.12, 0.88, 1);
   });
 
+  // Solid, rich opacity without washed-out transparency
   const opacity = useTransform(cardCenter, (center) => {
     if (!containerWidth) return 1;
 
     const viewportCenter = containerWidth / 2;
     const distance = Math.abs(center - viewportCenter) / viewportCenter;
 
-    return clamp(1 - distance * 0.38, 0.48, 1);
+    return clamp(1 - distance * 0.12, 0.85, 1);
   });
 
   const y = useTransform(cardCenter, (center) => {
@@ -388,10 +347,10 @@ function PosterCard({
     const viewportCenter = containerWidth / 2;
     const distance = Math.abs(center - viewportCenter) / viewportCenter;
 
-    return clamp(distance * 30, 0, 44);
+    return clamp(distance * 24, 0, 36);
   });
 
-  const rotateZ = useTransform(bend, (latest) => latest * 0.08);
+  const rotateZ = useTransform(bend, (latest) => latest * 0.06);
 
   return (
     <motion.article
@@ -413,25 +372,37 @@ function PosterCard({
         willChange: "transform",
       }}
     >
-      {/* 3D Sliced Tactile Poster Drum */}
+      {/* 3D Seamless Poster Card - Zero seams, zero lines, 100% crisp artwork */}
       <div
-        className="relative overflow-hidden rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] ring-1 ring-white/10 group-hover:ring-amber-500/40 group-hover:shadow-[0_24px_60px_rgba(245,158,11,0.18)] transition-[box-shadow,ring-color] duration-300"
+        className="relative overflow-hidden rounded-2xl bg-neutral-900 shadow-[0_20px_50px_rgba(0,0,0,0.6)] ring-1 ring-white/10 group-hover:ring-amber-500/40 group-hover:shadow-[0_24px_60px_rgba(245,158,11,0.2)] transition-all duration-300"
         style={{
           width: "100%",
           height: cardHeight,
-          display: "flex",
-          transformStyle: "preserve-3d",
         }}
       >
-        {Array.from({ length: slices }).map((_, sliceIndex) => (
-          <PosterSlice
-            key={`${image.src}-${sliceIndex}`}
+        {slices > 1 ? (
+          // Sliced rendering only if explicitly requested
+          <div className="w-full h-full flex" style={{ transformStyle: "preserve-3d" }}>
+            {Array.from({ length: slices }).map((_, sliceIndex) => (
+              <PosterSlice
+                key={`${image.src}-${sliceIndex}`}
+                src={image.src}
+                sliceIndex={sliceIndex}
+                slices={slices}
+                bend={bend}
+              />
+            ))}
+          </div>
+        ) : (
+          // Single, pristine, seamless, full-resolution theatrical movie poster
+          <img
             src={image.src}
-            sliceIndex={sliceIndex}
-            slices={slices}
-            bend={bend}
+            alt={image.alt ?? image.title ?? "Film Poster"}
+            className="w-full h-full object-cover object-center rounded-2xl select-none pointer-events-none group-hover:scale-103 transition-transform duration-500 ease-out"
+            loading="lazy"
+            draggable={false}
           />
-        ))}
+        )}
 
         {/* Ambient bottom film glow overlay on the poster */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
