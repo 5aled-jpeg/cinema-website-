@@ -174,17 +174,10 @@ export function MagazineScroller({
 
     isDraggingRef.current = true;
     hasMovedRef.current = false;
-    setIsDragging(true);
 
     dragStartXRef.current = event.clientX;
     dragStartYRef.current = event.clientY;
     dragStartValueRef.current = targetX.get();
-
-    try {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    } catch {
-      // Ignored
-    }
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
@@ -193,23 +186,41 @@ export function MagazineScroller({
     const distanceX = event.clientX - dragStartXRef.current;
     const distanceY = event.clientY - dragStartYRef.current;
 
-    if (Math.hypot(distanceX, distanceY) > 8) {
-      hasMovedRef.current = true;
+    if (!hasMovedRef.current) {
+      if (Math.hypot(distanceX, distanceY) > 8) {
+        hasMovedRef.current = true;
+        setIsDragging(true);
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId);
+        } catch {
+          // Ignored
+        }
+      }
     }
 
-    targetX.set(dragStartValueRef.current + distanceX * dragSpeed);
+    if (hasMovedRef.current) {
+      targetX.set(dragStartValueRef.current + distanceX * dragSpeed);
+    }
   };
 
   const stopDragging = (event: ReactPointerEvent<HTMLElement>) => {
     if (!isDraggingRef.current) return;
 
-    isDraggingRef.current = false;
-    setIsDragging(false);
-
-    try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    } catch {
-      // Pointer may already be released
+    if (hasMovedRef.current) {
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // Pointer may already be released
+      }
+      setTimeout(() => {
+        isDraggingRef.current = false;
+        hasMovedRef.current = false;
+        setIsDragging(false);
+      }, 50);
+    } else {
+      isDraggingRef.current = false;
+      hasMovedRef.current = false;
+      setIsDragging(false);
     }
   };
 
@@ -338,7 +349,7 @@ function PosterCard({
     const viewportCenter = containerWidth / 2;
     const distance = Math.abs(center - viewportCenter) / viewportCenter;
 
-    return clamp(1 - distance * 0.12, 0.85, 1);
+    return clamp(1 - distance * 0.08, 0.92, 1);
   });
 
   const y = useTransform(cardCenter, (center) => {
@@ -355,7 +366,10 @@ function PosterCard({
   return (
     <motion.article
       aria-label={image.alt ?? image.title ?? "Film poster"}
-      onClick={onCardClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onCardClick?.();
+      }}
       data-cursor-interactive="true"
       data-cursor-label="Details"
       className="group cursor-pointer select-none"
@@ -407,14 +421,28 @@ function PosterCard({
         {/* Ambient bottom film glow overlay on the poster */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-        {/* Pill affordance in the bottom right corner */}
-        <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-mono uppercase tracking-wider text-white opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all">
-          <span>View</span>
-        </div>
+        {/* Interactive Explore pill affordance in the bottom right corner */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onCardClick?.();
+          }}
+          className="pointer-events-auto absolute bottom-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500 text-black font-mono text-[11px] font-bold shadow-lg hover:bg-amber-400 active:scale-95 transition-all cursor-pointer"
+        >
+          <span>Explore</span>
+          <span aria-hidden="true">→</span>
+        </button>
       </div>
 
       {/* Movie Information & Details */}
-      <div className="mt-4 px-1.5 pointer-events-none">
+      <div
+        className="mt-4 px-1.5 cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onCardClick?.();
+        }}
+      >
         <h3 className="text-base font-bold font-sans tracking-tight text-neutral-900 dark:text-neutral-100 truncate group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors">
           {image.title}
         </h3>

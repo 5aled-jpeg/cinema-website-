@@ -20,19 +20,9 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import MouseTiltCard from "@/ui/components/cards/MouseTiltCard"
-import {
-  Dialog,
-  DialogClose,
-  DialogContainer,
-  DialogContent,
-  DialogDescription,
-  DialogImage,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/linear-modal"
 import { FilmModalView } from "@/components/film-modal-view"
 import { TextReveal } from "@/components/velora/text-reveal"
-import { Film, Plus, Star, Sparkles } from "lucide-react"
+import { Film, Star } from "lucide-react"
 
 export interface FilmStill {
   url: string
@@ -185,7 +175,37 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
     const target = React.useRef(0)
     const [active, setActive] = React.useState(0)
     const activeRef = React.useRef(0)
+    const [activeModalItem, setActiveModalItem] = React.useState<WorksWheelItem | null>(null)
     const [stage, setStage] = React.useState<Stage>({ w: 0, h: 0 })
+
+    // Lock body scroll and set dialog flag when modal is open
+    React.useEffect(() => {
+      if (activeModalItem) {
+        document.body.style.overflow = "hidden"
+        document.body.setAttribute("data-dialog-open", "true")
+        isModalOpenRef.current = true
+      } else {
+        document.body.style.overflow = ""
+        document.body.removeAttribute("data-dialog-open")
+        isModalOpenRef.current = false
+      }
+      return () => {
+        document.body.style.overflow = ""
+        document.body.removeAttribute("data-dialog-open")
+        isModalOpenRef.current = false
+      }
+    }, [activeModalItem])
+
+    // ESC key listener to close modal
+    React.useEffect(() => {
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          setActiveModalItem(null)
+        }
+      }
+      window.addEventListener("keydown", onKeyDown)
+      return () => window.removeEventListener("keydown", onKeyDown)
+    }, [])
 
     // Performance: tracks whether hero is visible to pause Three.js when off-screen
     const heroActiveRef = React.useRef(true)
@@ -792,188 +812,96 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                       marginTop: -metrics.cardH / 2,
                     }}
                   >
-                    <Dialog
-                      transition={{
-                        type: "spring",
-                        bounce: 0.05,
-                        duration: 0.5,
-                      }}
-                      onOpenChange={(open) => {
-                        isModalOpenRef.current = open
-                      }}
+                    <MouseTiltCard
+                      tiltIntensity={12}
+                      scale={1.03}
+                      glareIntensity={0.12}
+                      className="size-full"
+                      isActive={isFront}
+                      enableGyroscope={true}
                     >
-                      <MouseTiltCard
-                        tiltIntensity={12}
-                        scale={1.03}
-                        glareIntensity={0.12}
-                        className="size-full"
-                        isActive={isFront}
-                        enableGyroscope={true}
+                      <div
+                        id={`works-wheel-trigger-${i}`}
+                        style={{
+                          borderRadius: "16px",
+                        }}
+                        className="relative block size-full overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] shadow-[0_16px_36px_-8px_rgba(0,0,0,0.45)] dark:shadow-[0_20px_48px_-10px_rgba(0,0,0,0.85)] transition-shadow duration-300 cursor-pointer"
+                        onClick={(e) => {
+                          if (isDraggingRef.current) {
+                            e.preventDefault()
+                            return
+                          }
+
+                          const isFront =
+                            i === activeRef.current ||
+                            i === active ||
+                            Math.abs(turn.current - (i + 1)) < 0.35
+
+                          if (!isFront) {
+                            e.preventDefault()
+                            to(i + 1)
+                          } else {
+                            setActiveModalItem(item)
+                            onItemClick?.(item, i)
+                          }
+                        }}
                       >
-                        <DialogTrigger
-                          id={`works-wheel-trigger-${i}`}
-                          style={{
-                            borderRadius: "16px",
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="size-full object-cover object-center"
+                        />
+                        {/* Ambient Depth Shadow for Background Cards */}
+                        <div
+                          ref={(node) => {
+                            overlayRefs.current[i] = node
                           }}
-                          className="relative block size-full overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] shadow-[0_16px_36px_-8px_rgba(0,0,0,0.45)] dark:shadow-[0_20px_48px_-10px_rgba(0,0,0,0.85)] transition-shadow duration-300 cursor-pointer"
-                          onClick={(e) => {
-                            if (isDraggingRef.current) {
-                              e.preventDefault()
-                              return
-                            }
+                          className="pointer-events-none absolute inset-0 bg-black transition-opacity duration-75"
+                          style={{ opacity: 0 }}
+                        />
+                        {/* Inner Edge Bevel / Rim Lighting */}
+                        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/15 dark:ring-white/10" />
 
-                            const isFront =
-                              i === activeRef.current ||
-                              i === active ||
-                              Math.abs(turn.current - (i + 1)) < 0.35
-
-                            if (!isFront) {
-                              e.preventDefault()
-                              to(i + 1)
-                            } else {
-                              onItemClick?.(item, i)
-                            }
-                          }}
-                        >
-                          <DialogImage
-                            src={item.image}
-                            alt={item.title}
-                            className="size-full object-cover object-center"
-                          />
-                          {/* Ambient Depth Shadow for Background Cards */}
-                          <div
-                            ref={(node) => {
-                              overlayRefs.current[i] = node
-                            }}
-                            className="pointer-events-none absolute inset-0 bg-black transition-opacity duration-75"
-                            style={{ opacity: 0 }}
-                          />
-                          {/* Inner Edge Bevel / Rim Lighting */}
-                          <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/15 dark:ring-white/10" />
-
-                          {/* Card Header & View Pill Reveal */}
-                          <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-4.5 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end justify-between pointer-events-none">
-                            <div className="translate-y-0.5 group-hover:translate-y-0 transition-transform duration-200">
-                              <DialogTitle className="text-white font-serif font-semibold text-base sm:text-lg tracking-tight drop-shadow-sm">
-                                {item.title}
-                              </DialogTitle>
-                              {item.category && (
-                                <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-amber-400/90 block mt-0.5">
-                                  {item.category.split("·")[0].trim()} {item.imdbRating ? `· ★ ${item.imdbRating}` : ''}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Restored classic 'View' pill affordance — permanently visible on mobile, hover-revealed on desktop */}
-                            {action && (
-                              <span
-                                className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-black/10 dark:border-white/15 bg-white/85 dark:bg-black/85 px-3 py-1.5 text-[0.72rem] font-medium text-[var(--color-text-primary)] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 backdrop-blur-md backdrop-saturate-150 transition-all duration-200 shadow-sm cursor-pointer hover:scale-105 active:scale-95"
-                              >
-                                <svg viewBox="0 0 12 12" className="size-2.5" aria-hidden="true">
-                                  <path
-                                    d="M3 9 9 3M4 3h5v5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.4"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {action}
+                        {/* Card Header & View Pill Reveal */}
+                        <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-4.5 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end justify-between pointer-events-none">
+                          <div className="translate-y-0.5 group-hover:translate-y-0 transition-transform duration-200">
+                            <h3 className="text-white font-serif font-semibold text-base sm:text-lg tracking-tight drop-shadow-sm">
+                              {item.title}
+                            </h3>
+                            {item.category && (
+                              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-amber-400/90 block mt-0.5">
+                                {item.category.split("·")[0].trim()} {item.imdbRating ? `· ★ ${item.imdbRating}` : ''}
                               </span>
                             )}
                           </div>
-                        </DialogTrigger>
-                      </MouseTiltCard>
 
-                      {/* Linear App Animated Modal Container & Content */}
-                      <DialogContainer
-                        className="pt-12 sm:pt-16 pb-8"
-                        overlayClassName="dark:bg-black/85 bg-black/75 backdrop-blur-md"
-                      >
-                        <DialogContent
-                          style={{
-                            borderRadius: "24px",
-                          }}
-                          className="relative flex flex-col w-[92%] sm:w-[90%] lg:w-[920px] max-h-[88vh] mx-auto overflow-hidden rounded-[24px] border border-black/10 dark:border-white/10 bg-[var(--color-bg-base)] text-[var(--color-text-primary)] shadow-2xl"
-                        >
-                          {/* Top Close Button with Esc Hint - Always accessible */}
-                          <div className="absolute right-5 top-5 z-30 flex items-center gap-2">
-                            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[11px] font-medium border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400">
-                              ESC
-                            </span>
-                            <DialogClose className="static size-8.5 rounded-full border border-black/10 dark:border-white/15 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl text-neutral-800 dark:text-neutral-200 hover:scale-105 active:scale-95 transition-all" />
-                          </div>
-
-                          {/* Scrollable Container with native smooth scrolling & overscroll containment */}
-                          <div
-                            data-dialog-scroll="true"
-                            className="dialog-scroll-container overflow-y-auto overflow-x-hidden w-full h-full overscroll-contain focus:outline-none"
-                            tabIndex={0}
-                          >
-                            {/* Modal Image Reveal */}
-                            <div className="relative w-full h-72 sm:h-80 md:h-96 shrink-0 overflow-hidden bg-neutral-900">
-                              <DialogImage
-                                src={item.image}
-                                alt={item.title}
-                                className="w-full h-full object-cover object-center"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-transparent to-transparent" />
-                              <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg-base)]/50 via-transparent to-transparent" />
-
-                              {/* Badges in top-left */}
-                              <div className="absolute top-5 left-5 z-10 flex flex-wrap items-center gap-2">
-                                {item.category && (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-black/50 dark:bg-white/10 backdrop-blur-md text-white border border-white/20">
-                                    <Film className="size-3 text-amber-400" />
-                                    {item.category.split("·")[0].trim()}
-                                  </span>
-                                )}
-                                {item.imdbRating && (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 backdrop-blur-md text-amber-400 border border-amber-500/30">
-                                    <Star className="size-3 fill-amber-400" />
-                                    IMDb {item.imdbRating}
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Bottom Title & Tagline in Hero Banner */}
-                              <div className="absolute bottom-5 left-6 right-6 z-10">
-                                <DialogTitle className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[var(--color-text-primary)]">
-                                  {item.title}
-                                </DialogTitle>
-                                {item.tagline && (
-                                  <p className="mt-1.5 text-sm sm:text-base italic text-neutral-600 dark:text-neutral-400 font-serif">
-                                    &ldquo;{item.tagline}&rdquo;
-                                  </p>
-                                )}
-                                <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono text-[var(--color-text-secondary)]">
-                                  {item.director && (
-                                    <span>
-                                      Directed by <strong className="text-[var(--color-text-primary)] font-semibold">{item.director}</strong>
-                                    </span>
-                                  )}
-                                  {item.year && <span>· {item.year}</span>}
-                                  {item.duration && <span>· {item.duration}</span>}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Framer Motion Description Transition with Elegant Reveal */}
-                            <DialogDescription
-                              disableLayoutAnimation
-                              variants={{
-                                initial: { opacity: 0, scale: 0.8, y: -40 },
-                                animate: { opacity: 1, scale: 1, y: 0 },
-                                exit: { opacity: 0, scale: 0.8, y: -50 },
+                          {/* Restored classic 'View' pill affordance — permanently visible on mobile, hover-revealed on desktop */}
+                          {action && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActiveModalItem(item)
+                                onItemClick?.(item, i)
                               }}
+                              className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-black/10 dark:border-white/15 bg-white/85 dark:bg-black/85 px-3 py-1.5 text-[0.72rem] font-medium text-[var(--color-text-primary)] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 backdrop-blur-md backdrop-saturate-150 transition-all duration-200 shadow-sm cursor-pointer hover:scale-105 active:scale-95"
                             >
-                              <FilmModalView film={item} />
-                            </DialogDescription>
-                          </div>
-                        </DialogContent>
-                      </DialogContainer>
-                    </Dialog>
+                              <svg viewBox="0 0 12 12" className="size-2.5" aria-hidden="true">
+                                <path
+                                  d="M3 9 9 3M4 3h5v5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.4"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                              {action}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </MouseTiltCard>
                   </div>
                 )
               })}
@@ -1131,12 +1059,8 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
-                    const trigger = document.getElementById(`works-wheel-trigger-${active}`)
-                    if (trigger) {
-                      trigger.click()
-                    } else {
-                      onItemClick?.(activeItem, active)
-                    }
+                    setActiveModalItem(activeItem)
+                    onItemClick?.(activeItem, active)
                   }}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 hover:scale-[1.03] active:scale-[0.97] transition-all cursor-pointer shadow-sm"
                 >
@@ -1169,9 +1093,97 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               {menu}
             </div>
           )}
-
-
         </div>
+
+        {/* Film Details Modal - Full Screen Portal Overlay */}
+        {activeModalItem && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-10 pointer-events-auto bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setActiveModalItem(null)
+              }
+            }}
+          >
+            <div className="relative flex flex-col w-[92%] sm:w-[90%] lg:w-[920px] max-h-[88vh] mx-auto overflow-hidden rounded-[24px] border border-black/10 dark:border-white/10 bg-[var(--color-bg-base)] text-[var(--color-text-primary)] shadow-2xl animate-in zoom-in-95 duration-200">
+              {/* Top Close Button with Esc Hint */}
+              <div className="absolute right-5 top-5 z-30 flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[11px] font-medium border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400">
+                  ESC
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveModalItem(null)}
+                  data-cursor-interactive="true"
+                  data-cursor-label="Close"
+                  className="size-8.5 rounded-full border border-black/10 dark:border-white/15 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl text-neutral-800 dark:text-neutral-200 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Scrollable Container */}
+              <div
+                data-dialog-scroll="true"
+                className="dialog-scroll-container overflow-y-auto overflow-x-hidden w-full h-full overscroll-contain focus:outline-none"
+                tabIndex={0}
+              >
+                {/* Modal Image Header */}
+                <div className="relative w-full h-72 sm:h-80 md:h-96 shrink-0 overflow-hidden bg-neutral-900">
+                  <img
+                    src={activeModalItem.image}
+                    alt={activeModalItem.title}
+                    className="w-full h-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg-base)]/50 via-transparent to-transparent" />
+
+                  {/* Badges in top-left */}
+                  <div className="absolute top-5 left-5 z-10 flex flex-wrap items-center gap-2">
+                    {activeModalItem.category && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-black/50 dark:bg-white/10 backdrop-blur-md text-white border border-white/20">
+                        <Film className="size-3 text-amber-400" />
+                        {activeModalItem.category.split("·")[0].trim()}
+                      </span>
+                    )}
+                    {activeModalItem.imdbRating && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 backdrop-blur-md text-amber-400 border border-amber-500/30">
+                        <Star className="size-3 fill-amber-400" />
+                        IMDb {activeModalItem.imdbRating}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Bottom Title & Tagline in Hero Banner */}
+                  <div className="absolute bottom-5 left-6 right-6 z-10">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[var(--color-text-primary)]">
+                      {activeModalItem.title}
+                    </h2>
+                    {activeModalItem.tagline && (
+                      <p className="mt-1.5 text-sm sm:text-base italic text-neutral-600 dark:text-neutral-400 font-serif">
+                        &ldquo;{activeModalItem.tagline}&rdquo;
+                      </p>
+                    )}
+                    <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono text-[var(--color-text-secondary)]">
+                      {activeModalItem.director && (
+                        <span>
+                          Directed by <strong className="text-[var(--color-text-primary)] font-semibold">{activeModalItem.director}</strong>
+                        </span>
+                      )}
+                      {activeModalItem.year && <span>· {activeModalItem.year}</span>}
+                      {activeModalItem.duration && <span>· {activeModalItem.duration}</span>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* FilmModalView */}
+                <FilmModalView film={activeModalItem} />
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     )
   }

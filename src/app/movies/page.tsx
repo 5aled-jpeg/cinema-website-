@@ -105,6 +105,18 @@ export default function MoviesArchivePage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Lock body scroll when modal is active
+  React.useEffect(() => {
+    if (activeFilmForModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [activeFilmForModal]);
+
   return (
     <div className="relative w-full min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] antialiased transition-colors duration-300 flex flex-col justify-between">
       {/* Custom Spring Cursor */}
@@ -202,8 +214,22 @@ export default function MoviesArchivePage() {
             maxBend={96}
             lockWheel={false}
             onItemClick={(poster) => {
-              const fullFilm = archiveFilmsList.find((f) => f.id === poster.id);
-              if (fullFilm) setActiveFilmForModal(fullFilm);
+              const fullFilm =
+                archiveFilmsList.find((f) => f.id === poster.id || f.title.toLowerCase() === poster.title?.toLowerCase()) ||
+                ({
+                  id: poster.id ?? 1,
+                  title: poster.title || "Film Details",
+                  subtitle: `${poster.director || "Archival Master"} · ${poster.category || "Theatrical Exhibition"}`,
+                  meta: poster.year || "2026",
+                  image: poster.src,
+                  category: poster.category || "Theatrical Exhibition",
+                  imdbRating: poster.imdbRating || "8.5",
+                  duration: poster.duration || "2h 00m",
+                  tagline: poster.tagline || "Archival theatrical presentation.",
+                  synopsis: poster.synopsis || "",
+                  stills: poster.stills || [{ url: poster.src, caption: poster.title }],
+                } as ArchiveFilmItem);
+              setActiveFilmForModal(fullFilm);
             }}
             className="w-full"
           />
@@ -213,20 +239,22 @@ export default function MoviesArchivePage() {
       {/* Film Detail Modal when card is clicked */}
       {activeFilmForModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-10 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setActiveFilmForModal(null);
             }
           }}
         >
-          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--color-bg-base)] border border-[var(--color-border)] shadow-2xl p-5 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)]">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--color-bg-base)] border border-[var(--color-border)] shadow-2xl p-5 sm:p-8 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)] sticky top-0 bg-[var(--color-bg-base)]/95 backdrop-blur-md z-30">
               <div>
                 <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-amber-500 font-semibold block">
                   Theatrical Archive
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
                   {activeFilmForModal.title}
                 </h3>
               </div>
@@ -235,9 +263,10 @@ export default function MoviesArchivePage() {
                 onClick={() => setActiveFilmForModal(null)}
                 data-cursor-interactive="true"
                 data-cursor-label="Close"
-                className="px-3 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer font-mono text-xs"
+                className="px-3.5 py-1.5 rounded-full border border-[var(--color-border)] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--color-text-primary)] transition-all cursor-pointer font-mono text-xs font-semibold flex items-center gap-1.5"
               >
-                ✕ Close
+                <span>✕</span>
+                <span>Close</span>
               </button>
             </div>
 
