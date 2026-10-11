@@ -15,8 +15,8 @@ import {
   CINEMA_HALLS,
   INITIAL_FILMS,
   INITIAL_SCREENINGS,
-  getFilms,
-  getScreenings,
+  getLocalStore,
+  mergeAndSyncStore,
   type CinemaFilm,
   type CinemaHall,
   type Screening,
@@ -53,42 +53,49 @@ function formatDayParts(dateStr: string) {
 
 export default function SchedulePage() {
   const { navigate } = useCinemaTransition()
-  const [films, setFilms] = React.useState<CinemaFilm[]>(INITIAL_FILMS)
-  const [screenings, setScreenings] = React.useState<Screening[]>(INITIAL_SCREENINGS)
-  const [halls, setHalls] = React.useState<CinemaHall[]>(CINEMA_HALLS)
+  const [films, setFilms] = React.useState<CinemaFilm[]>(() => {
+    if (typeof window !== "undefined") return getLocalStore().films;
+    return INITIAL_FILMS;
+  })
+  const [screenings, setScreenings] = React.useState<Screening[]>(() => {
+    if (typeof window !== "undefined") return getLocalStore().screenings;
+    return INITIAL_SCREENINGS;
+  })
+  const [halls, setHalls] = React.useState<CinemaHall[]>(() => {
+    if (typeof window !== "undefined") return getLocalStore().halls || CINEMA_HALLS;
+    return CINEMA_HALLS;
+  })
   const [selectedDate, setSelectedDate] = React.useState<string>("2026-09-28")
   const [selectedExperience, setSelectedExperience] = React.useState<string>("all")
   const [activeFilmForModal, setActiveFilmForModal] = React.useState<CinemaFilm | null>(null)
 
   // Listen to client updates from localStorage or custom events and fetch server store
   React.useEffect(() => {
-    const loadData = () => {
-      setFilms(getFilms())
-      setScreenings(getScreenings())
-      fetch('/api/cinema-data')
-        .then((r) => r.json())
-        .then((json) => {
-          if (json?.success && json?.data) {
-            if (Array.isArray(json.data.films) && json.data.films.length > 0) {
-              setFilms(json.data.films)
-            }
-            if (Array.isArray(json.data.halls) && json.data.halls.length > 0) {
-              setHalls(json.data.halls)
-            }
-            if (Array.isArray(json.data.screenings) && json.data.screenings.length > 0) {
-              setScreenings(json.data.screenings)
-              const dates = Array.from(new Set(json.data.screenings.map((s: any) => s.date))).sort() as string[]
-              if (dates.length > 0) {
-                setSelectedDate((curr) => (dates.includes(curr) ? curr : dates[0]))
-              }
-            }
-          }
-        })
-        .catch(() => {})
-    }
-    loadData()
-    window.addEventListener("cenima_data_updated", loadData)
-    return () => window.removeEventListener("cenima_data_updated", loadData)
+    const loadData = (serverData?: any) => {
+      const { store } = mergeAndSyncStore(serverData);
+      setFilms(store.films);
+      setHalls(store.halls);
+      setScreenings(store.screenings);
+      const dates = Array.from(new Set(store.screenings.map((s) => s.date))).sort();
+      if (dates.length > 0) {
+        setSelectedDate((curr) => (dates.includes(curr) ? curr : dates[0]));
+      }
+    };
+
+    fetch('/api/cinema-data')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.success && json?.data) {
+          loadData(json.data);
+        } else {
+          loadData();
+        }
+      })
+      .catch(() => loadData());
+
+    const handleUpdate = () => loadData();
+    window.addEventListener("cenima_data_updated", handleUpdate);
+    return () => window.removeEventListener("cenima_data_updated", handleUpdate);
   }, [])
 
   // Calculate distinct available dates sorted

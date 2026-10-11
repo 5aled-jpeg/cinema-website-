@@ -33,12 +33,112 @@ const DEFAULT_STORE: CinemaStoreData = {
 
 let memoryStore: CinemaStoreData | null = null;
 
+// Cloud KV / Upstash Redis helper
+function getKvConfig() {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) return { url: url.replace(/\/+$/, ''), token };
+  return null;
+}
+
+async function getFromKv(): Promise<CinemaStoreData | null> {
+  const kv = getKvConfig();
+  if (!kv) return null;
+  try {
+    const res = await fetch(`${kv.url}/get/cinema_store_v3`, {
+      headers: { Authorization: `Bearer ${kv.token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json?.result) {
+      const parsed = typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
+      if (parsed && Array.isArray(parsed.films)) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('[Storage] KV read error:', err);
+  }
+  return null;
+}
+
+async function saveToKv(store: CinemaStoreData): Promise<boolean> {
+  const kv = getKvConfig();
+  if (!kv) return false;
+  try {
+    const res = await fetch(`${kv.url}/set/cinema_store_v3`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${kv.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(JSON.stringify(store)),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('[Storage] KV write error:', err);
+    return false;
+  }
+}
+
+// GitHub API Auto-Commit helper (if GITHUB_TOKEN is set)
+async function commitToGitHub(store: CinemaStoreData): Promise<boolean> {
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  const repo = process.env.VERCEL_GIT_REPO_OWNER && process.env.VERCEL_GIT_REPO_SLUG
+    ? `${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}`
+    : '5aled-jpeg/cinema-website-';
+  if (!token) return false;
+
+  try {
+    const fileUrl = `https://api.github.com/repos/${repo}/contents/data/cinema-store.json`;
+    const getRes = await fetch(fileUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+    let sha: string | undefined;
+    if (getRes.ok) {
+      const getJson = await getRes.json();
+      sha = getJson.sha;
+    }
+
+    const content = Buffer.from(JSON.stringify(store, null, 2)).toString('base64');
+    const putRes = await fetch(fileUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: 'chore(data): auto-sync cinema-store.json from admin panel',
+        content,
+        sha,
+        branch: 'main',
+      }),
+    });
+    return putRes.ok;
+  } catch (err) {
+    console.warn('[Storage] GitHub commit error:', err);
+    return false;
+  }
+}
+
 export async function getCinemaStore(): Promise<CinemaStoreData> {
   if (memoryStore) {
     return memoryStore;
   }
 
-  // 1. Try reading committed project data file
+  // 1. Try reading from Cloud KV if available
+  const fromKv = await getFromKv();
+  if (fromKv && Array.isArray(fromKv.films)) {
+    memoryStore = fromKv;
+    return fromKv;
+  }
+
+  // 2. Try reading committed project data file
   try {
     const raw = await fs.readFile(DATA_FILE, 'utf-8');
     const parsed = JSON.parse(raw) as CinemaStoreData;
@@ -50,7 +150,7 @@ export async function getCinemaStore(): Promise<CinemaStoreData> {
     // Continue to fallback
   }
 
-  // 2. Try reading from serverless tmpdir fallback
+  // 3. Try reading from serverless tmpdir fallback
   try {
     const raw = await fs.readFile(TMP_FILE, 'utf-8');
     const parsed = JSON.parse(raw) as CinemaStoreData;
@@ -62,12 +162,11 @@ export async function getCinemaStore(): Promise<CinemaStoreData> {
     // Continue to initialization
   }
 
-  // 3. Try initializing data directory (local development)
+  // 4. Try initializing data directory (local development)
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(DATA_FILE, JSON.stringify(DEFAULT_STORE, null, 2), 'utf-8');
   } catch {
-    // Read-only filesystem on Vercel, try tmpdir
     try {
       await fs.writeFile(TMP_FILE, JSON.stringify(DEFAULT_STORE, null, 2), 'utf-8');
     } catch {
@@ -91,7 +190,13 @@ export async function saveCinemaStore(
 
   memoryStore = next;
 
-  // Persist to disk if writable, fallback to /tmp or memory on Vercel serverless
+  // 1. Persist to Cloud KV if available
+  saveToKv(next).catch(() => {});
+
+  // 2. Persist to GitHub repo if token available
+  commitToGitHub(next).catch(() => {});
+
+  // 3. Persist to disk if writable (local dev)
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(DATA_FILE, JSON.stringify(next, null, 2), 'utf-8');
@@ -104,6 +209,44 @@ export async function saveCinemaStore(
   }
 
   return next;
+}
+
+export async function rehydrateCinemaStore(
+  snapshot: Partial<CinemaStoreData>
+): Promise<CinemaStoreData> {
+  if (!snapshot || !Array.isArray(snapshot.films) || snapshot.films.length === 0) {
+    return getCinemaStore();
+  }
+
+  const current = await getCinemaStore();
+  // Merge films by ID and title
+  const filmMap = new Map<number, CinemaFilm>();
+  (current.films || []).forEach((f) => filmMap.set(f.id, f));
+  snapshot.films.forEach((f) => filmMap.set(f.id, f));
+
+  const mergedFilms = Array.from(filmMap.values());
+  const mergedWheelIds = snapshot.wheelIds && snapshot.wheelIds.length > 0
+    ? snapshot.wheelIds
+    : current.wheelIds;
+  const mergedScreenings = snapshot.screenings && snapshot.screenings.length > 0
+    ? snapshot.screenings
+    : current.screenings;
+
+  return saveCinemaStore({
+    films: mergedFilms,
+    wheelIds: mergedWheelIds,
+    screenings: mergedScreenings,
+    halls: snapshot.halls || current.halls,
+  });
+}
+
+export function getStoreStorageStatus(): {
+  isCloudPersistent: boolean;
+  provider: 'upstash' | 'github' | 'local_file' | 'client_sync';
+} {
+  if (getKvConfig()) return { isCloudPersistent: true, provider: 'upstash' };
+  if (process.env.GITHUB_TOKEN || process.env.GH_TOKEN) return { isCloudPersistent: true, provider: 'github' };
+  return { isCloudPersistent: false, provider: 'client_sync' };
 }
 
 export async function getAllFilms(): Promise<CinemaFilm[]> {

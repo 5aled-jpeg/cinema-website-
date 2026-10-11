@@ -8,7 +8,7 @@ import {
   type WorksWheelItem,
   type WorksWheelHandle,
 } from "@/registry/crafterui/ui/works-wheel"
-import { INITIAL_FILMS } from "@/lib/cinema-data"
+import { INITIAL_FILMS, getLocalStore, mergeAndSyncStore, type CinemaFilm } from "@/lib/cinema-data"
 import { CinemaCursor } from "@/components/cinema-cursor"
 import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle"
 import { CinemaFooter } from "@/components/cinema-footer"
@@ -16,54 +16,68 @@ import { Component as ExperienceHero } from "@/components/ui/experience-hero"
 import { useCinemaTransition } from "@/components/cinema-page-curtains"
 import { CinemaLogo } from "@/components/cinema-logo"
 
-const WORKS: WorksWheelItem[] = INITIAL_FILMS.slice(0, 10).map((f) => ({
-  id: f.id,
-  title: f.title,
-  image: f.image,
-  href: `#film-${f.id}`,
-  category: f.category,
-  imdbRating: f.imdbRating,
-  director: f.director,
-  year: f.year,
-  duration: f.duration,
-  tagline: f.tagline,
-  synopsis: f.synopsis,
-  stills: f.stills,
-  screenings: ['Daily Archival Showings'],
-  screeningSlots: [],
-}))
+function mapToWheelItems(films: CinemaFilm[]): WorksWheelItem[] {
+  return films.map((f) => ({
+    id: f.id,
+    title: f.title,
+    image: f.image,
+    href: `#film-${f.id}`,
+    category: f.category,
+    imdbRating: f.imdbRating || '8.5',
+    director: f.director,
+    year: f.year,
+    duration: f.duration,
+    tagline: f.tagline || 'Exclusively in theatrical exhibition.',
+    synopsis: f.synopsis || '',
+    stills: f.stills?.length ? f.stills : [{ url: f.image, caption: `${f.title} Key Art`, aspectRatio: '2:3 Theatrical' }],
+    screenings: ['Daily Archival Showings'],
+    screeningSlots: [],
+  }));
+}
+
+const DEFAULT_WORKS: WorksWheelItem[] = mapToWheelItems(INITIAL_FILMS.slice(0, 10));
 
 export default function WorksWheelDemo() {
   const wheelRef = React.useRef<WorksWheelHandle>(null)
   const { navigate } = useCinemaTransition()
-  const [wheelItems, setWheelItems] = React.useState<WorksWheelItem[]>(WORKS)
+  const [wheelItems, setWheelItems] = React.useState<WorksWheelItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      const store = getLocalStore();
+      const wheelMap = new Map(store.films.map((f) => [f.id, f]));
+      const ordered = store.wheelIds
+        .map((id) => wheelMap.get(id))
+        .filter((f): f is CinemaFilm => Boolean(f));
+      if (ordered.length > 0) return mapToWheelItems(ordered);
+    }
+    return DEFAULT_WORKS;
+  })
 
-  // Fetch live wheel items from admin server store
+  // Fetch live wheel items from admin server store and sync
   React.useEffect(() => {
+    const syncWheel = (serverData?: any) => {
+      const { store } = mergeAndSyncStore(serverData);
+      const wheelMap = new Map(store.films.map((f) => [f.id, f]));
+      const ordered = store.wheelIds
+        .map((id) => wheelMap.get(id))
+        .filter((f): f is CinemaFilm => Boolean(f));
+      const list = ordered.length > 0 ? ordered : store.films.slice(0, 10);
+      setWheelItems(mapToWheelItems(list));
+    };
+
     fetch('/api/cinema-data')
       .then((r) => r.json())
       .then((json) => {
-        if (json?.success && Array.isArray(json?.data?.wheelFilms) && json.data.wheelFilms.length > 0) {
-          const mapped: WorksWheelItem[] = json.data.wheelFilms.map((f: any) => ({
-            id: f.id,
-            title: f.title,
-            image: f.image,
-            href: `#film-${f.id}`,
-            category: f.category,
-            imdbRating: f.imdbRating || '8.5',
-            director: f.director,
-            year: f.year,
-            duration: f.duration,
-            tagline: f.tagline || 'Exclusively in theatrical exhibition.',
-            synopsis: f.synopsis || '',
-            stills: f.stills?.length ? f.stills : [{ url: f.image, caption: `${f.title} Key Art`, aspectRatio: '2:3 Theatrical' }],
-            screenings: ['Daily Archival Showings'],
-            screeningSlots: [],
-          }))
-          setWheelItems(mapped)
+        if (json?.success && json?.data) {
+          syncWheel(json.data);
+        } else {
+          syncWheel();
         }
       })
-      .catch(() => {})
+      .catch(() => syncWheel());
+
+    const handleUpdate = () => syncWheel();
+    window.addEventListener('cenima_data_updated', handleUpdate);
+    return () => window.removeEventListener('cenima_data_updated', handleUpdate);
   }, [])
 
   // Handle navigation events

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { ARCHIVE_FILMS, type ArchiveFilmItem } from "@/lib/archive-films";
+import { getLocalStore, mergeAndSyncStore, type CinemaFilm } from "@/lib/cinema-data";
 import { CinemaCursor } from "@/components/cinema-cursor";
 import { LandscapeOrbToggle } from "@/components/landscape-orb-toggle";
 import { CinemaFooter } from "@/components/cinema-footer";
@@ -14,11 +15,35 @@ import { FilmModalView } from "@/components/film-modal-view";
 import { CinemaLogo } from "@/components/cinema-logo";
 import { MagazineScroller, type Poster } from "@/components/ui/magazine-scroller";
 
+function mapToArchiveFilms(films: CinemaFilm[]): ArchiveFilmItem[] {
+  return films.map((f) => ({
+    id: f.id,
+    title: f.title,
+    subtitle: `${f.director || "Archival Master"} · ${f.category || "Theatrical Exhibition"}`,
+    meta: f.year ? f.year.toString() : "2026",
+    image: f.image,
+    category: f.category || "General",
+    imdbRating: f.imdbRating || "8.5",
+    duration: f.duration || "2h 00m",
+    tagline: f.tagline || "Exclusively in theatrical exhibition.",
+    synopsis: f.synopsis || "",
+    stills: f.stills || [{ url: f.image, caption: `${f.title} Poster` }],
+  }));
+}
+
 export default function MoviesArchivePage() {
   const { navigate } = useCinemaTransition();
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
   const [activeFilmForModal, setActiveFilmForModal] = React.useState<ArchiveFilmItem | null>(null);
-  const [archiveFilmsList, setArchiveFilmsList] = React.useState<ArchiveFilmItem[]>(ARCHIVE_FILMS);
+  const [archiveFilmsList, setArchiveFilmsList] = React.useState<ArchiveFilmItem[]>(() => {
+    if (typeof window !== "undefined") {
+      const store = getLocalStore();
+      if (store.films && store.films.length > 0) {
+        return mapToArchiveFilms(store.films);
+      }
+    }
+    return ARCHIVE_FILMS;
+  });
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
@@ -30,29 +55,27 @@ export default function MoviesArchivePage() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Fetch live films from server store
+  // Fetch live films from server store and sync with persistent local store
   React.useEffect(() => {
+    const syncArchive = (serverData?: any) => {
+      const { store } = mergeAndSyncStore(serverData);
+      setArchiveFilmsList(mapToArchiveFilms(store.films));
+    };
+
     fetch("/api/cinema-data")
       .then((r) => r.json())
       .then((json) => {
-        if (json?.success && Array.isArray(json?.data?.films) && json.data.films.length > 0) {
-          const mapped: ArchiveFilmItem[] = json.data.films.map((f: any) => ({
-            id: f.id,
-            title: f.title,
-            subtitle: `${f.director || "Archival Master"} · ${f.category || "Theatrical Exhibition"}`,
-            meta: f.year ? f.year.toString() : "2026",
-            image: f.image,
-            category: f.category || "General",
-            imdbRating: f.imdbRating || "8.5",
-            duration: f.duration || "2h 00m",
-            tagline: f.tagline || "Exclusively in theatrical exhibition.",
-            synopsis: f.synopsis || "",
-            stills: f.stills || [{ url: f.image, caption: `${f.title} Poster` }],
-          }));
-          setArchiveFilmsList(mapped);
+        if (json?.success && json?.data) {
+          syncArchive(json.data);
+        } else {
+          syncArchive();
         }
       })
-      .catch(() => {});
+      .catch(() => syncArchive());
+
+    const handleUpdate = () => syncArchive();
+    window.addEventListener("cenima_data_updated", handleUpdate);
+    return () => window.removeEventListener("cenima_data_updated", handleUpdate);
   }, []);
 
   const categories = React.useMemo(

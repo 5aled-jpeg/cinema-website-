@@ -649,51 +649,165 @@ export const INITIAL_SCREENINGS: Screening[] = [
   }
 ];
 
+export interface CinemaStoreData {
+  films: CinemaFilm[];
+  wheelIds: number[];
+  halls: CinemaHall[];
+  screenings: Screening[];
+  lastUpdated: string;
+}
+
+export const STORAGE_STORE_KEY = 'cenima_full_store_v3';
 export const STORAGE_FILMS_KEY = 'cenima_films_v2';
 export const STORAGE_SCREENINGS_KEY = 'cenima_screenings_v2';
+export const STORAGE_WHEEL_KEY = 'cenima_wheel_ids_v2';
+
+export const DEFAULT_STORE_DATA: CinemaStoreData = {
+  films: INITIAL_FILMS,
+  wheelIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  halls: CINEMA_HALLS,
+  screenings: INITIAL_SCREENINGS,
+  lastUpdated: new Date().toISOString(),
+};
+
+export function getLocalStore(): CinemaStoreData {
+  if (typeof window === 'undefined') return DEFAULT_STORE_DATA;
+  try {
+    const raw = localStorage.getItem(STORAGE_STORE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.films) && parsed.films.length > 0) {
+        return {
+          films: parsed.films,
+          wheelIds: Array.isArray(parsed.wheelIds) && parsed.wheelIds.length > 0
+            ? parsed.wheelIds
+            : parsed.films.slice(0, 10).map((f: CinemaFilm) => f.id),
+          halls: Array.isArray(parsed.halls) && parsed.halls.length > 0 ? parsed.halls : CINEMA_HALLS,
+          screenings: Array.isArray(parsed.screenings) ? parsed.screenings : INITIAL_SCREENINGS,
+          lastUpdated: parsed.lastUpdated || new Date().toISOString(),
+        };
+      }
+    }
+    // Fallback: check legacy keys
+    const rawFilms = localStorage.getItem(STORAGE_FILMS_KEY);
+    const rawScreenings = localStorage.getItem(STORAGE_SCREENINGS_KEY);
+    const rawWheel = localStorage.getItem(STORAGE_WHEEL_KEY);
+    if (rawFilms) {
+      const films = JSON.parse(rawFilms);
+      if (Array.isArray(films) && films.length > 0) {
+        const screenings = rawScreenings ? JSON.parse(rawScreenings) : INITIAL_SCREENINGS;
+        const wheelIds = rawWheel ? JSON.parse(rawWheel) : films.slice(0, 10).map((f: CinemaFilm) => f.id);
+        return {
+          films,
+          wheelIds: Array.isArray(wheelIds) ? wheelIds : films.slice(0, 10).map((f: CinemaFilm) => f.id),
+          halls: CINEMA_HALLS,
+          screenings: Array.isArray(screenings) ? screenings : INITIAL_SCREENINGS,
+          lastUpdated: new Date().toISOString(),
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to read local store:', err);
+  }
+  return DEFAULT_STORE_DATA;
+}
+
+export function saveLocalStore(updates: Partial<CinemaStoreData>): CinemaStoreData {
+  if (typeof window === 'undefined') {
+    return { ...DEFAULT_STORE_DATA, ...updates };
+  }
+  try {
+    const current = getLocalStore();
+    const next: CinemaStoreData = {
+      ...current,
+      ...updates,
+      lastUpdated: new Date().toISOString(),
+    };
+    localStorage.setItem(STORAGE_STORE_KEY, JSON.stringify(next));
+    localStorage.setItem(STORAGE_FILMS_KEY, JSON.stringify(next.films));
+    localStorage.setItem(STORAGE_SCREENINGS_KEY, JSON.stringify(next.screenings));
+    localStorage.setItem(STORAGE_WHEEL_KEY, JSON.stringify(next.wheelIds));
+    window.dispatchEvent(new Event('cenima_data_updated'));
+    return next;
+  } catch (err) {
+    console.error('Failed to save local store:', err);
+    return { ...DEFAULT_STORE_DATA, ...updates };
+  }
+}
+
+export function mergeAndSyncStore(serverData?: Partial<CinemaStoreData> | null): {
+  store: CinemaStoreData;
+  shouldPushToServer: boolean;
+} {
+  const local = getLocalStore();
+  if (!serverData || !Array.isArray(serverData.films) || serverData.films.length === 0) {
+    return { store: local, shouldPushToServer: local.films.length > 0 };
+  }
+
+  // Find films in local that are NOT in server (e.g. lost due to serverless cold restart)
+  const serverFilmIds = new Set(serverData.films.map((f) => f.id));
+  const serverFilmTitles = new Set(serverData.films.map((f) => f.title.toLowerCase().trim()));
+
+  const customLocalFilms = local.films.filter(
+    (lf) => !serverFilmIds.has(lf.id) && !serverFilmTitles.has(lf.title.toLowerCase().trim())
+  );
+
+  // Find screenings in local that are NOT in server
+  const serverScreeningIds = new Set((serverData.screenings || []).map((s) => s.id));
+  const customLocalScreenings = (local.screenings || []).filter(
+    (ls) => !serverScreeningIds.has(ls.id)
+  );
+
+  let mergedFilms = [...(serverData.films || [])];
+  let shouldPushToServer = false;
+
+  if (customLocalFilms.length > 0) {
+    mergedFilms = [...mergedFilms, ...customLocalFilms];
+    shouldPushToServer = true;
+  }
+
+  let mergedScreenings = [...(serverData.screenings || [])];
+  if (customLocalScreenings.length > 0) {
+    mergedScreenings = [...mergedScreenings, ...customLocalScreenings];
+    shouldPushToServer = true;
+  }
+
+  let mergedWheelIds = serverData.wheelIds && serverData.wheelIds.length > 0
+    ? serverData.wheelIds
+    : local.wheelIds;
+
+  const validIds = new Set(mergedFilms.map((f) => f.id));
+  mergedWheelIds = mergedWheelIds.filter((id) => validIds.has(id));
+  if (mergedWheelIds.length === 0) {
+    mergedWheelIds = mergedFilms.slice(0, 10).map((f) => f.id);
+  }
+
+  const mergedStore: CinemaStoreData = {
+    films: mergedFilms,
+    wheelIds: mergedWheelIds,
+    halls: serverData.halls && serverData.halls.length > 0 ? serverData.halls : (local.halls || CINEMA_HALLS),
+    screenings: mergedScreenings,
+    lastUpdated: new Date().toISOString(),
+  };
+
+  saveLocalStore(mergedStore);
+  return { store: mergedStore, shouldPushToServer };
+}
 
 export function getFilms(): CinemaFilm[] {
-  if (typeof window === 'undefined') return INITIAL_FILMS;
-  try {
-    const raw = localStorage.getItem(STORAGE_FILMS_KEY);
-    if (!raw) return INITIAL_FILMS;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_FILMS;
-  } catch {
-    return INITIAL_FILMS;
-  }
+  return getLocalStore().films;
 }
 
 export function saveFilms(films: CinemaFilm[]): void {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_FILMS_KEY, JSON.stringify(films));
-    window.dispatchEvent(new Event('cenima_data_updated'));
-  } catch (err) {
-    console.error('Failed to save films:', err);
-  }
+  saveLocalStore({ films });
 }
 
 export function getScreenings(): Screening[] {
-  if (typeof window === 'undefined') return INITIAL_SCREENINGS;
-  try {
-    const raw = localStorage.getItem(STORAGE_SCREENINGS_KEY);
-    if (!raw) return INITIAL_SCREENINGS;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_SCREENINGS;
-  } catch {
-    return INITIAL_SCREENINGS;
-  }
+  return getLocalStore().screenings;
 }
 
 export function saveScreenings(screenings: Screening[]): void {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_SCREENINGS_KEY, JSON.stringify(screenings));
-    window.dispatchEvent(new Event('cenima_data_updated'));
-  } catch (err) {
-    console.error('Failed to save screenings:', err);
-  }
+  saveLocalStore({ screenings });
 }
 
 export function getScreeningsForDate(dateStr: string, screeningsList?: Screening[]): Screening[] {

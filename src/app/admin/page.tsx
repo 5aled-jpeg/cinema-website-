@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -28,12 +28,18 @@ import {
   Zap,
   Info,
   Tv,
+  Download,
+  Upload,
+  HardDrive,
 } from 'lucide-react';
 import {
   type CinemaFilm,
   type Screening,
   type CinemaHall,
   CINEMA_HALLS,
+  getLocalStore,
+  saveLocalStore,
+  mergeAndSyncStore,
 } from '@/lib/cinema-data';
 
 // Helper to format date as "11 Oct 2026"
@@ -52,13 +58,18 @@ export default function AdminDashboardPage() {
   // Navigation tab state
   const [activeTab, setActiveTab] = useState<'wheel' | 'catalogue' | 'screenings'>('wheel');
 
-  // Core data states
-  const [loading, setLoading] = useState(true);
+  // Core data states (instantly hydrated from persistent local vault)
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [films, setFilms] = useState<CinemaFilm[]>([]);
-  const [wheelIds, setWheelIds] = useState<number[]>([]);
-  const [screenings, setScreenings] = useState<Screening[]>([]);
-  const [halls, setHalls] = useState<CinemaHall[]>(CINEMA_HALLS);
+  const [films, setFilms] = useState<CinemaFilm[]>(() => getLocalStore().films);
+  const [wheelIds, setWheelIds] = useState<number[]>(() => getLocalStore().wheelIds);
+  const [screenings, setScreenings] = useState<Screening[]>(() => getLocalStore().screenings);
+  const [halls, setHalls] = useState<CinemaHall[]>(() => getLocalStore().halls || CINEMA_HALLS);
+  const [storageStatus, setStorageStatus] = useState<{ isCloudPersistent: boolean; provider: string }>({
+    isCloudPersistent: false,
+    provider: 'client_sync',
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Search & filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -141,20 +152,43 @@ export default function AdminDashboardPage() {
     ],
   });
 
-  // Fetch initial cinema data from server
+  // Fetch initial cinema data and sync with local vault
   const loadCinemaData = async () => {
     try {
       setLoading(true);
+      const local = getLocalStore();
+      setFilms(local.films);
+      setWheelIds(local.wheelIds);
+      setScreenings(local.screenings);
+      if (local.halls) setHalls(local.halls);
+
       const res = await fetch('/api/cinema-data');
       const json = await res.json();
       if (json.success && json.data) {
-        setFilms(json.data.films || []);
-        setWheelIds(json.data.wheelIds || []);
-        setScreenings(json.data.screenings || []);
-        if (json.data.halls) setHalls(json.data.halls);
+        if (json.storageStatus) {
+          setStorageStatus(json.storageStatus);
+        }
+        const { store: merged, shouldPushToServer } = mergeAndSyncStore(json.data);
+        setFilms(merged.films);
+        setWheelIds(merged.wheelIds);
+        setScreenings(merged.screenings);
+        if (merged.halls) setHalls(merged.halls);
+
+        // If local had films lost on cold serverless restart, re-hydrate server
+        if (shouldPushToServer) {
+          fetch('/api/cinema-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(merged),
+          }).catch(() => {});
+        }
       }
     } catch {
-      showToast('error', 'Failed to load cinema data from server.');
+      // Offline fallback: persistent local storage already active
+      const local = getLocalStore();
+      setFilms(local.films);
+      setWheelIds(local.wheelIds);
+      setScreenings(local.screenings);
     } finally {
       setLoading(false);
     }
@@ -163,6 +197,53 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     loadCinemaData();
   }, []);
+
+  const handleExportJson = () => {
+    const data = getLocalStore();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cinema-store-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('success', `Exported ${data.films.length} films to cinema-store.json.`);
+  };
+
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = JSON.parse(text);
+        if (!parsed || !Array.isArray(parsed.films) || parsed.films.length === 0) {
+          showToast('error', 'Invalid store JSON: missing films list.');
+          return;
+        }
+        saveLocalStore(parsed);
+        setFilms(parsed.films);
+        if (parsed.wheelIds) setWheelIds(parsed.wheelIds);
+        if (parsed.screenings) setScreenings(parsed.screenings);
+        if (parsed.halls) setHalls(parsed.halls);
+
+        await fetch('/api/cinema-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsed),
+        });
+
+        showToast('success', `Successfully restored ${parsed.films.length} films & ${parsed.screenings?.length || 0} screenings!`);
+      } catch (err: any) {
+        showToast('error', 'Import error: ' + (err?.message || 'Invalid JSON file'));
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   // Compute films in wheel sequence
   const wheelFilms = useMemo(() => {
@@ -224,6 +305,7 @@ export default function AdminDashboardPage() {
   const syncWheelOrder = async (ids: number[]) => {
     try {
       setSaving(true);
+      saveLocalStore({ wheelIds: ids });
       const res = await fetch('/api/admin/wheel-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -372,15 +454,13 @@ export default function AdminDashboardPage() {
         setWheelIds(nextWheelIds);
       }
 
-      // Update state
+      // Update state & persist to local storage
       setFilms((prev) => {
         const idx = prev.findIndex((f) => f.id === savedFilm.id);
-        if (idx >= 0) {
-          const updated = [...prev];
-          updated[idx] = savedFilm;
-          return updated;
-        }
-        return [...prev, savedFilm];
+        const updated = idx >= 0 ? [...prev] : [...prev, savedFilm];
+        if (idx >= 0) updated[idx] = savedFilm;
+        saveLocalStore({ films: updated, wheelIds: nextWheelIds });
+        return updated;
       });
 
       setFilmModalOpen(false);
@@ -405,7 +485,13 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || 'Failed to delete film');
       }
 
-      setFilms((prev) => prev.filter((f) => f.id !== film.id));
+      setFilms((prev) => {
+        const remaining = prev.filter((f) => f.id !== film.id);
+        const remainingWheel = wheelIds.filter((id) => id !== film.id);
+        const remainingScr = screenings.filter((s) => s.filmId !== film.id);
+        saveLocalStore({ films: remaining, wheelIds: remainingWheel, screenings: remainingScr });
+        return remaining;
+      });
       setWheelIds((prev) => prev.filter((id) => id !== film.id));
       setScreenings((prev) => prev.filter((s) => s.filmId !== film.id));
       showToast('success', `"${film.title}" deleted.`);
@@ -480,12 +566,9 @@ export default function AdminDashboardPage() {
 
       setScreenings((prev) => {
         const idx = prev.findIndex((s) => s.id === savedSlot.id);
-        if (idx >= 0) {
-          const updated = [...prev];
-          updated[idx] = savedSlot;
-          return updated;
-        }
-        return [...prev, savedSlot];
+        const updated = idx >= 0 ? prev.map((s) => (s.id === savedSlot.id ? savedSlot : s)) : [...prev, savedSlot];
+        saveLocalStore({ screenings: updated });
+        return updated;
       });
 
       setScreeningModalOpen(false);
@@ -508,7 +591,11 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || 'Failed to delete screening');
       }
 
-      setScreenings((prev) => prev.filter((s) => s.id !== slotId));
+      setScreenings((prev) => {
+        const updated = prev.filter((s) => s.id !== slotId);
+        saveLocalStore({ screenings: updated });
+        return updated;
+      });
       showToast('success', 'Screening slot removed.');
     } catch (err: any) {
       showToast('error', err.message || 'Failed to delete screening.');
@@ -617,6 +704,7 @@ export default function AdminDashboardPage() {
           if (idx >= 0) copy[idx] = saved;
           else copy.push(saved);
         });
+        saveLocalStore({ screenings: copy });
         return copy;
       });
 
@@ -770,6 +858,48 @@ export default function AdminDashboardPage() {
 
           {/* Quick Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* Storage Protection Indicator */}
+            <div
+              title={
+                storageStatus.isCloudPersistent
+                  ? `Cloud Database Connected (${storageStatus.provider}). All additions permanent across all devices.`
+                  : 'Persistent Local Vault Active. Your additions are saved in your browser and automatically sync with the serverless store.'
+              }
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px] font-mono select-none"
+            >
+              <HardDrive className="w-3 h-3 text-emerald-400" />
+              <span>{storageStatus.isCloudPersistent ? 'Cloud Database' : 'Vault Synced'}</span>
+            </div>
+
+            {/* Export Store JSON */}
+            <button
+              type="button"
+              onClick={handleExportJson}
+              title="Download full cinema database (cinema-store.json) backup"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
+            >
+              <Download className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Export</span>
+            </button>
+
+            {/* Import Store JSON */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".json"
+              onChange={handleImportJson}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              title="Upload cinema-store.json to restore all films and showtimes"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
+            >
+              <Upload className="w-3.5 h-3.5 text-sky-400" />
+              <span className="hidden sm:inline">Import</span>
+            </button>
+
             <Link
               href="/"
               target="_blank"
