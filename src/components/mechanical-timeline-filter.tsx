@@ -40,6 +40,60 @@ function parseDateForOdometer(dateStr: string | null) {
   };
 }
 
+// Escapement Resonators & Filters (Restored from Peng Zheng's exact implementation)
+const G: [number, number, number][] = [
+  [5200, 0.8, 0.6],
+  [7400, 0.5, 0.4],
+];
+const FILT = { hp: 4000, gain: 0.12, decay: 0.25 };
+const PROFILES = {
+  fine: { pitch: 1.0, decay: 0.5, level: 0.28 },
+  line: { pitch: 0.9, decay: 0.7, level: 0.35 },
+  travel: { pitch: 1.1, decay: 0.6, level: 0.32 },
+  close: { pitch: 1.2, decay: 0.85, level: 0.4 },
+};
+
+function generateEscapementSample(sampleRate: number, pitch = 1, decay = 1) {
+  const len = Math.round(sampleRate * 0.04 * Math.max(1, decay));
+  const buf = new Float32Array(len);
+  const a = (2 * Math.PI * FILT.hp * pitch) / sampleRate;
+  const cosA = Math.cos(a);
+  const sinA = Math.sin(a) / 1.414;
+  const [c, l, u] = [(1 + cosA) / 2, -(1 + cosA), (1 + cosA) / 2];
+  const [d, f, p] = [1 + sinA, -2 * cosA, 1 - sinA];
+  let m = 0,
+    h = 0,
+    vVal = 0,
+    yVal = 0,
+    peak = 0;
+
+  for (let i = 0; i < len; i++) {
+    const t = i / sampleRate;
+    const noise = Math.random() * 2 - 1;
+    const filtered = (c * noise + l * m + u * h - f * vVal - p * yVal) / d;
+    h = m;
+    m = noise;
+    yVal = vVal;
+    vVal = filtered;
+
+    let s = FILT.gain * filtered * Math.exp(-t / ((FILT.decay * decay) / 1000)) * 3;
+    for (const [freq, q, amp] of G) {
+      s += amp * Math.sin(2 * Math.PI * freq * pitch * t) * Math.exp(-t / ((q * decay) / 1000));
+    }
+    buf[i] = s * Math.min(1, t / 0.0001);
+    peak = Math.max(peak, Math.abs(buf[i]));
+  }
+
+  const fade = Math.round(sampleRate * 0.005);
+  for (let i = 0; i < fade; i++) {
+    buf[len - 1 - i] *= i / fade;
+  }
+  for (let i = 0; i < len; i++) {
+    buf[i] /= peak || 1;
+  }
+  return buf;
+}
+
 export function MechanicalTimelineFilter({
   dates,
   screeningsCountByDate = {},
@@ -51,7 +105,7 @@ export function MechanicalTimelineFilter({
   const [hoverPositionPct, setHoverPositionPct] = useState<number>(0);
   const [cursorPositionPct, setCursorPositionPct] = useState<number>(0);
 
-  // Web Haptics for Mobile & Vibrating Devices (iOS / Android)
+  // Web Haptics for Mobile & Tablets
   const { trigger } = useWebHaptics();
 
   // Audio Context Ref
@@ -62,12 +116,18 @@ export function MechanicalTimelineFilter({
   const isDraggingRef = useRef<boolean>(false);
 
   // DOM Refs
-  const zoneRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const prefixRef = useRef<HTMLSpanElement>(null);
   const reelRef = useRef<HTMLSpanElement>(null);
   const digitRef = useRef<HTMLSpanElement>(null);
   const lastDateTextRef = useRef<string>('');
+
+  // Geometry Constants for the Half-Circle Arc
+  const SVG_W = 340;
+  const SVG_H = 150;
+  const CX = 170;
+  const CY = 138;
+  const R = 120;
 
   // Timeline Items (first item is "All", followed by sorted dates)
   const timelineItems: TimelineDateItem[] = useMemo(() => {
@@ -101,7 +161,9 @@ export function MechanicalTimelineFilter({
   const initAudio = useCallback(() => {
     if (typeof window === 'undefined') return;
     try {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!audioCtxRef.current) {
         audioCtxRef.current = new AudioCtx();
       }
@@ -111,44 +173,17 @@ export function MechanicalTimelineFilter({
     } catch {}
   }, []);
 
-  const generateAudioSample = useCallback((sampleRate: number, pitch = 1.0, decay = 1.0) => {
-    const len = Math.round(sampleRate * 0.045);
-    const buf = new Float32Array(len);
-    const f1 = 5200 * pitch;
-    const f2 = 7400 * pitch;
-    let y1 = 0, y2 = 0, v1 = 0, v2 = 0;
-    const w1 = (2 * Math.PI * f1) / sampleRate;
-    const w2 = (2 * Math.PI * f2) / sampleRate;
-    const d1 = Math.exp((-320 * decay) / sampleRate);
-    const d2 = Math.exp((-480 * decay) / sampleRate);
-    let hp = 0;
-    let peak = 0;
-
-    for (let i = 0; i < len; i++) {
-      const noise = (Math.random() * 2 - 1) * Math.exp(-i / (sampleRate * 0.0035));
-      const impulse = i === 0 ? 1.0 : (i === 3 ? -0.4 : 0);
-      const input = impulse + noise * 0.45;
-
-      v1 = v1 * d1 + (input - y1) * w1;
-      y1 += v1 * w1;
-      v2 = v2 * d2 + (input - y2) * w2;
-      y2 += v2 * w2;
-
-      hp = 0.85 * (hp + input);
-      const s = y1 * 0.6 + y2 * 0.4 + hp * 0.15;
-      buf[i] = s;
-      if (Math.abs(s) > peak) peak = Math.abs(s);
-    }
-
-    const fade = Math.round(sampleRate * 0.005);
-    for (let i = 0; i < fade; i++) {
-      buf[len - 1 - i] *= i / fade;
-    }
-    for (let i = 0; i < len; i++) {
-      buf[i] /= peak || 1;
-    }
-    return buf;
-  }, []);
+  // Auto unlock audio on first user touch / pointer gesture (critical for mobile iOS/Android)
+  useEffect(() => {
+    const unlock = () => initAudio();
+    const evts = ['pointerdown', 'touchstart', 'wheel', 'keydown', 'pointermove'];
+    evts.forEach((evt) => {
+      window.addEventListener(evt, unlock, { capture: true, once: true });
+    });
+    return () => {
+      evts.forEach((evt) => window.removeEventListener(evt, unlock, { capture: true }));
+    };
+  }, [initAudio]);
 
   const playTick = useCallback(
     (type: 'fine' | 'line' | 'travel' | 'close' = 'fine') => {
@@ -156,16 +191,9 @@ export function MechanicalTimelineFilter({
       const ctx = audioCtxRef.current;
       if (!ctx || ctx.state !== 'running') return;
 
-      const profiles = {
-        fine: { pitch: 1.0, decay: 0.5, level: 0.28 },
-        line: { pitch: 0.9, decay: 0.7, level: 0.35 },
-        travel: { pitch: 1.1, decay: 0.6, level: 0.32 },
-        close: { pitch: 1.2, decay: 0.85, level: 0.4 },
-      };
-
-      const profile = profiles[type] || profiles.fine;
+      const profile = PROFILES[type] || PROFILES.fine;
       if (!audioBuffersRef.current[type]) {
-        const raw = generateAudioSample(ctx.sampleRate, profile.pitch, profile.decay);
+        const raw = generateEscapementSample(ctx.sampleRate, profile.pitch, profile.decay);
         const b = ctx.createBuffer(1, raw.length, ctx.sampleRate);
         b.getChannelData(0).set(raw);
         audioBuffersRef.current[type] = b;
@@ -175,13 +203,13 @@ export function MechanicalTimelineFilter({
         const src = ctx.createBufferSource();
         src.buffer = audioBuffersRef.current[type];
         const gain = ctx.createGain();
-        gain.gain.value = (profile.level || 1) * 0.55;
+        gain.gain.value = (profile.level || 1) * 0.6;
         src.connect(gain);
         gain.connect(ctx.destination);
         src.start();
       } catch {}
     },
-    [initAudio, generateAudioSample]
+    [initAudio]
   );
 
   // 3D Perspective Cylindrical Odometer Date Roll
@@ -231,16 +259,28 @@ export function MechanicalTimelineFilter({
 
     ghost.animate(
       [
-        { transform: 'perspective(3em) translateZ(-0.54em) rotateX(0deg) translateZ(0.54em)', opacity: '1' },
-        { transform: `perspective(3em) translateZ(-0.54em) rotateX(${rollDir * 64}deg) translateZ(0.54em)`, opacity: '0' },
+        {
+          transform: 'perspective(3em) translateZ(-0.54em) rotateX(0deg) translateZ(0.54em)',
+          opacity: '1',
+        },
+        {
+          transform: `perspective(3em) translateZ(-0.54em) rotateX(${rollDir * 64}deg) translateZ(0.54em)`,
+          opacity: '0',
+        },
       ],
       { duration: dur, easing, fill: 'forwards' }
     ).finished.then(() => ghost.remove()).catch(() => ghost.remove());
 
     digitRef.current.animate(
       [
-        { transform: `perspective(3em) translateZ(-0.54em) rotateX(${-rollDir * 64}deg) translateZ(0.54em)`, opacity: '0' },
-        { transform: 'perspective(3em) translateZ(-0.54em) rotateX(0deg) translateZ(0.54em)', opacity: '1' },
+        {
+          transform: `perspective(3em) translateZ(-0.54em) rotateX(${-rollDir * 64}deg) translateZ(0.54em)`,
+          opacity: '0',
+        },
+        {
+          transform: 'perspective(3em) translateZ(-0.54em) rotateX(0deg) translateZ(0.54em)',
+          opacity: '1',
+        },
       ],
       { duration: dur, easing, fill: 'forwards' }
     );
@@ -263,14 +303,27 @@ export function MechanicalTimelineFilter({
     }
   }, [selectedDate, timelineItems, setDateWithOdometer]);
 
-  // Compute tick and item at pointer position
-  const getItemAtClientX = useCallback(
-    (clientX: number) => {
-      if (!trackRef.current) return null;
-      const rect = trackRef.current.getBoundingClientRect();
-      const offset = clientX - rect.left;
-      const rawPct = Math.max(0, Math.min(1, offset / rect.width));
-      const tickIdx = Math.round(rawPct * (totalTicks - 1));
+  // Compute angle and item at pointer position along the half-circle arc
+  const getItemAtClientPos = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!svgRef.current) return null;
+      const rect = svgRef.current.getBoundingClientRect();
+      const scale = SVG_W / rect.width;
+      const localX = (clientX - rect.left) * scale;
+      const localY = (clientY - rect.top) * scale;
+
+      const dx = localX - CX;
+      const dy = CY - localY; // positive when above center
+
+      let angle = Math.atan2(dy, dx);
+      // Clamp angle to half-circle (0 to pi)
+      if (angle < 0) {
+        angle = dx < 0 ? Math.PI : 0;
+      }
+
+      // Fractional progress: 0 (left/pi) to 1 (right/0)
+      const rawT = Math.max(0, Math.min(1, (Math.PI - angle) / Math.PI));
+      const tickIdx = Math.round(rawT * (totalTicks - 1));
       const pct = (tickIdx / (totalTicks - 1)) * 100;
       const itemIdx = Math.round((tickIdx / (totalTicks - 1)) * (timelineItems.length - 1));
       const item = timelineItems[itemIdx] || timelineItems[0];
@@ -279,12 +332,12 @@ export function MechanicalTimelineFilter({
     [totalTicks, timelineItems]
   );
 
-  // Update hover preview (NO SWITCH on hover — only visual preview & audio tick)
+  // Update hover preview (PREVIEW ONLY — NO SWITCH ON HOVER)
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
     setIsDialActive(true);
 
-    const info = getItemAtClientX(e.clientX);
+    const info = getItemAtClientPos(e.clientX, e.clientY);
     if (!info) return;
 
     setHoverPositionPct(info.pct);
@@ -298,10 +351,10 @@ export function MechanicalTimelineFilter({
         trigger(isMajor ? 'medium' : 'selection');
       } catch {}
 
-      // Preview date in odometer label ONLY — NEVER switch on hover
+      // Preview date in odometer label ONLY
       setDateWithOdometer(info.item.label, dir);
 
-      // If user is actively dragging/scrubbing with mouse button held down, commit date
+      // If dragging with button held down, update committed position
       if (isDraggingRef.current) {
         setCursorPositionPct(info.pct);
         const dateParam = info.item.id === 'all' ? null : info.item.id;
@@ -316,7 +369,7 @@ export function MechanicalTimelineFilter({
     setIsDialActive(true);
     isDraggingRef.current = true;
 
-    const info = getItemAtClientX(e.clientX);
+    const info = getItemAtClientPos(e.clientX, e.clientY);
     if (info) {
       setHoverPositionPct(info.pct);
       setCursorPositionPct(info.pct);
@@ -327,7 +380,7 @@ export function MechanicalTimelineFilter({
       } catch {}
       setDateWithOdometer(info.item.label, 0);
 
-      // SWITCH IS EXCLUSIVELY ON CLICK / DRAG!
+      // SWITCH IS STRICTLY ON CLICK!
       const dateParam = info.item.id === 'all' ? null : info.item.id;
       onSelectDate(dateParam);
     }
@@ -347,90 +400,189 @@ export function MechanicalTimelineFilter({
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
 
-    if (zoneRef.current) {
-      const r = zoneRef.current.getBoundingClientRect();
-      const inside =
-        e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top - 15 && e.clientY <= r.bottom + 15;
-      if (!inside) {
-        hideTimeoutRef.current = setTimeout(() => {
-          setIsDialActive(false);
-          const cur = selectedDate ? timelineItems.find((it) => it.id === selectedDate) : timelineItems[0];
-          if (cur) setDateWithOdometer(cur.label, 0);
-        }, 250);
-      }
-    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsDialActive(false);
+      const cur = selectedDate
+        ? timelineItems.find((it) => it.id === selectedDate)
+        : timelineItems[0];
+      if (cur) setDateWithOdometer(cur.label, 0);
+    }, 400);
   };
 
   const handlePointerLeave = () => {
     if (!isDraggingRef.current) {
       hideTimeoutRef.current = setTimeout(() => {
         setIsDialActive(false);
-        const cur = selectedDate ? timelineItems.find((it) => it.id === selectedDate) : timelineItems[0];
+        const cur = selectedDate
+          ? timelineItems.find((it) => it.id === selectedDate)
+          : timelineItems[0];
         if (cur) setDateWithOdometer(cur.label, 0);
-      }, 350);
+      }, 400);
     }
   };
 
+  // Calculate arc tick points
+  const ticksData = useMemo(() => {
+    const list = [];
+    for (let i = 0; i < totalTicks; i++) {
+      const isMajor = i % majorInterval === 0;
+      const t = i / (totalTicks - 1);
+      const theta = Math.PI * (1 - t);
+      const L = isMajor ? 12 : 6.5;
+
+      const rInner = R - L / 2;
+      const rOuter = R + L / 2;
+
+      const cos = Math.cos(theta);
+      const sin = Math.sin(theta);
+
+      const x1 = CX + rInner * cos;
+      const y1 = CY - rInner * sin;
+      const x2 = CX + rOuter * cos;
+      const y2 = CY - rOuter * sin;
+
+      list.push({ i, isMajor, x1, y1, x2, y2 });
+    }
+    return list;
+  }, [totalTicks]);
+
+  // Dual committed cursor lines
+  const committedCursorLines = useMemo(() => {
+    const t = cursorPositionPct / 100;
+    const centerTheta = Math.PI * (1 - t);
+    const dTheta = 0.024;
+    const L = 16;
+    const rInner = R - L / 2;
+    const rOuter = R + L / 2;
+
+    const makeLine = (angle: number) => {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return {
+        x1: CX + rInner * cos,
+        y1: CY - rInner * sin,
+        x2: CX + rOuter * cos,
+        y2: CY - rOuter * sin,
+      };
+    };
+
+    return [makeLine(centerTheta - dTheta), makeLine(centerTheta + dTheta)];
+  }, [cursorPositionPct]);
+
+  // Amber indicator tick
+  const hoverIndicatorLine = useMemo(() => {
+    const t = hoverPositionPct / 100;
+    const theta = Math.PI * (1 - t);
+    const L = 20;
+    const rInner = R - L / 2;
+    const rOuter = R + L / 2;
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
+    return {
+      x1: CX + rInner * cos,
+      y1: CY - rInner * sin,
+      x2: CX + rOuter * cos,
+      y2: CY - rOuter * sin,
+    };
+  }, [hoverPositionPct]);
+
   return (
     <div
-      ref={zoneRef}
+      data-timeline-zone="true"
       role="slider"
-      aria-label="Mechanical Escapement Timeline Filter"
+      aria-label="Half-Circle Escapement Timeline Filter"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerLeave}
       className={cn(
-        'relative w-full max-w-md mx-auto h-11 flex flex-col justify-end pb-2 cursor-pointer select-none',
+        'relative w-[340px] max-w-[92vw] h-[142px] select-none cursor-pointer flex flex-col items-center justify-end touch-none',
         className
       )}
     >
-      <div ref={trackRef} className="relative w-full h-5">
-        {/* Static Background Ruler Ticks */}
-        <div className="absolute inset-0 pointer-events-none">
-          {Array.from({ length: totalTicks }).map((_, i) => {
-            const isMajor = i % majorInterval === 0;
-            const pct = (i / (totalTicks - 1)) * 100;
-            return (
-              <div
-                key={i}
-                className={cn(
-                  'absolute bottom-0 -translate-x-1/2 rounded-full transition-colors duration-200',
-                  isMajor ? 'w-[1.5px] h-3.5 bg-white/45' : 'w-[1px] h-2 bg-white/20'
-                )}
-                style={{ left: `${pct}%` }}
-              />
-            );
-          })}
-        </div>
+      {/* Half-Circle SVG Radial Arc */}
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+        className="w-full h-full overflow-visible pointer-events-none"
+      >
+        <defs>
+          <filter id="amber-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="white-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-        {/* Active Viewport Dual Ticks (| |) representing committed date */}
-        <div
-          className="absolute bottom-0 flex gap-[2.5px] -translate-x-1/2 pointer-events-none z-10 transition-[left] duration-150 ease-out"
-          style={{ left: `${cursorPositionPct}%` }}
-        >
-          <div className="w-[2px] h-4 bg-white rounded-full shadow-[0_0_6px_rgba(255,255,255,0.7)]" />
-          <div className="w-[2px] h-4 bg-white rounded-full shadow-[0_0_6px_rgba(255,255,255,0.7)]" />
-        </div>
-
-        {/* Vibrant Amber/Gold Scrub Indicator Tick */}
-        <div
-          className={cn(
-            'absolute bottom-0 w-[2px] h-5 bg-amber-500 rounded-full -translate-x-1/2 pointer-events-none z-20 shadow-[0_0_8px_rgba(245,158,11,0.85)] transition-opacity duration-150',
-            isDialActive ? 'opacity-100' : 'opacity-0'
-          )}
-          style={{ left: `${hoverPositionPct}%` }}
+        {/* Circular Guide Arc Hairline */}
+        <path
+          d={`M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`}
+          fill="none"
+          stroke="rgba(255, 255, 255, 0.14)"
+          strokeWidth="1"
+          strokeDasharray="2 4"
         />
 
-        {/* Floating 3D Cylindrical Odometer Typography Directly Above the Amber Tick */}
-        <div
-          className={cn(
-            'absolute bottom-6 -translate-x-1/2 text-white font-serif text-sm font-semibold tracking-tight whitespace-pre pointer-events-none z-30 transition-opacity duration-150 flex items-baseline drop-shadow-md select-none',
-            isDialActive ? 'opacity-100' : 'opacity-0'
-          )}
-          style={{ left: `${hoverPositionPct}%` }}
-        >
-          <span ref={prefixRef} className="inline-block text-amber-400 font-mono text-xs uppercase mr-0.5">
+        {/* Radial Escapement Ticks */}
+        {ticksData.map((t) => (
+          <line
+            key={t.i}
+            x1={t.x1}
+            y1={t.y1}
+            x2={t.x2}
+            y2={t.y2}
+            stroke={t.isMajor ? 'rgba(255, 255, 255, 0.52)' : 'rgba(255, 255, 255, 0.24)'}
+            strokeWidth={t.isMajor ? 1.6 : 1}
+            strokeLinecap="round"
+          />
+        ))}
+
+        {/* Active Committed Dual Ticks (| |) */}
+        {committedCursorLines.map((line, idx) => (
+          <line
+            key={`cur-${idx}`}
+            x1={line.x1}
+            y1={line.y1}
+            x2={line.x2}
+            y2={line.y2}
+            stroke="#ffffff"
+            strokeWidth="2"
+            strokeLinecap="round"
+            filter="url(#white-glow)"
+          />
+        ))}
+
+        {/* Vibrant Amber/Gold Scrub Indicator Tick */}
+        <line
+          x1={hoverIndicatorLine.x1}
+          y1={hoverIndicatorLine.y1}
+          x2={hoverIndicatorLine.x2}
+          y2={hoverIndicatorLine.y2}
+          stroke="#f59e0b"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          filter="url(#amber-glow)"
+          className="transition-opacity duration-150"
+          opacity={isDialActive ? 1 : 0}
+        />
+      </svg>
+
+      {/* 3D Cylindrical Odometer Rolling Date (Anchored in Center Under the Arch) */}
+      <div className="absolute top-[48px] inset-x-0 flex flex-col items-center justify-center pointer-events-none">
+        <div className="flex items-baseline text-white font-serif tracking-tight drop-shadow-md select-none">
+          <span
+            ref={prefixRef}
+            className="inline-block text-amber-400 font-mono text-[11px] sm:text-xs uppercase mr-0.5 tracking-wider font-semibold"
+          >
             OCT{' '}
           </span>
           <span
@@ -439,13 +591,20 @@ export function MechanicalTimelineFilter({
           >
             <span
               ref={digitRef}
-              className="absolute inset-0 leading-tight origin-center [backface-visibility:hidden] will-change-transform text-white font-mono text-xs font-bold"
+              className="absolute inset-0 leading-tight origin-center [backface-visibility:hidden] will-change-transform text-white font-mono text-sm sm:text-base font-bold"
             >
               19
             </span>
           </span>
         </div>
+
+        {/* Subtle Arch Complication Label */}
+        <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-neutral-400/80 mt-1">
+          {selectedDate ? 'Filter Active' : 'Curated Wheel'}
+        </span>
       </div>
     </div>
   );
 }
+
+export default MechanicalTimelineFilter;

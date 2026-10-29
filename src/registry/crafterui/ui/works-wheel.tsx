@@ -602,12 +602,15 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
           targetEl?.closest('[data-dialog-scroll="true"]') ||
           targetEl?.closest('[data-dialog-container]')
         )
+        const isOverTimeline = Boolean(
+          targetEl?.closest('[data-timeline-zone="true"]')
+        )
         const isModalActive =
           isModalOpenRef.current ||
           document.body.getAttribute('data-dialog-open') === 'true' ||
           Boolean(document.querySelector('[role="dialog"]'))
 
-        if (isOverModal || isModalActive) return
+        if (isOverModal || isModalActive || isOverTimeline) return
 
         if (e.touches.length === 1) {
           touchStartY = e.touches[0].clientY
@@ -626,12 +629,15 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
           targetEl?.closest('[data-dialog-scroll="true"]') ||
           targetEl?.closest('[data-dialog-container]')
         )
+        const isOverTimeline = Boolean(
+          targetEl?.closest('[data-timeline-zone="true"]')
+        )
         const isModalActive =
           isModalOpenRef.current ||
           document.body.getAttribute('data-dialog-open') === 'true' ||
           Boolean(document.querySelector('[role="dialog"]'))
 
-        if (isOverModal || isModalActive) return
+        if (isOverModal || isModalActive || isOverTimeline) return
 
         const currentY = e.touches[0].clientY
         const currentX = e.touches[0].clientX
@@ -1151,9 +1157,15 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             </div>
           )}
 
-          {/* Mechanical Escapement Timeline Filter */}
-          {timelineDates && timelineDates.length > 0 && isLanded && (
-            <div className="absolute inset-x-0 bottom-3 sm:bottom-4 z-40 flex justify-center pointer-events-auto px-3">
+          {/* Half-Circle Mechanical Escapement Timeline Filter */}
+          {timelineDates && timelineDates.length > 0 && (
+            <div
+              data-timeline-zone="true"
+              className={cn(
+                "absolute inset-x-0 bottom-2 sm:bottom-4 pb-[env(safe-area-inset-bottom,12px)] z-50 flex justify-center pointer-events-auto px-2 transition-opacity duration-300",
+                isLanded ? "opacity-100" : "opacity-0 pointer-events-none"
+              )}
+            >
               <MechanicalTimelineFilter
                 dates={timelineDates}
                 screeningsCountByDate={screeningsCountByDate}
