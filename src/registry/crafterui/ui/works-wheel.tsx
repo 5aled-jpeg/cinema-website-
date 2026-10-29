@@ -252,8 +252,8 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
       const { w, h } = stage
       const isMobile = w > 0 && w < 640
       const isLandscapePhone = h > 0 && h < 520 && w > h
-      const cardMaxW = isMobile ? 0.70 : CARD_MAX_W
-      const cardHRatio = isMobile ? 0.44 : CARD_H
+      const cardMaxW = isMobile ? (isLandscapePhone ? 0.32 : 0.74) : CARD_MAX_W
+      const cardHRatio = isMobile ? (isLandscapePhone ? 0.52 : 0.50) : CARD_H
       const cardW = Math.min(h * cardHRatio * CARD_RATIO, w * cardMaxW)
       const cardH = cardW / CARD_RATIO
       const drumR = cardH * DRUM
@@ -291,7 +291,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
       }
 
       const t = turn.current
-      const m = clamp(t, 0, 1)
+      const m = hasHero ? 1 : clamp(t, 0, 1)
       const pos = clamp(t - 1, 0, last)
 
       // Track landing on Works Wheel: activates once stage is in view (t >= 0.7)
@@ -324,8 +324,11 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
         const d = i - pos
         const card = cardRefs.current[i]
         if (card) {
-          // Card culling: during hero transition (m < 0.7), render at most first 2 cards to save 80% 3D GPU load
-          const isHidden = (m < 0.7 && i > 1) || (m >= 0.7 && Math.abs(d) > CULL)
+          // Card culling: during hero transition (m < 0.7), render at most first 2 cards to save 80% 3D GPU load; hide film cover cards on phone landscape
+          const isHidden =
+            (m < 0.7 && i > 1) ||
+            (m >= 0.7 && Math.abs(d) > CULL) ||
+            metricsRef.current.isLandscapePhone
           if (isHidden) {
             card.style.display = "none"
           } else {
@@ -828,11 +831,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
 
             <div
               ref={wheelRef}
-              className={cn(
-                "absolute left-1/2 [transform-style:preserve-3d] transition-all duration-300",
-                metrics.isMobile ? "top-[46%]" : "top-1/2",
-                metrics.isLandscapePhone && "opacity-0 pointer-events-none hidden"
-              )}
+              className="absolute top-1/2 left-1/2 [transform-style:preserve-3d]"
             >
               {items.map((item, i) => {
                 const isFront = i === active
@@ -845,7 +844,10 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                     ref={(node: HTMLElement | null) => {
                       cardRefs.current[i] = node
                     }}
-                    className="group absolute [backface-visibility:hidden] select-none"
+                    className={cn(
+                      "group absolute [backface-visibility:hidden] select-none",
+                      metrics.isLandscapePhone && "hidden"
+                    )}
                     style={{
                       width: metrics.cardW,
                       height: metrics.cardH,
@@ -1163,12 +1165,12 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             </div>
           )}
 
-          {/* Half-Circle Rotating Timeline Wheel (matching Image 3) */}
+          {/* Half-Circle Rotating Timeline Wheel */}
           {timelineDates && timelineDates.length > 0 && (
             <div
               data-timeline-zone="true"
               className={cn(
-                "absolute inset-x-0 bottom-0 pb-[env(safe-area-inset-bottom,4px)] z-50 flex justify-center pointer-events-auto px-2 transition-opacity duration-300",
+                "absolute inset-x-0 bottom-2 sm:bottom-4 pb-[env(safe-area-inset-bottom,6px)] z-50 flex justify-center pointer-events-auto px-2 transition-opacity duration-300",
                 isLanded ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >

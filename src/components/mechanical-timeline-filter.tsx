@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 export interface TimelineDateItem {
   id: string; // e.g. "2026-09-28" or "all"
   label: string; // e.g. "Sep 28" or "ALL FILMS"
+  rimLabel: string; // e.g. "28" or "ALL"
   fullFormatted: string; // e.g. "28 Sep 2026"
   count?: number; // number of screenings on this date
 }
@@ -19,28 +20,29 @@ export interface MechanicalTimelineFilterProps {
   className?: string;
 }
 
-// Format "2026-09-28" into { prefix: "Sep ", digit: "28", full: "28 Sep 2026" }
+// Format "2026-09-28" into { prefix: "SEP ", digit: "28", full: "28 Sep 2026", rim: "28" }
 function parseDateForOdometer(dateStr: string | null) {
   if (!dateStr || dateStr === 'all') {
-    return { prefix: 'ALL ', digit: 'FILMS', full: 'All Theatrical Screenings' };
+    return { prefix: 'ALL ', digit: 'FILMS', full: 'All Theatrical Screenings', rim: 'ALL' };
   }
   const parts = dateStr.split('-');
   if (parts.length < 3) {
-    return { prefix: 'DATE ', digit: '01', full: dateStr };
+    return { prefix: 'DATE ', digit: '01', full: dateStr, rim: '01' };
   }
   const [y, m, d] = parts.map(Number);
   const dateObj = new Date(y, m - 1, d);
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const monthName = months[dateObj.getMonth()] || 'Oct';
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const monthName = months[dateObj.getMonth()] || 'OCT';
   const dayStr = String(d).padStart(2, '0');
   return {
     prefix: `${monthName} `,
     digit: dayStr,
     full: `${dayStr} ${monthName} ${y}`,
+    rim: dayStr,
   };
 }
 
-// Exact Swiss Escapement Synthesizer from Peng Zheng's portfolio
+// Authentic Swiss Escapement Synthesizer from Peng Zheng's portfolio
 const G: [number, number, number][] = [
   [5200, 0.8, 0.6],
   [7400, 0.5, 0.4],
@@ -110,13 +112,13 @@ export function MechanicalTimelineFilter({
   const lastTickIndexCrossed = useRef<number>(-1);
 
   // Geometry Constants for the Arched Rotary Wheel
-  const SVG_W = 340;
-  const SVG_H = 100;
-  const CX = 170;
-  const R = 260;
-  const CY = 292; // Apex at (170, 32)
-  const STEP_DEG = 14; // Degrees between date markers
-  const SUB_STEP_DEG = 3.5; // Degrees between minor ticks (4 intervals per date)
+  const SVG_W = 320;
+  const SVG_H = 76;
+  const CX = 160;
+  const R = 230;
+  const CY = 262; // Apex is at (160, 32)
+  const STEP_DEG = 15; // Degrees between dates
+  const SUB_STEP_DEG = 3.75; // Degrees between minor ticks (4 intervals per date)
 
   // Timeline Items (first item is "All", followed by sorted dates)
   const timelineItems: TimelineDateItem[] = useMemo(() => {
@@ -124,6 +126,7 @@ export function MechanicalTimelineFilter({
       {
         id: 'all',
         label: 'ALL FILMS',
+        rimLabel: 'ALL',
         fullFormatted: 'All Curated Films',
         count: Object.values(screeningsCountByDate).reduce((a, b) => a + b, 0),
       },
@@ -135,6 +138,7 @@ export function MechanicalTimelineFilter({
       list.push({
         id: d,
         label: `${parsed.prefix}${parsed.digit}`,
+        rimLabel: parsed.rim,
         fullFormatted: parsed.full,
         count: screeningsCountByDate[d] || 0,
       });
@@ -159,6 +163,7 @@ export function MechanicalTimelineFilter({
   const isDragging = useRef(false);
   const startPointerX = useRef(0);
   const startPhi = useRef(0);
+  const hasMovedRef = useRef(false);
   const rafId = useRef<number | null>(null);
   const targetPhi = useRef(phi);
 
@@ -214,7 +219,7 @@ export function MechanicalTimelineFilter({
         const src = ctx.createBufferSource();
         src.buffer = audioBuffersRef.current[type];
         const gain = ctx.createGain();
-        gain.gain.value = (profile.level || 1) * 0.6;
+        gain.gain.value = (profile.level || 1) * 0.55;
         src.connect(gain);
         gain.connect(ctx.destination);
         src.start();
@@ -227,7 +232,7 @@ export function MechanicalTimelineFilter({
   const setDateWithOdometer = useCallback((fullDateStr: string, dir = 1) => {
     if (fullDateStr === lastDateTextRef.current) return;
 
-    const match = fullDateStr.match(/^(.*?)(\d+)$/);
+    const match = fullDateStr.match(/^(.*?)(\d+|FILMS)$/);
     let prefix = fullDateStr;
     let digitStr = '';
 
@@ -264,7 +269,7 @@ export function MechanicalTimelineFilter({
 
     digitRef.current.textContent = newDigit;
 
-    const dur = 220;
+    const dur = 200;
     const easing = 'cubic-bezier(0.4, 0, 0.2, 1)';
     const rollDir = dir >= 0 ? 1 : -1;
 
@@ -297,10 +302,9 @@ export function MechanicalTimelineFilter({
     );
   }, []);
 
-  // Update odometer when nearest item changes
+  // Check and play escapement sound when dial crosses ticks
   const checkTickCrossed = useCallback(
     (currentAngle: number) => {
-      // Each sub-tick is SUB_STEP_DEG
       const subTickIdx = Math.round(currentAngle / SUB_STEP_DEG);
       if (subTickIdx !== lastTickIndexCrossed.current) {
         const isMajor = subTickIdx % 4 === 0;
@@ -332,13 +336,13 @@ export function MechanicalTimelineFilter({
       const step = () => {
         const current = phiRef.current;
         const diff = targetPhi.current - current;
-        if (Math.abs(diff) < 0.1) {
+        if (Math.abs(diff) < 0.08) {
           setPhi(targetPhi.current);
           phiRef.current = targetPhi.current;
           checkTickCrossed(targetPhi.current);
           onComplete?.();
         } else {
-          const next = current + diff * 0.22;
+          const next = current + diff * 0.24;
           setPhi(next);
           phiRef.current = next;
           checkTickCrossed(next);
@@ -371,6 +375,7 @@ export function MechanicalTimelineFilter({
     if (e.button !== 0) return;
     if (rafId.current) cancelAnimationFrame(rafId.current);
     isDragging.current = true;
+    hasMovedRef.current = false;
     startPointerX.current = e.clientX;
     startPhi.current = phiRef.current;
     try {
@@ -381,9 +386,12 @@ export function MechanicalTimelineFilter({
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging.current) return;
     const deltaX = e.clientX - startPointerX.current;
+    if (Math.abs(deltaX) > 3) {
+      hasMovedRef.current = true;
+    }
     // Dragging left moves to later dates; dragging right moves to earlier dates
-    const angleDelta = -(deltaX / (R * 0.75)) * (180 / Math.PI);
-    const nextPhi = Math.max(-5, Math.min(maxPhi + 5, startPhi.current + angleDelta));
+    const angleDelta = -(deltaX / (R * 0.72)) * (180 / Math.PI);
+    const nextPhi = Math.max(-4, Math.min(maxPhi + 4, startPhi.current + angleDelta));
     setPhi(nextPhi);
     phiRef.current = nextPhi;
     checkTickCrossed(nextPhi);
@@ -414,7 +422,9 @@ export function MechanicalTimelineFilter({
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
-    commitNearestDate();
+    if (hasMovedRef.current) {
+      commitNearestDate();
+    }
   };
 
   // Mouse wheel rotation over dial
@@ -438,7 +448,7 @@ export function MechanicalTimelineFilter({
     }
   };
 
-  // Click direct date marker on wheel to rotate to it
+  // Direct click on tick or date label: snaps dial and switches date immediately
   const handleTickClick = (dateIdx: number, e: React.MouseEvent) => {
     e.stopPropagation();
     const targetAngle = dateIdx * STEP_DEG;
@@ -454,7 +464,7 @@ export function MechanicalTimelineFilter({
     });
   };
 
-  // Calculate visible rotating ticks and date marks along the arch
+  // Calculate visible ticks and date numbers along the arch
   const { visibleTicks, visibleDates } = useMemo(() => {
     const ticks = [];
     const dateMarks = [];
@@ -462,12 +472,12 @@ export function MechanicalTimelineFilter({
 
     for (let j = 0; j <= totalSubTicks; j++) {
       const angleDeg = j * SUB_STEP_DEG - phi;
-      // Only render ticks within the visible arch aperture [-50 deg, +50 deg]
-      if (angleDeg >= -52 && angleDeg <= 52) {
+      // Only render ticks within the visible aperture [-46 deg, +46 deg]
+      if (angleDeg >= -48 && angleDeg <= 48) {
         const isDate = j % 4 === 0;
         const dateIdx = j / 4;
         const theta = (angleDeg * Math.PI) / 180;
-        const L = isDate ? 13 : 6.5;
+        const L = isDate ? 11 : 5.5;
 
         const rInner = R - L / 2;
         const rOuter = R + L / 2;
@@ -479,7 +489,7 @@ export function MechanicalTimelineFilter({
         const x2 = CX + rOuter * sin;
         const y2 = CY - rOuter * cos;
 
-        const isCenter = Math.abs(angleDeg) < 3.5;
+        const isCenter = Math.abs(angleDeg) < 2.5;
 
         ticks.push({
           j,
@@ -494,8 +504,8 @@ export function MechanicalTimelineFilter({
 
         if (isDate) {
           const item = timelineItems[dateIdx];
-          // Position label slightly inside the rim
-          const labelR = R - 18;
+          // Position label slightly below the tick mark along the radius
+          const labelR = R - 14.5;
           const lx = CX + labelR * sin;
           const ly = CY - labelR * cos;
           dateMarks.push({
@@ -523,55 +533,64 @@ export function MechanicalTimelineFilter({
     <div
       data-timeline-zone="true"
       role="slider"
-      aria-label="Rotary Timeline Wheel"
+      aria-label="Mechanical Timeline Escapement"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       onWheel={handleWheel}
       className={cn(
-        'relative w-[340px] max-w-[94vw] h-[105px] select-none cursor-grab active:cursor-grabbing flex flex-col items-center justify-end touch-none',
+        'relative w-[320px] max-w-[92vw] h-[86px] select-none cursor-grab active:cursor-grabbing flex flex-col items-center justify-end touch-none',
         className
       )}
     >
+      {/* Subtle Ambient Radial Backing for contrast against 3D drum cards */}
+      <div
+        className="pointer-events-none absolute inset-x-2 bottom-0 top-1 -z-10 rounded-t-full opacity-80"
+        style={{
+          background:
+            'radial-gradient(ellipse at 50% 70%, rgba(6,6,8,0.92) 0%, rgba(6,6,8,0.5) 60%, transparent 85%)',
+        }}
+      />
+
       {/* 3D Cylindrical Odometer Rolling Date (Anchored in Upper Center) */}
-      <div className="absolute top-[2px] inset-x-0 flex flex-col items-center justify-center pointer-events-none z-30">
-        <div className="flex items-baseline text-white font-serif tracking-tight drop-shadow-md select-none">
+      <div className="absolute top-0 inset-x-0 flex flex-col items-center justify-center pointer-events-none z-30">
+        <div className="flex items-center justify-center text-white tracking-tight drop-shadow-md select-none">
           <span
             ref={prefixRef}
-            className="inline-block text-amber-400 font-mono text-[11px] sm:text-xs uppercase mr-0.5 tracking-wider font-semibold"
+            className="inline-flex items-center text-amber-500 font-mono text-[11px] sm:text-xs uppercase mr-1 tracking-wider font-semibold"
           >
             ALL{' '}
           </span>
           <span
             ref={reelRef}
-            className="inline-block relative h-[1.3em] min-w-[1.6em] align-baseline [perspective:3em] overflow-visible"
+            className="inline-flex items-center justify-center relative h-[1.35em] min-w-[1.6em] [perspective:3em] overflow-visible"
           >
             <span
               ref={digitRef}
-              className="absolute inset-0 leading-tight origin-center [backface-visibility:hidden] will-change-transform text-white font-mono text-sm sm:text-base font-bold"
+              className="absolute inset-0 flex items-center justify-center leading-none origin-center [backface-visibility:hidden] will-change-transform text-white font-mono text-sm sm:text-base font-bold"
             >
               FILMS
             </span>
           </span>
         </div>
 
-        {/* Selected Status Indicator */}
-        <span className="text-[8.5px] font-mono tracking-[0.2em] uppercase text-neutral-400/80 -mt-0.5">
+        {/* Selected Status / Screening Count */}
+        <span className="text-[8.5px] font-mono tracking-[0.2em] uppercase text-neutral-400 mt-0.5">
           {activeDateItem?.count !== undefined && activeDateItem.count > 0
-            ? `${activeDateItem.count} Showtimes`
-            : activeDateItem?.fullFormatted || 'All Theatrical Screenings'}
+            ? `${activeDateItem.count} Screenings`
+            : 'All Curated Films'}
         </span>
       </div>
 
-      {/* SVG Arched Rotating Timeline Dial (curves upward like Image 3) */}
+      {/* SVG Arched Rotary Timeline Dial (Pure mechanical tick marks, zero clutter) */}
       <svg
         viewBox={`0 0 ${SVG_W} ${SVG_H}`}
         className="w-full h-full overflow-visible pointer-events-none z-10"
       >
         <defs>
-          <filter id="rotary-amber-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <filter id="escapement-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -579,13 +598,13 @@ export function MechanicalTimelineFilter({
           </filter>
         </defs>
 
-        {/* Circular Rim Arc (Gold/Amber Arched Crest matching Image 3) */}
+        {/* Subtle Hairline Base Arch Track (Ultra-refined luxury guideline) */}
         <path
-          d={`M ${CX - 150} 78 A ${R} ${R} 0 0 1 ${CX + 150} 78`}
+          d={`M ${CX - 130} 66 A ${R} ${R} 0 0 1 ${CX + 130} 66`}
           fill="none"
-          stroke="#f59e0b"
-          strokeWidth="1.8"
-          strokeOpacity="0.85"
+          stroke="rgba(255, 255, 255, 0.08)"
+          strokeWidth="1"
+          strokeDasharray="2 3"
         />
 
         {/* Rotating Radial Ticks */}
@@ -600,15 +619,15 @@ export function MechanicalTimelineFilter({
               t.isCenter
                 ? '#f59e0b'
                 : t.isDate
-                ? '#ffffff'
-                : 'rgba(255, 255, 255, 0.35)'
+                ? 'rgba(255, 255, 255, 0.9)'
+                : 'rgba(255, 255, 255, 0.22)'
             }
-            strokeWidth={t.isCenter ? 2.2 : t.isDate ? 1.7 : 1}
+            strokeWidth={t.isCenter ? 2.2 : t.isDate ? 1.6 : 1}
             strokeLinecap="round"
           />
         ))}
 
-        {/* Rotating Date Labels along Rim */}
+        {/* Clean Day Numbers on Major Ticks (Zero duplicate text, crisp tachymeter numbers) */}
         {visibleDates.map((d) => (
           <text
             key={`date-lbl-${d.dateIdx}`}
@@ -616,31 +635,40 @@ export function MechanicalTimelineFilter({
             y={d.ly}
             textAnchor="middle"
             dominantBaseline="central"
-            transform={`rotate(${d.angleDeg}, ${d.lx}, ${d.ly})`}
+            transform={`rotate(${d.angleDeg * 0.75}, ${d.lx}, ${d.ly})`}
             fill={d.isCenter ? '#f59e0b' : 'rgba(255, 255, 255, 0.65)'}
-            fontSize="8.5"
-            fontFamily="monospace"
+            fontSize="8"
+            fontFamily="ui-monospace, SFMono-Regular, monospace"
             fontWeight={d.isCenter ? 'bold' : 'normal'}
-            letterSpacing="0.05em"
+            letterSpacing="0.04em"
             onClick={(e) => handleTickClick(d.dateIdx, e)}
-            className="pointer-events-auto cursor-pointer hover:fill-amber-400 select-none"
+            className="pointer-events-auto cursor-pointer hover:fill-amber-400 select-none transition-colors"
           >
-            {d.item.label}
+            {d.item.rimLabel}
           </text>
         ))}
 
-        {/* Fixed 12 O'Clock Center Apex Needle (The Anchor Marker) */}
+        {/* Fixed 12 O'Clock Dual Viewport Cursor (Peng Zheng Escapement Dual Bar) */}
         <line
-          x1={CX}
+          x1={CX - 1.5}
           y1={24}
-          x2={CX}
-          y2={40}
+          x2={CX - 1.5}
+          y2={38}
           stroke="#f59e0b"
-          strokeWidth="2.5"
+          strokeWidth="1.8"
           strokeLinecap="round"
-          filter="url(#rotary-amber-glow)"
+          filter="url(#escapement-glow)"
         />
-        <circle cx={CX} cy={22} r={2} fill="#f59e0b" filter="url(#rotary-amber-glow)" />
+        <line
+          x1={CX + 1.5}
+          y1={24}
+          x2={CX + 1.5}
+          y2={38}
+          stroke="#f59e0b"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          filter="url(#escapement-glow)"
+        />
       </svg>
     </div>
   );
