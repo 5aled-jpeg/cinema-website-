@@ -40,7 +40,7 @@ function parseDateForOdometer(dateStr: string | null) {
   };
 }
 
-// Escapement Resonators & Filters (Restored from Peng Zheng's exact implementation)
+// Exact Swiss Escapement Synthesizer from Peng Zheng's portfolio
 const G: [number, number, number][] = [
   [5200, 0.8, 0.6],
   [7400, 0.5, 0.4],
@@ -101,33 +101,22 @@ export function MechanicalTimelineFilter({
   onSelectDate,
   className,
 }: MechanicalTimelineFilterProps) {
-  const [isDialActive, setIsDialActive] = useState<boolean>(false);
-  const [hoverPositionPct, setHoverPositionPct] = useState<number>(0);
-  const [cursorPositionPct, setCursorPositionPct] = useState<number>(0);
-
   // Web Haptics for Mobile & Tablets
   const { trigger } = useWebHaptics();
 
   // Audio Context Ref
   const audioCtxRef = useRef<AudioContext | null>(null);
   const audioBuffersRef = useRef<Record<string, AudioBuffer>>({});
-  const lastHoveredIdxRef = useRef<number>(-1);
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isDraggingRef = useRef<boolean>(false);
+  const lastTickIndexCrossed = useRef<number>(-1);
 
-  // DOM Refs
-  const svgRef = useRef<SVGSVGElement>(null);
-  const prefixRef = useRef<HTMLSpanElement>(null);
-  const reelRef = useRef<HTMLSpanElement>(null);
-  const digitRef = useRef<HTMLSpanElement>(null);
-  const lastDateTextRef = useRef<string>('');
-
-  // Geometry Constants for the Half-Circle Arc
+  // Geometry Constants for the Arched Rotary Wheel
   const SVG_W = 340;
-  const SVG_H = 150;
+  const SVG_H = 100;
   const CX = 170;
-  const CY = 138;
-  const R = 120;
+  const R = 260;
+  const CY = 292; // Apex at (170, 32)
+  const STEP_DEG = 14; // Degrees between date markers
+  const SUB_STEP_DEG = 3.5; // Degrees between minor ticks (4 intervals per date)
 
   // Timeline Items (first item is "All", followed by sorted dates)
   const timelineItems: TimelineDateItem[] = useMemo(() => {
@@ -154,10 +143,32 @@ export function MechanicalTimelineFilter({
     return list;
   }, [dates, screeningsCountByDate]);
 
-  const totalTicks = Math.max(48, timelineItems.length * 5);
-  const majorInterval = 6;
+  const maxPhi = Math.max(0, (timelineItems.length - 1) * STEP_DEG);
 
-  // Initialize Web Audio Escapement Synthesizer
+  // Dial rotation angle state (in degrees)
+  const [phi, setPhi] = useState<number>(() => {
+    if (!selectedDate) return 0;
+    const idx = timelineItems.findIndex((it) => it.id === selectedDate);
+    return idx >= 0 ? idx * STEP_DEG : 0;
+  });
+
+  const phiRef = useRef(phi);
+  phiRef.current = phi;
+
+  // Interaction refs
+  const isDragging = useRef(false);
+  const startPointerX = useRef(0);
+  const startPhi = useRef(0);
+  const rafId = useRef<number | null>(null);
+  const targetPhi = useRef(phi);
+
+  // DOM Refs for rolling odometer
+  const prefixRef = useRef<HTMLSpanElement>(null);
+  const reelRef = useRef<HTMLSpanElement>(null);
+  const digitRef = useRef<HTMLSpanElement>(null);
+  const lastDateTextRef = useRef<string>('');
+
+  // Initialize Web Audio
   const initAudio = useCallback(() => {
     if (typeof window === 'undefined') return;
     try {
@@ -173,7 +184,7 @@ export function MechanicalTimelineFilter({
     } catch {}
   }, []);
 
-  // Auto unlock audio on first user touch / pointer gesture (critical for mobile iOS/Android)
+  // Unlock audio on first touch
   useEffect(() => {
     const unlock = () => initAudio();
     const evts = ['pointerdown', 'touchstart', 'wheel', 'keydown', 'pointermove'];
@@ -253,7 +264,7 @@ export function MechanicalTimelineFilter({
 
     digitRef.current.textContent = newDigit;
 
-    const dur = 240;
+    const dur = 220;
     const easing = 'cubic-bezier(0.4, 0, 0.2, 1)';
     const rollDir = dir >= 0 ? 1 : -1;
 
@@ -286,7 +297,60 @@ export function MechanicalTimelineFilter({
     );
   }, []);
 
-  // Sync cursor position whenever selectedDate prop changes externally
+  // Update odometer when nearest item changes
+  const checkTickCrossed = useCallback(
+    (currentAngle: number) => {
+      // Each sub-tick is SUB_STEP_DEG
+      const subTickIdx = Math.round(currentAngle / SUB_STEP_DEG);
+      if (subTickIdx !== lastTickIndexCrossed.current) {
+        const isMajor = subTickIdx % 4 === 0;
+        lastTickIndexCrossed.current = subTickIdx;
+        playTick(isMajor ? 'line' : 'fine');
+        try {
+          trigger(isMajor ? 'medium' : 'selection');
+        } catch {}
+
+        const nearestItemIdx = Math.max(
+          0,
+          Math.min(timelineItems.length - 1, Math.round(currentAngle / STEP_DEG))
+        );
+        const item = timelineItems[nearestItemIdx];
+        if (item) {
+          setDateWithOdometer(item.label, currentAngle > phiRef.current ? 1 : -1);
+        }
+      }
+    },
+    [timelineItems, playTick, trigger, setDateWithOdometer]
+  );
+
+  // Smooth animation loop to target angle
+  const animateTo = useCallback(
+    (target: number, onComplete?: () => void) => {
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      targetPhi.current = Math.max(0, Math.min(maxPhi, target));
+
+      const step = () => {
+        const current = phiRef.current;
+        const diff = targetPhi.current - current;
+        if (Math.abs(diff) < 0.1) {
+          setPhi(targetPhi.current);
+          phiRef.current = targetPhi.current;
+          checkTickCrossed(targetPhi.current);
+          onComplete?.();
+        } else {
+          const next = current + diff * 0.22;
+          setPhi(next);
+          phiRef.current = next;
+          checkTickCrossed(next);
+          rafId.current = requestAnimationFrame(step);
+        }
+      };
+      rafId.current = requestAnimationFrame(step);
+    },
+    [maxPhi, checkTickCrossed]
+  );
+
+  // Sync external selectedDate changes
   useEffect(() => {
     if (timelineItems.length === 0) return;
     let targetIdx = 0;
@@ -294,296 +358,190 @@ export function MechanicalTimelineFilter({
       targetIdx = timelineItems.findIndex((it) => it.id === selectedDate);
       if (targetIdx === -1) targetIdx = 0;
     }
-    const pct = (targetIdx / (timelineItems.length - 1)) * 100;
-    setCursorPositionPct(pct);
-    setHoverPositionPct(pct);
+    const targetAngle = targetIdx * STEP_DEG;
+    animateTo(targetAngle);
     const item = timelineItems[targetIdx];
     if (item) {
       setDateWithOdometer(item.label, 0);
     }
-  }, [selectedDate, timelineItems, setDateWithOdometer]);
+  }, [selectedDate, timelineItems, animateTo, setDateWithOdometer]);
 
-  // Compute angle and item at pointer position along the half-circle arc
-  const getItemAtClientPos = useCallback(
-    (clientX: number, clientY: number) => {
-      if (!svgRef.current) return null;
-      const rect = svgRef.current.getBoundingClientRect();
-      const scale = SVG_W / rect.width;
-      const localX = (clientX - rect.left) * scale;
-      const localY = (clientY - rect.top) * scale;
-
-      const dx = localX - CX;
-      const dy = CY - localY; // positive when above center
-
-      let angle = Math.atan2(dy, dx);
-      // Clamp angle to half-circle (0 to pi)
-      if (angle < 0) {
-        angle = dx < 0 ? Math.PI : 0;
-      }
-
-      // Fractional progress: 0 (left/pi) to 1 (right/0)
-      const rawT = Math.max(0, Math.min(1, (Math.PI - angle) / Math.PI));
-      const tickIdx = Math.round(rawT * (totalTicks - 1));
-      const pct = (tickIdx / (totalTicks - 1)) * 100;
-      const itemIdx = Math.round((tickIdx / (totalTicks - 1)) * (timelineItems.length - 1));
-      const item = timelineItems[itemIdx] || timelineItems[0];
-      return { tickIdx, pct, itemIdx, item };
-    },
-    [totalTicks, timelineItems]
-  );
-
-  // Update hover preview (PREVIEW ONLY — NO SWITCH ON HOVER)
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-    setIsDialActive(true);
-
-    const info = getItemAtClientPos(e.clientX, e.clientY);
-    if (!info) return;
-
-    setHoverPositionPct(info.pct);
-
-    if (info.tickIdx !== lastHoveredIdxRef.current) {
-      const dir = info.tickIdx > lastHoveredIdxRef.current ? 1 : -1;
-      lastHoveredIdxRef.current = info.tickIdx;
-      const isMajor = info.tickIdx % majorInterval === 0;
-      playTick(isMajor ? 'line' : 'fine');
-      try {
-        trigger(isMajor ? 'medium' : 'selection');
-      } catch {}
-
-      // Preview date in odometer label ONLY
-      setDateWithOdometer(info.item.label, dir);
-
-      // If dragging with button held down, update committed position
-      if (isDraggingRef.current) {
-        setCursorPositionPct(info.pct);
-        const dateParam = info.item.id === 'all' ? null : info.item.id;
-        onSelectDate(dateParam);
-      }
-    }
-  };
-
-  // Commit on click / pointer down
+  // Pointer drag to rotate timeline wheel
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
-    setIsDialActive(true);
-    isDraggingRef.current = true;
-
-    const info = getItemAtClientPos(e.clientX, e.clientY);
-    if (info) {
-      setHoverPositionPct(info.pct);
-      setCursorPositionPct(info.pct);
-      lastHoveredIdxRef.current = info.tickIdx;
-      playTick('line');
-      try {
-        trigger('light');
-      } catch {}
-      setDateWithOdometer(info.item.label, 0);
-
-      // SWITCH IS STRICTLY ON CLICK!
-      const dateParam = info.item.id === 'all' ? null : info.item.id;
-      onSelectDate(dateParam);
-    }
-
+    if (rafId.current) cancelAnimationFrame(rafId.current);
+    isDragging.current = true;
+    startPointerX.current = e.clientX;
+    startPhi.current = phiRef.current;
     try {
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     } catch {}
   };
 
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging.current) return;
+    const deltaX = e.clientX - startPointerX.current;
+    // Dragging left moves to later dates; dragging right moves to earlier dates
+    const angleDelta = -(deltaX / (R * 0.75)) * (180 / Math.PI);
+    const nextPhi = Math.max(-5, Math.min(maxPhi + 5, startPhi.current + angleDelta));
+    setPhi(nextPhi);
+    phiRef.current = nextPhi;
+    checkTickCrossed(nextPhi);
+  };
+
+  const commitNearestDate = useCallback(() => {
+    const nearestIdx = Math.max(
+      0,
+      Math.min(timelineItems.length - 1, Math.round(phiRef.current / STEP_DEG))
+    );
+    const snappedAngle = nearestIdx * STEP_DEG;
+    animateTo(snappedAngle, () => {
+      const selectedItem = timelineItems[nearestIdx];
+      if (selectedItem) {
+        playTick('close');
+        try {
+          trigger('light');
+        } catch {}
+        const dateParam = selectedItem.id === 'all' ? null : selectedItem.id;
+        onSelectDate(dateParam);
+      }
+    });
+  }, [timelineItems, animateTo, playTick, trigger, onSelectDate]);
+
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    isDraggingRef.current = false;
-    playTick('close');
-    try {
-      trigger('rigid');
-    } catch {}
+    if (!isDragging.current) return;
+    isDragging.current = false;
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
-
-    hideTimeoutRef.current = setTimeout(() => {
-      setIsDialActive(false);
-      const cur = selectedDate
-        ? timelineItems.find((it) => it.id === selectedDate)
-        : timelineItems[0];
-      if (cur) setDateWithOdometer(cur.label, 0);
-    }, 400);
+    commitNearestDate();
   };
 
-  const handlePointerLeave = () => {
-    if (!isDraggingRef.current) {
-      hideTimeoutRef.current = setTimeout(() => {
-        setIsDialActive(false);
-        const cur = selectedDate
-          ? timelineItems.find((it) => it.id === selectedDate)
-          : timelineItems[0];
-        if (cur) setDateWithOdometer(cur.label, 0);
-      }, 400);
+  // Mouse wheel rotation over dial
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const delta = Math.sign(e.deltaY || e.deltaX);
+    if (!delta) return;
+    const curIdx = Math.round(phiRef.current / STEP_DEG);
+    const nextIdx = Math.max(0, Math.min(timelineItems.length - 1, curIdx + delta));
+    if (nextIdx !== curIdx) {
+      animateTo(nextIdx * STEP_DEG, () => {
+        const item = timelineItems[nextIdx];
+        if (item) {
+          playTick('close');
+          try {
+            trigger('light');
+          } catch {}
+          onSelectDate(item.id === 'all' ? null : item.id);
+        }
+      });
     }
   };
 
-  // Calculate arc tick points
-  const ticksData = useMemo(() => {
-    const list = [];
-    for (let i = 0; i < totalTicks; i++) {
-      const isMajor = i % majorInterval === 0;
-      const t = i / (totalTicks - 1);
-      const theta = Math.PI * (1 - t);
-      const L = isMajor ? 12 : 6.5;
+  // Click direct date marker on wheel to rotate to it
+  const handleTickClick = (dateIdx: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const targetAngle = dateIdx * STEP_DEG;
+    animateTo(targetAngle, () => {
+      const item = timelineItems[dateIdx];
+      if (item) {
+        playTick('close');
+        try {
+          trigger('light');
+        } catch {}
+        onSelectDate(item.id === 'all' ? null : item.id);
+      }
+    });
+  };
 
-      const rInner = R - L / 2;
-      const rOuter = R + L / 2;
+  // Calculate visible rotating ticks and date marks along the arch
+  const { visibleTicks, visibleDates } = useMemo(() => {
+    const ticks = [];
+    const dateMarks = [];
+    const totalSubTicks = (timelineItems.length - 1) * 4;
 
-      const cos = Math.cos(theta);
-      const sin = Math.sin(theta);
+    for (let j = 0; j <= totalSubTicks; j++) {
+      const angleDeg = j * SUB_STEP_DEG - phi;
+      // Only render ticks within the visible arch aperture [-50 deg, +50 deg]
+      if (angleDeg >= -52 && angleDeg <= 52) {
+        const isDate = j % 4 === 0;
+        const dateIdx = j / 4;
+        const theta = (angleDeg * Math.PI) / 180;
+        const L = isDate ? 13 : 6.5;
 
-      const x1 = CX + rInner * cos;
-      const y1 = CY - rInner * sin;
-      const x2 = CX + rOuter * cos;
-      const y2 = CY - rOuter * sin;
+        const rInner = R - L / 2;
+        const rOuter = R + L / 2;
+        const sin = Math.sin(theta);
+        const cos = Math.cos(theta);
 
-      list.push({ i, isMajor, x1, y1, x2, y2 });
+        const x1 = CX + rInner * sin;
+        const y1 = CY - rInner * cos;
+        const x2 = CX + rOuter * sin;
+        const y2 = CY - rOuter * cos;
+
+        const isCenter = Math.abs(angleDeg) < 3.5;
+
+        ticks.push({
+          j,
+          isDate,
+          angleDeg,
+          x1,
+          y1,
+          x2,
+          y2,
+          isCenter,
+        });
+
+        if (isDate) {
+          const item = timelineItems[dateIdx];
+          // Position label slightly inside the rim
+          const labelR = R - 18;
+          const lx = CX + labelR * sin;
+          const ly = CY - labelR * cos;
+          dateMarks.push({
+            dateIdx,
+            item,
+            angleDeg,
+            lx,
+            ly,
+            isCenter,
+          });
+        }
+      }
     }
-    return list;
-  }, [totalTicks]);
 
-  // Dual committed cursor lines
-  const committedCursorLines = useMemo(() => {
-    const t = cursorPositionPct / 100;
-    const centerTheta = Math.PI * (1 - t);
-    const dTheta = 0.024;
-    const L = 16;
-    const rInner = R - L / 2;
-    const rOuter = R + L / 2;
+    return { visibleTicks: ticks, visibleDates: dateMarks };
+  }, [phi, timelineItems]);
 
-    const makeLine = (angle: number) => {
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      return {
-        x1: CX + rInner * cos,
-        y1: CY - rInner * sin,
-        x2: CX + rOuter * cos,
-        y2: CY - rOuter * sin,
-      };
-    };
-
-    return [makeLine(centerTheta - dTheta), makeLine(centerTheta + dTheta)];
-  }, [cursorPositionPct]);
-
-  // Amber indicator tick
-  const hoverIndicatorLine = useMemo(() => {
-    const t = hoverPositionPct / 100;
-    const theta = Math.PI * (1 - t);
-    const L = 20;
-    const rInner = R - L / 2;
-    const rOuter = R + L / 2;
-    const cos = Math.cos(theta);
-    const sin = Math.sin(theta);
-    return {
-      x1: CX + rInner * cos,
-      y1: CY - rInner * sin,
-      x2: CX + rOuter * cos,
-      y2: CY - rOuter * sin,
-    };
-  }, [hoverPositionPct]);
+  const nearestActiveIdx = Math.max(
+    0,
+    Math.min(timelineItems.length - 1, Math.round(phi / STEP_DEG))
+  );
+  const activeDateItem = timelineItems[nearestActiveIdx] || timelineItems[0];
 
   return (
     <div
       data-timeline-zone="true"
       role="slider"
-      aria-label="Half-Circle Escapement Timeline Filter"
+      aria-label="Rotary Timeline Wheel"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerLeave}
+      onPointerCancel={handlePointerUp}
+      onWheel={handleWheel}
       className={cn(
-        'relative w-[340px] max-w-[92vw] h-[142px] select-none cursor-pointer flex flex-col items-center justify-end touch-none',
+        'relative w-[340px] max-w-[94vw] h-[105px] select-none cursor-grab active:cursor-grabbing flex flex-col items-center justify-end touch-none',
         className
       )}
     >
-      {/* Half-Circle SVG Radial Arc */}
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-        className="w-full h-full overflow-visible pointer-events-none"
-      >
-        <defs>
-          <filter id="amber-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          <filter id="white-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        {/* Circular Guide Arc Hairline */}
-        <path
-          d={`M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`}
-          fill="none"
-          stroke="rgba(255, 255, 255, 0.14)"
-          strokeWidth="1"
-          strokeDasharray="2 4"
-        />
-
-        {/* Radial Escapement Ticks */}
-        {ticksData.map((t) => (
-          <line
-            key={t.i}
-            x1={t.x1}
-            y1={t.y1}
-            x2={t.x2}
-            y2={t.y2}
-            stroke={t.isMajor ? 'rgba(255, 255, 255, 0.52)' : 'rgba(255, 255, 255, 0.24)'}
-            strokeWidth={t.isMajor ? 1.6 : 1}
-            strokeLinecap="round"
-          />
-        ))}
-
-        {/* Active Committed Dual Ticks (| |) */}
-        {committedCursorLines.map((line, idx) => (
-          <line
-            key={`cur-${idx}`}
-            x1={line.x1}
-            y1={line.y1}
-            x2={line.x2}
-            y2={line.y2}
-            stroke="#ffffff"
-            strokeWidth="2"
-            strokeLinecap="round"
-            filter="url(#white-glow)"
-          />
-        ))}
-
-        {/* Vibrant Amber/Gold Scrub Indicator Tick */}
-        <line
-          x1={hoverIndicatorLine.x1}
-          y1={hoverIndicatorLine.y1}
-          x2={hoverIndicatorLine.x2}
-          y2={hoverIndicatorLine.y2}
-          stroke="#f59e0b"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          filter="url(#amber-glow)"
-          className="transition-opacity duration-150"
-          opacity={isDialActive ? 1 : 0}
-        />
-      </svg>
-
-      {/* 3D Cylindrical Odometer Rolling Date (Anchored in Center Under the Arch) */}
-      <div className="absolute top-[48px] inset-x-0 flex flex-col items-center justify-center pointer-events-none">
+      {/* 3D Cylindrical Odometer Rolling Date (Anchored in Upper Center) */}
+      <div className="absolute top-[2px] inset-x-0 flex flex-col items-center justify-center pointer-events-none z-30">
         <div className="flex items-baseline text-white font-serif tracking-tight drop-shadow-md select-none">
           <span
             ref={prefixRef}
             className="inline-block text-amber-400 font-mono text-[11px] sm:text-xs uppercase mr-0.5 tracking-wider font-semibold"
           >
-            OCT{' '}
+            ALL{' '}
           </span>
           <span
             ref={reelRef}
@@ -593,16 +551,97 @@ export function MechanicalTimelineFilter({
               ref={digitRef}
               className="absolute inset-0 leading-tight origin-center [backface-visibility:hidden] will-change-transform text-white font-mono text-sm sm:text-base font-bold"
             >
-              19
+              FILMS
             </span>
           </span>
         </div>
 
-        {/* Subtle Arch Complication Label */}
-        <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-neutral-400/80 mt-1">
-          {selectedDate ? 'Filter Active' : 'Curated Wheel'}
+        {/* Selected Status Indicator */}
+        <span className="text-[8.5px] font-mono tracking-[0.2em] uppercase text-neutral-400/80 -mt-0.5">
+          {activeDateItem?.count !== undefined && activeDateItem.count > 0
+            ? `${activeDateItem.count} Showtimes`
+            : activeDateItem?.fullFormatted || 'All Theatrical Screenings'}
         </span>
       </div>
+
+      {/* SVG Arched Rotating Timeline Dial (curves upward like Image 3) */}
+      <svg
+        viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+        className="w-full h-full overflow-visible pointer-events-none z-10"
+      >
+        <defs>
+          <filter id="rotary-amber-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Circular Rim Arc (Gold/Amber Arched Crest matching Image 3) */}
+        <path
+          d={`M ${CX - 150} 78 A ${R} ${R} 0 0 1 ${CX + 150} 78`}
+          fill="none"
+          stroke="#f59e0b"
+          strokeWidth="1.8"
+          strokeOpacity="0.85"
+        />
+
+        {/* Rotating Radial Ticks */}
+        {visibleTicks.map((t) => (
+          <line
+            key={`tick-${t.j}`}
+            x1={t.x1}
+            y1={t.y1}
+            x2={t.x2}
+            y2={t.y2}
+            stroke={
+              t.isCenter
+                ? '#f59e0b'
+                : t.isDate
+                ? '#ffffff'
+                : 'rgba(255, 255, 255, 0.35)'
+            }
+            strokeWidth={t.isCenter ? 2.2 : t.isDate ? 1.7 : 1}
+            strokeLinecap="round"
+          />
+        ))}
+
+        {/* Rotating Date Labels along Rim */}
+        {visibleDates.map((d) => (
+          <text
+            key={`date-lbl-${d.dateIdx}`}
+            x={d.lx}
+            y={d.ly}
+            textAnchor="middle"
+            dominantBaseline="central"
+            transform={`rotate(${d.angleDeg}, ${d.lx}, ${d.ly})`}
+            fill={d.isCenter ? '#f59e0b' : 'rgba(255, 255, 255, 0.65)'}
+            fontSize="8.5"
+            fontFamily="monospace"
+            fontWeight={d.isCenter ? 'bold' : 'normal'}
+            letterSpacing="0.05em"
+            onClick={(e) => handleTickClick(d.dateIdx, e)}
+            className="pointer-events-auto cursor-pointer hover:fill-amber-400 select-none"
+          >
+            {d.item.label}
+          </text>
+        ))}
+
+        {/* Fixed 12 O'Clock Center Apex Needle (The Anchor Marker) */}
+        <line
+          x1={CX}
+          y1={24}
+          x2={CX}
+          y2={40}
+          stroke="#f59e0b"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          filter="url(#rotary-amber-glow)"
+        />
+        <circle cx={CX} cy={22} r={2} fill="#f59e0b" filter="url(#rotary-amber-glow)" />
+      </svg>
     </div>
   );
 }

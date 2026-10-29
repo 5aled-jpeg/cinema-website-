@@ -251,8 +251,9 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
     const metrics = React.useMemo(() => {
       const { w, h } = stage
       const isMobile = w > 0 && w < 640
-      const cardMaxW = isMobile ? 0.74 : CARD_MAX_W
-      const cardHRatio = isMobile ? 0.50 : CARD_H
+      const isLandscapePhone = h > 0 && h < 520 && w > h
+      const cardMaxW = isMobile ? 0.70 : CARD_MAX_W
+      const cardHRatio = isMobile ? 0.44 : CARD_H
       const cardW = Math.min(h * cardHRatio * CARD_RATIO, w * cardMaxW)
       const cardH = cardW / CARD_RATIO
       const drumR = cardH * DRUM
@@ -271,6 +272,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
         title: cardH * (isMobile ? 0.08 : TITLE),
         index: cardH * INDEX,
         isMobile,
+        isLandscapePhone,
       }
     }, [stage, count])
 
@@ -826,7 +828,11 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
 
             <div
               ref={wheelRef}
-              className="absolute top-1/2 left-1/2 [transform-style:preserve-3d]"
+              className={cn(
+                "absolute left-1/2 [transform-style:preserve-3d] transition-all duration-300",
+                metrics.isMobile ? "top-[46%]" : "top-1/2",
+                metrics.isLandscapePhone && "opacity-0 pointer-events-none hidden"
+              )}
             >
               {items.map((item, i) => {
                 const isFront = i === active
@@ -1157,12 +1163,12 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             </div>
           )}
 
-          {/* Half-Circle Mechanical Escapement Timeline Filter */}
+          {/* Half-Circle Rotating Timeline Wheel (matching Image 3) */}
           {timelineDates && timelineDates.length > 0 && (
             <div
               data-timeline-zone="true"
               className={cn(
-                "absolute inset-x-0 bottom-2 sm:bottom-4 pb-[env(safe-area-inset-bottom,12px)] z-50 flex justify-center pointer-events-auto px-2 transition-opacity duration-300",
+                "absolute inset-x-0 bottom-0 pb-[env(safe-area-inset-bottom,4px)] z-50 flex justify-center pointer-events-auto px-2 transition-opacity duration-300",
                 isLanded ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
