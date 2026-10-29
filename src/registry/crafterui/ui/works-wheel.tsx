@@ -1129,52 +1129,6 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             </div>
           )}
 
-          {/* Active Film Showtime Badges (Positioned Below the Front Card) */}
-          {activeItem && activeItem.screeningSlots && activeItem.screeningSlots.length > 0 && isLanded && (
-            <div
-              className="absolute left-1/2 -translate-x-1/2 z-30 flex items-center justify-center gap-1.5 sm:gap-2 pointer-events-auto transition-opacity duration-300 max-w-[92vw] overflow-x-auto no-scrollbar py-1"
-              style={{
-                top: `calc(50% + ${metrics.cardH / 2 + 14}px)`,
-              }}
-            >
-              {activeItem.screeningSlots.slice(0, 4).map((slot, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    try {
-                      triggerHaptic('light')
-                    } catch {}
-                    setActiveModalItem(activeItem)
-                    onItemClick?.(activeItem, active)
-                  }}
-                  className="group/slot flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-amber-500/30 bg-black/75 dark:bg-neutral-900/85 backdrop-blur-md text-[11px] sm:text-xs font-mono text-neutral-200 hover:text-white hover:border-amber-500/70 hover:bg-amber-500/20 transition-all cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
-                >
-                  <span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  <span className="font-semibold text-white tracking-tight">{slot.time}</span>
-                  <span className="text-[10px] text-neutral-400 hidden sm:inline">· {slot.auditorium}</span>
-                  {slot.format && (
-                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold hidden md:inline">
-                      {slot.format}
-                    </span>
-                  )}
-                </button>
-              ))}
-              {activeItem.screeningSlots.length > 4 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveModalItem(activeItem)
-                    onItemClick?.(activeItem, active)
-                  }}
-                  className="px-2.5 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-[10px] sm:text-[11px] font-mono text-neutral-400 hover:text-white transition-all cursor-pointer whitespace-nowrap"
-                >
-                  +{activeItem.screeningSlots.length - 4} more
-                </button>
-              )}
-            </div>
-          )}
-
           {/* Empty State when no films match selected date */}
           {items.length === 0 && isLanded && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-30 pointer-events-auto">
