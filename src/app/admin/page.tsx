@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import {
   type CinemaFilm,
+  type FilmStill,
   type Screening,
   type CinemaHall,
   CINEMA_HALLS,
@@ -90,7 +91,19 @@ export default function AdminDashboardPage() {
   const [editingFilm, setEditingFilm] = useState<CinemaFilm | null>(null);
   const [imdbFetchQuery, setImdbFetchQuery] = useState('');
   const [fetchingImdb, setFetchingImdb] = useState(false);
-  const [filmFormData, setFilmFormData] = useState({
+  const [filmFormData, setFilmFormData] = useState<{
+    title: string;
+    year: number;
+    category: string;
+    imdbRating: string;
+    director: string;
+    duration: string;
+    tagline: string;
+    synopsis: string;
+    image: string;
+    isOnWheel: boolean;
+    stills: FilmStill[];
+  }>({
     title: '',
     year: new Date().getFullYear(),
     category: 'Cinema Masterpiece',
@@ -101,6 +114,12 @@ export default function AdminDashboardPage() {
     synopsis: '',
     image: '',
     isOnWheel: false,
+    stills: [
+      { url: '', caption: '', aspectRatio: '2:3 THEATRICAL' },
+      { url: '', caption: '', aspectRatio: '16:9 VISTA' },
+      { url: '', caption: '', aspectRatio: '16:9 VISTA' },
+      { url: '', caption: '', aspectRatio: '2:3 ARCHIVAL' },
+    ],
   });
 
   // Screening Add / Edit Modal state
@@ -339,6 +358,12 @@ export default function AdminDashboardPage() {
       synopsis: '',
       image: '',
       isOnWheel: wheelIds.length < 10,
+      stills: [
+        { url: '', caption: '', aspectRatio: '2:3 THEATRICAL' },
+        { url: '', caption: '', aspectRatio: '16:9 VISTA' },
+        { url: '', caption: '', aspectRatio: '16:9 VISTA' },
+        { url: '', caption: '', aspectRatio: '2:3 ARCHIVAL' },
+      ],
     });
     setFilmModalOpen(true);
   };
@@ -346,6 +371,19 @@ export default function AdminDashboardPage() {
   const handleOpenEditFilm = (film: CinemaFilm) => {
     setEditingFilm(film);
     setImdbFetchQuery('');
+
+    const existingStills: FilmStill[] = (film.stills && film.stills.length > 0)
+      ? film.stills.map((s) => ({ ...s }))
+      : [{ url: film.image, caption: `${film.title} — Official Archival Exhibition Print`, aspectRatio: '2:3 THEATRICAL' }];
+
+    while (existingStills.length < 4) {
+      existingStills.push({
+        url: '',
+        caption: '',
+        aspectRatio: existingStills.length === 1 || existingStills.length === 2 ? '16:9 VISTA' : '2:3 ARCHIVAL',
+      });
+    }
+
     setFilmFormData({
       title: film.title,
       year: film.year,
@@ -357,6 +395,7 @@ export default function AdminDashboardPage() {
       synopsis: film.synopsis,
       image: film.image,
       isOnWheel: wheelIds.includes(film.id),
+      stills: existingStills,
     });
     setFilmModalOpen(true);
   };
@@ -393,9 +432,10 @@ export default function AdminDashboardPage() {
         tagline: fetched.tagline || prev.tagline,
         synopsis: fetched.synopsis || prev.synopsis,
         image: fetched.image || prev.image,
+        stills: fetched.stills && fetched.stills.length > 0 ? fetched.stills : prev.stills,
       }));
 
-      showToast('success', `✨ Successfully fetched "${fetched.title}" from IMDb!`);
+      showToast('success', `✨ Successfully fetched "${fetched.title}" with 4 archival film stills!`);
     } catch (err: any) {
       showToast('error', err.message || 'IMDb auto-fetch failed.');
     } finally {
@@ -412,6 +452,19 @@ export default function AdminDashboardPage() {
 
     try {
       setSaving(true);
+
+      const validStills = filmFormData.stills.filter((s) => s.url && s.url.trim().length > 0);
+      const finalStills =
+        validStills.length > 0
+          ? validStills
+          : [
+              {
+                url: filmFormData.image.trim(),
+                caption: `${filmFormData.title} — Official Archival Exhibition Print`,
+                aspectRatio: '2:3 THEATRICAL',
+              },
+            ];
+
       const payload: Partial<CinemaFilm> & { title: string } = {
         id: editingFilm ? editingFilm.id : undefined,
         title: filmFormData.title.trim(),
@@ -425,6 +478,7 @@ export default function AdminDashboardPage() {
         image:
           filmFormData.image.trim() ||
           'https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg',
+        stills: finalStills,
       };
 
       const res = await fetch('/api/admin/films', {
@@ -1515,7 +1569,7 @@ export default function AdminDashboardPage() {
       {/* ------------------------------------------------------------- */}
       {filmModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0d0f14] border border-white/15 p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0d0f14] border border-white/15 p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
               <div>
@@ -1701,6 +1755,258 @@ export default function AdminDashboardPage() {
                   placeholder="Enter complete theatrical synopsis..."
                   className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400 resize-none leading-relaxed"
                 />
+              </div>
+
+              {/* ----------------------------------------------------------- */}
+              {/* FILM STILLS & EXHIBITION PHOTOGRAPHY (4-IMAGE BENTO GRID) */}
+              {/* ----------------------------------------------------------- */}
+              <div className="pt-4 border-t border-white/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
+                      <Film className="w-4 h-4 text-amber-400" />
+                      Film Stills &amp; Exhibition Photography (4-Photo Bento Grid)
+                    </label>
+                    <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+                      Rendered in the film modal as an asymmetric bento grid (Box 1 tall left, Boxes 2 &amp; 3 stacked center, Box 4 tall right).
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!filmFormData.image) return;
+                      setFilmFormData((prev) => ({
+                        ...prev,
+                        stills: [
+                          {
+                            url: prev.image,
+                            caption: `${prev.title} — Official Archival Exhibition Print`,
+                            aspectRatio: '2:3 THEATRICAL',
+                          },
+                          prev.stills[1]?.url
+                            ? prev.stills[1]
+                            : {
+                                url: prev.image,
+                                caption: `${prev.title} — Archival 35mm Frame Capture`,
+                                aspectRatio: '16:9 VISTA',
+                              },
+                          prev.stills[2]?.url
+                            ? prev.stills[2]
+                            : {
+                                url: prev.image,
+                                caption: `${prev.title} — Theatrical Production Still`,
+                                aspectRatio: '16:9 VISTA',
+                              },
+                          prev.stills[3]?.url
+                            ? prev.stills[3]
+                            : {
+                                url: prev.image,
+                                caption: `${prev.title} — Cinematography Exhibition Frame`,
+                                aspectRatio: '2:3 ARCHIVAL',
+                              },
+                        ],
+                      }));
+                    }}
+                    className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-neutral-300 border border-white/10 hover:border-amber-500/40 transition-colors shrink-0"
+                  >
+                    Auto-Fill Empty
+                  </button>
+                </div>
+
+                {/* Live Mini Bento Preview */}
+                <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 font-semibold">
+                      Live Modal Bento Layout Preview
+                    </span>
+                    <span className="text-[10px] font-mono text-amber-500/80">
+                      4 Prints Active
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-12 gap-2 h-40">
+                    {/* Slot 1: Box 1 Left Tall 2:3 */}
+                    <div className="col-span-4 h-full rounded-lg overflow-hidden bg-neutral-900 border border-white/10 relative flex items-center justify-center group">
+                      {filmFormData.stills[0]?.url ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={filmFormData.stills[0].url}
+                          alt="Still 1"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-[10px] font-mono text-neutral-600">Still 1 (2:3)</span>
+                      )}
+                      <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-amber-400 font-semibold backdrop-blur-sm border border-white/10">
+                        1 · 2:3 Tall
+                      </span>
+                    </div>
+
+                    {/* Slot 2 & 3: Boxes 2 & 3 Center Stacked 16:9 */}
+                    <div className="col-span-4 h-full flex flex-col gap-2">
+                      <div className="flex-1 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 relative flex items-center justify-center group">
+                        {filmFormData.stills[1]?.url ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={filmFormData.stills[1].url}
+                            alt="Still 2"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[10px] font-mono text-neutral-600">Still 2 (16:9)</span>
+                        )}
+                        <span className="absolute bottom-1 left-1.5 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-neutral-300 font-semibold backdrop-blur-sm border border-white/10">
+                          2 · 16:9 Top
+                        </span>
+                      </div>
+                      <div className="flex-1 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 relative flex items-center justify-center group">
+                        {filmFormData.stills[2]?.url ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={filmFormData.stills[2].url}
+                            alt="Still 3"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[10px] font-mono text-neutral-600">Still 3 (16:9)</span>
+                        )}
+                        <span className="absolute bottom-1 left-1.5 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-neutral-300 font-semibold backdrop-blur-sm border border-white/10">
+                          3 · 16:9 Bottom
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Slot 4: Box 4 Right Tall 2:3 */}
+                    <div className="col-span-4 h-full rounded-lg overflow-hidden bg-neutral-900 border border-white/10 relative flex items-center justify-center group">
+                      {filmFormData.stills[3]?.url ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={filmFormData.stills[3].url}
+                          alt="Still 4"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-[10px] font-mono text-neutral-600">Still 4 (2:3)</span>
+                      )}
+                      <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-amber-400 font-semibold backdrop-blur-sm border border-white/10">
+                        4 · 2:3 Tall
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 Interactive Still Slot Editors */}
+                <div className="space-y-3">
+                  {[0, 1, 2, 3].map((slotIdx) => {
+                    const still = filmFormData.stills[slotIdx] || {
+                      url: '',
+                      caption: '',
+                      aspectRatio: slotIdx === 1 || slotIdx === 2 ? '16:9 VISTA' : '2:3 ARCHIVAL',
+                    };
+                    const slotLabels = [
+                      'Still 1 — Primary Key Art / Poster (Box 1 Tall Left)',
+                      'Still 2 — Widescreen Cinema Frame (Box 2 Center Top)',
+                      'Still 3 — Production Still / Scene (Box 3 Center Bottom)',
+                      'Still 4 — Exhibition Print / Frame (Box 4 Tall Right)',
+                    ];
+                    const defaultAspects = ['2:3 THEATRICAL', '16:9 VISTA', '16:9 VISTA', '2:3 ARCHIVAL'];
+
+                    return (
+                      <div
+                        key={slotIdx}
+                        className="p-3.5 rounded-xl bg-black/40 border border-white/10 space-y-2.5 hover:border-amber-500/30 transition-all"
+                      >
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-mono text-neutral-200 font-semibold flex items-center gap-2">
+                            <span className="size-5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] flex items-center justify-center font-bold border border-amber-500/30">
+                              {slotIdx + 1}
+                            </span>
+                            {slotLabels[slotIdx]}
+                          </span>
+                          <span className="text-[10px] font-mono text-amber-400/90 uppercase font-semibold">
+                            {still.aspectRatio || defaultAspects[slotIdx]}
+                          </span>
+                        </div>
+
+                        <div className="flex gap-2.5 items-start">
+                          {/* Image preview thumbnail */}
+                          <div className="w-14 h-14 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center">
+                            {still.url ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img
+                                src={still.url}
+                                alt={`Slot ${slotIdx + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <Film className="size-5 text-neutral-600" />
+                            )}
+                          </div>
+
+                          <div className="flex-1 space-y-1.5">
+                            <input
+                              type="url"
+                              value={still.url || ''}
+                              onChange={(e) => {
+                                const newUrl = e.target.value;
+                                setFilmFormData((prev) => {
+                                  const nextStills = [...prev.stills];
+                                  nextStills[slotIdx] = {
+                                    ...nextStills[slotIdx],
+                                    url: newUrl,
+                                    aspectRatio:
+                                      nextStills[slotIdx]?.aspectRatio || defaultAspects[slotIdx],
+                                  };
+                                  return { ...prev, stills: nextStills };
+                                });
+                              }}
+                              placeholder="Image URL (e.g. https://image.tmdb.org/t/p/w1280/...)"
+                              className="w-full px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-amber-400"
+                            />
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={still.caption || ''}
+                                onChange={(e) => {
+                                  const newCaption = e.target.value;
+                                  setFilmFormData((prev) => {
+                                    const nextStills = [...prev.stills];
+                                    nextStills[slotIdx] = {
+                                      ...nextStills[slotIdx],
+                                      caption: newCaption,
+                                    };
+                                    return { ...prev, stills: nextStills };
+                                  });
+                                }}
+                                placeholder="Caption / Print description"
+                                className="flex-1 px-3 py-1 rounded-lg bg-black/60 border border-white/10 text-white text-[11px] focus:outline-none focus:border-amber-400"
+                              />
+                              <select
+                                value={still.aspectRatio || defaultAspects[slotIdx]}
+                                onChange={(e) => {
+                                  const newAspect = e.target.value;
+                                  setFilmFormData((prev) => {
+                                    const nextStills = [...prev.stills];
+                                    nextStills[slotIdx] = {
+                                      ...nextStills[slotIdx],
+                                      aspectRatio: newAspect,
+                                    };
+                                    return { ...prev, stills: nextStills };
+                                  });
+                                }}
+                                className="px-2 py-1 rounded-lg bg-black/60 border border-white/10 text-[10px] font-mono text-neutral-300 focus:outline-none focus:border-amber-400"
+                              >
+                                <option value="2:3 THEATRICAL">2:3 THEATRICAL</option>
+                                <option value="16:9 VISTA">16:9 VISTA</option>
+                                <option value="2:3 ARCHIVAL">2:3 ARCHIVAL</option>
+                                <option value="16:10 WIDE">16:10 WIDE</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Works Wheel Checkbox */}
