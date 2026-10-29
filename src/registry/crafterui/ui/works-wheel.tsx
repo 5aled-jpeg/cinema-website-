@@ -23,7 +23,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import MouseTiltCard from "@/ui/components/cards/MouseTiltCard"
 import { FilmModalView } from "@/components/film-modal-view"
 import { TextReveal } from "@/components/velora/text-reveal"
-import { Film, Star } from "lucide-react"
+import { Calendar, Film, Star } from "lucide-react"
+import { MechanicalTimelineFilter } from "@/components/mechanical-timeline-filter"
 
 export interface FilmStill {
   url: string
@@ -90,6 +91,14 @@ export interface WorksWheelProps extends Omit<
   onDiscoverAll?: () => void
   /** Optional callback fired when timeline position or active card changes */
   onTurnChange?: (turn: number, activeIndex: number) => void
+  /** Dates for the mechanical timeline filter */
+  timelineDates?: string[]
+  /** Map of date string to number of screenings */
+  screeningsCountByDate?: Record<string, number>
+  /** Active selected date filter (or null for all) */
+  selectedDate?: string | null
+  /** Callback when date is selected on timeline */
+  onSelectDate?: (date: string | null) => void
 }
 
 export interface WorksWheelHandle {
@@ -150,6 +159,10 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
       onItemClick,
       onDiscoverAll,
       onTurnChange,
+      timelineDates,
+      screeningsCountByDate,
+      selectedDate,
+      onSelectDate,
       className,
       ...props
     },
@@ -471,6 +484,14 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
       if (!stage.h) return
       scheduleDraw()
     }, [stage.h, scheduleDraw])
+
+    // Handle dynamic filtering changes when items count adjusts
+    React.useEffect(() => {
+      if (target.current > maxTarget) {
+        target.current = Math.max(1, Math.min(target.current, maxTarget))
+      }
+      scheduleDraw()
+    }, [count, maxTarget, scheduleDraw])
 
     const settling = React.useRef(0)
     const drag = React.useRef<{ x: number; y: number } | null>(null)
@@ -1092,6 +1113,86 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               className="absolute bottom-8 left-8 z-40 transition-opacity duration-300 pointer-events-auto hidden md:block"
             >
               {menu}
+            </div>
+          )}
+
+          {/* Active Film Showtime Badges (Positioned Below the Front Card) */}
+          {activeItem && activeItem.screeningSlots && activeItem.screeningSlots.length > 0 && isLanded && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 z-30 flex items-center justify-center gap-1.5 sm:gap-2 pointer-events-auto transition-opacity duration-300 max-w-[92vw] overflow-x-auto no-scrollbar py-1"
+              style={{
+                top: `calc(50% + ${metrics.cardH / 2 + 14}px)`,
+              }}
+            >
+              {activeItem.screeningSlots.slice(0, 4).map((slot, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setActiveModalItem(activeItem)
+                    onItemClick?.(activeItem, active)
+                  }}
+                  className="group/slot flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-amber-500/30 bg-black/75 dark:bg-neutral-900/85 backdrop-blur-md text-[11px] sm:text-xs font-mono text-neutral-200 hover:text-white hover:border-amber-500/70 hover:bg-amber-500/20 transition-all cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
+                >
+                  <span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="font-semibold text-white tracking-tight">{slot.time}</span>
+                  <span className="text-[10px] text-neutral-400 hidden sm:inline">· {slot.auditorium}</span>
+                  {slot.format && (
+                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold hidden md:inline">
+                      {slot.format}
+                    </span>
+                  )}
+                </button>
+              ))}
+              {activeItem.screeningSlots.length > 4 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveModalItem(activeItem)
+                    onItemClick?.(activeItem, active)
+                  }}
+                  className="px-2.5 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-[10px] sm:text-[11px] font-mono text-neutral-400 hover:text-white transition-all cursor-pointer whitespace-nowrap"
+                >
+                  +{activeItem.screeningSlots.length - 4} more
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Empty State when no films match selected date */}
+          {items.length === 0 && isLanded && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-30 pointer-events-auto">
+              <div className="size-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-3">
+                <Calendar className="size-5 text-amber-500" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-serif font-semibold text-[var(--color-text-primary)] mb-1.5">
+                No Theatrical Screenings
+              </h3>
+              <p className="text-xs sm:text-sm font-sans text-[var(--color-text-secondary)] max-w-sm mb-4">
+                No screenings scheduled for this date. Scrub another date on the timeline or view all films.
+              </p>
+              <button
+                type="button"
+                onClick={() => onSelectDate?.(null)}
+                className="px-4 py-2 rounded-full text-xs font-mono bg-amber-500 text-black font-semibold hover:bg-amber-400 transition-all cursor-pointer shadow-lg shadow-amber-500/20 active:scale-95"
+              >
+                Reset to All Dates
+              </button>
+            </div>
+          )}
+
+          {/* Mechanical Escapement Timeline Filter */}
+          {timelineDates && timelineDates.length > 0 && isLanded && (
+            <div className="absolute inset-x-0 bottom-3 sm:bottom-4 z-40 flex justify-center pointer-events-auto px-3">
+              <MechanicalTimelineFilter
+                dates={timelineDates}
+                screeningsCountByDate={screeningsCountByDate}
+                selectedDate={selectedDate || null}
+                onSelectDate={(d) => {
+                  onSelectDate?.(d)
+                  to(1)
+                }}
+              />
             </div>
           )}
         </div>

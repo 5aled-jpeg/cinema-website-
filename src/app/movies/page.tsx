@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, Calendar, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
@@ -162,19 +162,8 @@ export default function MoviesArchivePage() {
           </button>
         </div>
 
-        {/* Right Actions: Schedule Shortcut & Theme Toggle */}
+        {/* Right Actions: Theme Toggle */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            type="button"
-            onClick={() => navigate("/schedule", "Exhibition Schedule")}
-            data-cursor-interactive="true"
-            data-cursor-label="Schedule"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 transition-all bg-black/[0.02] dark:bg-white/[0.04] cursor-pointer"
-          >
-            <Calendar className="size-3.5 text-amber-500" />
-            <span className="hidden sm:inline">Schedule</span>
-          </button>
-
           <div className="pl-0.5">
             <LandscapeOrbToggle size={30} />
           </div>
@@ -343,7 +332,6 @@ export default function MoviesArchivePage() {
       {/* Footer */}
       <CinemaFooter
         onNavigateHome={() => navigate("/", "Works '26 · Index")}
-        onNavigateSchedule={() => navigate("/schedule", "Exhibition Schedule")}
       />
     </div>
   );

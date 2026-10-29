@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
-import { Home, Clapperboard, Calendar } from "lucide-react"
+import { Home, Clapperboard } from "lucide-react"
 import { MercuryMenu, type MercuryMenuItem } from "@/registry/crafterui/ui/mercury-menu"
 import { useCinemaTransition } from "@/components/cinema-page-curtains"
 import { cn } from "@/lib/utils"
@@ -18,7 +18,7 @@ export function CinemaFloatingNav() {
 
   const isHome = pathname === "/"
   const isMovies = pathname === "/movies"
-  const isSchedule = pathname === "/schedule"
+  const isExcludedPage = Boolean(pathname?.startsWith("/admin"))
 
   // Reset visibility on route changes
   React.useEffect(() => {
@@ -112,10 +112,12 @@ export function CinemaFloatingNav() {
   //    - Disappeared on Hero page section (turn < 0.45)
   //    - Visible on Works Wheel carousel across all 10 films (turn >= 0.45 && turn <= 10.35)
   //    - Disappeared when reaching the Footer (turn > 10.35)
-  // 2. On other tabs (/movies, /schedule):
+  // 2. On other tabs (/movies):
   //    - Visible while browsing
   //    - Disappeared when reaching the Footer (!footerInView)
-  const isVisible = isHome
+  const isVisible = isExcludedPage
+    ? false
+    : isHome
     ? isWheelVisible
     : !footerInView
 
@@ -158,26 +160,8 @@ export function CinemaFloatingNav() {
           }
         },
       },
-      {
-        id: "schedule",
-        label: "Schedule",
-        icon: <Calendar className={glyph} aria-hidden="true" />,
-        active: isSchedule,
-        onSelect: () => {
-          if (isSchedule) {
-            window.scrollTo({ top: 0, behavior: "smooth" })
-          } else {
-            navigate("/schedule", "Exhibition Schedule")
-            setTimeout(() => {
-              if (typeof window !== "undefined" && window.location.pathname !== "/schedule") {
-                window.location.href = "/schedule"
-              }
-            }, 450)
-          }
-        },
-      },
     ]
-  }, [isHome, isMovies, isSchedule, navigate])
+  }, [isHome, isMovies, navigate])
 
   return (
     <div

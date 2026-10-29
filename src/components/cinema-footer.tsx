@@ -10,13 +10,11 @@ import { cn } from '@/lib/utils';
 
 export interface CinemaFooterProps {
   onNavigateHome?: () => void;
-  onNavigateSchedule?: () => void;
   onNavigateMovies?: () => void;
 }
 
 export function CinemaFooter({
   onNavigateHome,
-  onNavigateSchedule,
   onNavigateMovies,
 }: CinemaFooterProps = {}) {
   const pathname = usePathname();
@@ -24,7 +22,6 @@ export function CinemaFooter({
 
   const isHome = pathname === '/';
   const isMovies = pathname === '/movies';
-  const isSchedule = pathname === '/schedule';
 
   const handleGoMovies = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -41,15 +38,6 @@ export function CinemaFooter({
       onNavigateHome();
     } else {
       navigate('/', "Works '26 · Index");
-    }
-  };
-
-  const handleGoSchedule = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (onNavigateSchedule) {
-      onNavigateSchedule();
-    } else {
-      navigate('/schedule', 'Exhibition Schedule');
     }
   };
 
@@ -116,22 +104,6 @@ export function CinemaFooter({
                 )}
               >
                 <CenterUnderline>All Movies</CenterUnderline>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/schedule"
-                onClick={handleGoSchedule}
-                data-cursor-interactive="true"
-                data-cursor-label="Schedule"
-                className={cn(
-                  "cursor-pointer transition-colors inline-block",
-                  isSchedule
-                    ? "text-amber-500 dark:text-amber-400 font-semibold"
-                    : "hover:text-black dark:hover:text-white"
-                )}
-              >
-                <CenterUnderline>Schedule</CenterUnderline>
               </a>
             </li>
           </ul>
