@@ -24,7 +24,7 @@ import MouseTiltCard from "@/ui/components/cards/MouseTiltCard"
 import { FilmModalView } from "@/components/film-modal-view"
 import { TextReveal } from "@/components/velora/text-reveal"
 import { Calendar, Film, Star } from "lucide-react"
-import { useWebHaptics } from "web-haptics/react"
+import { triggerTactileTick, triggerTactileSnap } from "@/lib/tactile-haptics"
 import { MechanicalTimelineFilter } from "@/components/mechanical-timeline-filter"
 
 export interface FilmStill {
@@ -193,9 +193,6 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
     const [activeModalItem, setActiveModalItem] = React.useState<WorksWheelItem | null>(null)
     const [stage, setStage] = React.useState<Stage>({ w: 0, h: 0 })
 
-    // Web Haptics on mobile / tablet touch & timeline motion
-    const { trigger: triggerHaptic } = useWebHaptics()
-
     // Lock body scroll and set dialog flag when modal is open
     React.useEffect(() => {
       if (activeModalItem) {
@@ -362,7 +359,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
         activeRef.current = near
         setActive(near)
         try {
-          triggerHaptic('selection')
+          triggerTactileTick(true)
         } catch {}
       }
       onTurnChangeRef.current?.(t, near)
@@ -883,12 +880,12 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                           if (!isFront) {
                             e.preventDefault()
                             try {
-                              triggerHaptic('selection')
+                              triggerTactileTick(true)
                             } catch {}
                             to(i + 1)
                           } else {
                             try {
-                              triggerHaptic('light')
+                              triggerTactileSnap()
                             } catch {}
                             setActiveModalItem(item)
                             onItemClick?.(item, i)
@@ -1161,7 +1158,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
           {/* Half-Circle Rotating Timeline Wheel */}
           {timelineDates && timelineDates.length > 0 && (
             <div
-              data-timeline-zone="true"
+              data-timeline-anchor="true"
               className={cn(
                 "absolute inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] sm:bottom-4 z-50 flex justify-center pointer-events-auto px-2 transition-opacity duration-300",
                 isLanded ? "opacity-100" : "opacity-0 pointer-events-none"

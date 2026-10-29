@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { useWebHaptics } from 'web-haptics/react';
 import { cn } from '@/lib/utils';
+import { initTactileHaptics, triggerTactileTick, triggerTactileSnap } from '@/lib/tactile-haptics';
 
 export interface TimelineDateItem {
   id: string; // e.g. "2026-09-28" or "all"
@@ -103,14 +103,10 @@ export function MechanicalTimelineFilter({
   onSelectDate,
   className,
 }: MechanicalTimelineFilterProps) {
-  // Web Haptics for Mobile & Tablets
-  const { trigger } = useWebHaptics();
-
   // Audio Context Ref
   const audioCtxRef = useRef<AudioContext | null>(null);
   const audioBuffersRef = useRef<Record<string, AudioBuffer>>({});
   const lastTickIndexCrossed = useRef<number>(-1);
-  const lastVibrateTimeRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Geometry Constants for the Arched Rotary Wheel
@@ -179,9 +175,13 @@ export function MechanicalTimelineFilter({
     } catch {}
   }, []);
 
-  // Unlock audio on first touch
+  // Unlock audio and initialize mobile tactile haptic bridges on mount
   useEffect(() => {
-    const unlock = () => initAudio();
+    initTactileHaptics();
+    const unlock = () => {
+      initAudio();
+      initTactileHaptics();
+    };
     const evts = ['pointerdown', 'touchstart', 'wheel', 'keydown', 'pointermove'];
     evts.forEach((evt) => {
       window.addEventListener(evt, unlock, { capture: true, once: true });
@@ -293,35 +293,15 @@ export function MechanicalTimelineFilter({
     );
   }, []);
 
-  // Continuous tactile haptic feedback during active drag/movement
-  const triggerContinuousHaptic = useCallback(
-    (isMajor = false) => {
-      const now = performance.now();
-      // Ensure rapid tactile ticks (min 26ms between pulses so hardware motor responds smoothly)
-      if (now - lastVibrateTimeRef.current < 26) return;
-      lastVibrateTimeRef.current = now;
-
-      if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-        try {
-          navigator.vibrate(isMajor ? 20 : 12);
-        } catch {}
-      }
-      try {
-        trigger(isMajor ? 20 : 12);
-      } catch {}
-    },
-    [trigger]
-  );
-
   // Check and play escapement sound and mobile haptics when dial crosses ticks
   const checkTickCrossed = useCallback(
-    (currentAngle: number) => {
+    (currentAngle: number, dir = 1) => {
       const subTickIdx = Math.round(currentAngle / SUB_STEP_DEG);
       if (subTickIdx !== lastTickIndexCrossed.current) {
         const isMajor = subTickIdx % 4 === 0;
         lastTickIndexCrossed.current = subTickIdx;
         playTick(isMajor ? 'line' : 'fine');
-        triggerContinuousHaptic(isMajor);
+        triggerTactileTick(isMajor);
 
         const nearestItemIdx = Math.max(
           0,
@@ -329,11 +309,11 @@ export function MechanicalTimelineFilter({
         );
         const item = timelineItems[nearestItemIdx];
         if (item) {
-          setDateWithOdometer(item.label, currentAngle > phiRef.current ? 1 : -1);
+          setDateWithOdometer(item.label, dir);
         }
       }
     },
-    [timelineItems, playTick, triggerContinuousHaptic, setDateWithOdometer]
+    [timelineItems, playTick, setDateWithOdometer]
   );
 
   // Smooth animation loop to target angle
@@ -348,13 +328,13 @@ export function MechanicalTimelineFilter({
         if (Math.abs(diff) < 0.08) {
           setPhi(targetPhi.current);
           phiRef.current = targetPhi.current;
-          checkTickCrossed(targetPhi.current);
+          checkTickCrossed(targetPhi.current, diff >= 0 ? 1 : -1);
           onComplete?.();
         } else {
           const next = current + diff * 0.24;
           setPhi(next);
           phiRef.current = next;
-          checkTickCrossed(next);
+          checkTickCrossed(next, diff >= 0 ? 1 : -1);
           rafId.current = requestAnimationFrame(step);
         }
       };
@@ -379,23 +359,26 @@ export function MechanicalTimelineFilter({
     }
   }, [selectedDate, timelineItems, animateTo, setDateWithOdometer]);
 
-  // Pointer drag to rotate timeline wheel
+  // Pointer drag to rotate timeline wheel (desktop mouse/pen)
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // For mouse, only accept primary button; allow touch/pen pointers
+    // If touch pointer, let dedicated touch listeners handle it to prevent event fighting
+    if (e.pointerType === 'touch') return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     if (rafId.current) cancelAnimationFrame(rafId.current);
     isDragging.current = true;
     hasMovedRef.current = false;
     startPointerX.current = e.clientX;
     startPhi.current = phiRef.current;
+    lastTickIndexCrossed.current = Math.round(phiRef.current / SUB_STEP_DEG);
     initAudio();
-    triggerContinuousHaptic(false);
+    triggerTactileTick(false);
     try {
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     } catch {}
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch') return;
     if (!isDragging.current) return;
     const deltaX = e.clientX - startPointerX.current;
     if (Math.abs(deltaX) > 2) {
@@ -406,7 +389,7 @@ export function MechanicalTimelineFilter({
     const nextPhi = Math.max(-4, Math.min(maxPhi + 4, startPhi.current + angleDelta));
     setPhi(nextPhi);
     phiRef.current = nextPhi;
-    checkTickCrossed(nextPhi);
+    checkTickCrossed(nextPhi, deltaX < 0 ? 1 : -1);
   };
 
   const commitNearestDate = useCallback(() => {
@@ -419,20 +402,14 @@ export function MechanicalTimelineFilter({
       const selectedItem = timelineItems[nearestIdx];
       if (selectedItem) {
         playTick('close');
-        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-          try {
-            navigator.vibrate(28);
-          } catch {}
-        }
-        try {
-          trigger(28);
-        } catch {}
+        triggerTactileSnap();
         onSelectDate(selectedItem.id);
       }
     });
-  }, [timelineItems, animateTo, playTick, trigger, onSelectDate]);
+  }, [timelineItems, animateTo, playTick, onSelectDate]);
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch') return;
     if (!isDragging.current) return;
     isDragging.current = false;
     try {
@@ -459,8 +436,10 @@ export function MechanicalTimelineFilter({
       hasTouchMoved = false;
       touchStartX = e.touches[0].clientX;
       touchStartPhi = phiRef.current;
+      lastTickIndexCrossed.current = Math.round(phiRef.current / SUB_STEP_DEG);
       initAudio();
-      triggerContinuousHaptic(false);
+      initTactileHaptics();
+      triggerTactileTick(false);
     };
 
     const onNativeTouchMove = (e: TouchEvent) => {
@@ -476,7 +455,7 @@ export function MechanicalTimelineFilter({
       const nextPhi = Math.max(-4, Math.min(maxPhi + 4, touchStartPhi + angleDelta));
       setPhi(nextPhi);
       phiRef.current = nextPhi;
-      checkTickCrossed(nextPhi);
+      checkTickCrossed(nextPhi, deltaX < 0 ? 1 : -1);
     };
 
     const onNativeTouchEnd = () => {
@@ -498,7 +477,7 @@ export function MechanicalTimelineFilter({
       el.removeEventListener('touchend', onNativeTouchEnd);
       el.removeEventListener('touchcancel', onNativeTouchEnd);
     };
-  }, [maxPhi, checkTickCrossed, commitNearestDate, initAudio, triggerContinuousHaptic]);
+  }, [maxPhi, checkTickCrossed, commitNearestDate, initAudio]);
 
   // Mouse wheel rotation over dial
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -512,14 +491,7 @@ export function MechanicalTimelineFilter({
         const item = timelineItems[nextIdx];
         if (item) {
           playTick('close');
-          if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-            try {
-              navigator.vibrate(28);
-            } catch {}
-          }
-          try {
-            trigger(28);
-          } catch {}
+          triggerTactileSnap();
           onSelectDate(item.id);
         }
       });
@@ -534,14 +506,7 @@ export function MechanicalTimelineFilter({
       const item = timelineItems[dateIdx];
       if (item) {
         playTick('close');
-        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-          try {
-            navigator.vibrate(28);
-          } catch {}
-        }
-        try {
-          trigger(28);
-        } catch {}
+        triggerTactileSnap();
         onSelectDate(item.id);
       }
     });
