@@ -200,7 +200,7 @@ export default function WorksWheelDemo() {
   }, [])
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden bg-[var(--color-bg-base)] text-[var(--color-text-primary)]">
+    <main className="relative w-screen h-screen h-[100dvh] overflow-hidden bg-[var(--color-bg-base)] text-[var(--color-text-primary)]">
       {/* Custom Spring Animated Cursor */}
       <CinemaCursor attachToParent={false} />
 

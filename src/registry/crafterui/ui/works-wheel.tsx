@@ -1170,7 +1170,7 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
             <div
               data-timeline-zone="true"
               className={cn(
-                "absolute inset-x-0 bottom-2 sm:bottom-4 pb-[env(safe-area-inset-bottom,6px)] z-50 flex justify-center pointer-events-auto px-2 transition-opacity duration-300",
+                "absolute inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] sm:bottom-4 z-50 flex justify-center pointer-events-auto px-2 transition-opacity duration-300",
                 isLanded ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
