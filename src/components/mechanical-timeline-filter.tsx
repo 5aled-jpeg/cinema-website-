@@ -23,7 +23,7 @@ export interface MechanicalTimelineFilterProps {
 // Format "2026-09-28" into { prefix: "SEP ", digit: "28", full: "28 Sep 2026", rim: "28" }
 function parseDateForOdometer(dateStr: string | null) {
   if (!dateStr || dateStr === 'all') {
-    return { prefix: 'ALL ', digit: 'FILMS', full: 'All Theatrical Screenings', rim: 'ALL' };
+    return { prefix: 'OCT ', digit: '01', full: '01 Oct 2026', rim: '01' };
   }
   const parts = dateStr.split('-');
   if (parts.length < 3) {
@@ -120,31 +120,19 @@ export function MechanicalTimelineFilter({
   const STEP_DEG = 15; // Degrees between dates
   const SUB_STEP_DEG = 3.75; // Degrees between minor ticks (4 intervals per date)
 
-  // Timeline Items (first item is "All", followed by sorted dates)
+  // Timeline Items (strictly calendar dates from screenings, zero filler)
   const timelineItems: TimelineDateItem[] = useMemo(() => {
-    const list: TimelineDateItem[] = [
-      {
-        id: 'all',
-        label: 'ALL FILMS',
-        rimLabel: 'ALL',
-        fullFormatted: 'All Curated Films',
-        count: Object.values(screeningsCountByDate).reduce((a, b) => a + b, 0),
-      },
-    ];
-
     const sortedDates = [...dates].sort();
-    sortedDates.forEach((d) => {
+    return sortedDates.map((d) => {
       const parsed = parseDateForOdometer(d);
-      list.push({
+      return {
         id: d,
         label: `${parsed.prefix}${parsed.digit}`,
         rimLabel: parsed.rim,
         fullFormatted: parsed.full,
         count: screeningsCountByDate[d] || 0,
-      });
+      };
     });
-
-    return list;
   }, [dates, screeningsCountByDate]);
 
   const maxPhi = Math.max(0, (timelineItems.length - 1) * STEP_DEG);
@@ -303,7 +291,7 @@ export function MechanicalTimelineFilter({
     );
   }, []);
 
-  // Check and play escapement sound when dial crosses ticks
+  // Check and play escapement sound and mobile haptics when dial crosses ticks
   const checkTickCrossed = useCallback(
     (currentAngle: number) => {
       const subTickIdx = Math.round(currentAngle / SUB_STEP_DEG);
@@ -311,8 +299,15 @@ export function MechanicalTimelineFilter({
         const isMajor = subTickIdx % 4 === 0;
         lastTickIndexCrossed.current = subTickIdx;
         playTick(isMajor ? 'line' : 'fine');
+
+        // Tactile vibration pulse while moving timeline (mimics iOS Clock alarm wheel)
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+          try {
+            navigator.vibrate(isMajor ? 24 : 16);
+          } catch {}
+        }
         try {
-          trigger(isMajor ? 'medium' : 'selection');
+          trigger(isMajor ? 26 : 18);
         } catch {}
 
         const nearestItemIdx = Math.max(
@@ -379,6 +374,12 @@ export function MechanicalTimelineFilter({
     hasMovedRef.current = false;
     startPointerX.current = e.clientX;
     startPhi.current = phiRef.current;
+    initAudio();
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      try {
+        navigator.vibrate(14);
+      } catch {}
+    }
     try {
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     } catch {}
@@ -408,11 +409,15 @@ export function MechanicalTimelineFilter({
       const selectedItem = timelineItems[nearestIdx];
       if (selectedItem) {
         playTick('close');
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+          try {
+            navigator.vibrate(28);
+          } catch {}
+        }
         try {
-          trigger('light');
+          trigger(28);
         } catch {}
-        const dateParam = selectedItem.id === 'all' ? null : selectedItem.id;
-        onSelectDate(dateParam);
+        onSelectDate(selectedItem.id);
       }
     });
   }, [timelineItems, animateTo, playTick, trigger, onSelectDate]);
@@ -440,10 +445,15 @@ export function MechanicalTimelineFilter({
         const item = timelineItems[nextIdx];
         if (item) {
           playTick('close');
+          if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            try {
+              navigator.vibrate(28);
+            } catch {}
+          }
           try {
-            trigger('light');
+            trigger(28);
           } catch {}
-          onSelectDate(item.id === 'all' ? null : item.id);
+          onSelectDate(item.id);
         }
       });
     }
@@ -457,10 +467,15 @@ export function MechanicalTimelineFilter({
       const item = timelineItems[dateIdx];
       if (item) {
         playTick('close');
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+          try {
+            navigator.vibrate(28);
+          } catch {}
+        }
         try {
-          trigger('light');
+          trigger(28);
         } catch {}
-        onSelectDate(item.id === 'all' ? null : item.id);
+        onSelectDate(item.id);
       }
     });
   };
@@ -550,9 +565,9 @@ export function MechanicalTimelineFilter({
         <div className="flex items-center justify-center text-neutral-900 dark:text-white tracking-tight drop-shadow-sm select-none">
           <span
             ref={prefixRef}
-            className="inline-flex items-center text-amber-500 font-mono text-[11px] sm:text-xs uppercase mr-1 tracking-wider font-semibold"
+            className="inline-flex items-center text-amber-500 font-mono text-xs uppercase mr-1 tracking-wider font-bold"
           >
-            ALL{' '}
+            {activeDateItem ? `${activeDateItem.label.slice(0, 4)} ` : 'SEP '}
           </span>
           <span
             ref={reelRef}
@@ -560,9 +575,9 @@ export function MechanicalTimelineFilter({
           >
             <span
               ref={digitRef}
-              className="absolute inset-0 flex items-center justify-center leading-none origin-center [backface-visibility:hidden] will-change-transform text-neutral-900 dark:text-white font-mono text-sm sm:text-base font-bold"
+              className="absolute inset-0 flex items-center justify-center leading-none origin-center [backface-visibility:hidden] will-change-transform text-neutral-900 dark:text-white font-mono text-sm sm:text-base font-black"
             >
-              FILMS
+              {activeDateItem ? activeDateItem.rimLabel : '28'}
             </span>
           </span>
         </div>
@@ -588,12 +603,12 @@ export function MechanicalTimelineFilter({
           d={`M ${CX - 130} 66 A ${R} ${R} 0 0 1 ${CX + 130} 66`}
           fill="none"
           stroke="currentColor"
-          className="text-neutral-900/10 dark:text-white/10"
-          strokeWidth="1"
+          className="text-neutral-900/15 dark:text-white/15"
+          strokeWidth="1.5"
           strokeDasharray="2 3"
         />
 
-        {/* Rotating Radial Ticks: Black on light mode, White on dark mode, Amber when centered */}
+        {/* Rotating Radial Ticks: Bolder and crisp for high-contrast readability */}
         {visibleTicks.map((t) => (
           <line
             key={`tick-${t.j}`}
@@ -606,15 +621,15 @@ export function MechanicalTimelineFilter({
               t.isCenter
                 ? 'text-amber-500'
                 : t.isDate
-                ? 'text-neutral-900 dark:text-white'
-                : 'text-neutral-900/25 dark:text-white/20'
+                ? 'text-neutral-950 dark:text-white'
+                : 'text-neutral-900/40 dark:text-white/35'
             }
-            strokeWidth={t.isCenter ? 2.2 : t.isDate ? 1.6 : 1}
+            strokeWidth={t.isCenter ? 2.8 : t.isDate ? 2.2 : 1.4}
             strokeLinecap="round"
           />
         ))}
 
-        {/* Clean Day Numbers on Major Ticks: Dark on light mode, White on dark mode, Amber when centered */}
+        {/* Clean Day Numbers on Major Ticks: Bold & crisp */}
         {visibleDates.map((d) => (
           <text
             key={`date-lbl-${d.dateIdx}`}
@@ -623,15 +638,16 @@ export function MechanicalTimelineFilter({
             textAnchor="middle"
             dominantBaseline="central"
             transform={`rotate(${d.angleDeg * 0.75}, ${d.lx}, ${d.ly})`}
-            fontSize="8"
+            fontSize="9"
+            fontWeight="700"
             fontFamily="ui-monospace, SFMono-Regular, monospace"
             letterSpacing="0.04em"
             onClick={(e) => handleTickClick(d.dateIdx, e)}
             className={cn(
-              'pointer-events-auto cursor-pointer select-none transition-colors',
+              'pointer-events-auto cursor-pointer select-none transition-colors font-bold',
               d.isCenter
-                ? 'fill-amber-500 font-bold'
-                : 'fill-neutral-800 dark:fill-neutral-200 hover:fill-amber-500'
+                ? 'fill-amber-500 font-extrabold'
+                : 'fill-neutral-950 dark:fill-white hover:fill-amber-500 font-bold'
             )}
           >
             {d.item.rimLabel}
@@ -641,21 +657,21 @@ export function MechanicalTimelineFilter({
         {/* Fixed 12 O'Clock Dual Viewport Cursor (Peng Zheng Escapement Dual Bar) */}
         <line
           x1={CX - 1.5}
-          y1={24}
+          y1={22}
           x2={CX - 1.5}
-          y2={38}
+          y2={39}
           stroke="#f59e0b"
-          strokeWidth="1.8"
+          strokeWidth="2.2"
           strokeLinecap="round"
           filter="url(#escapement-glow)"
         />
         <line
           x1={CX + 1.5}
-          y1={24}
+          y1={22}
           x2={CX + 1.5}
-          y2={38}
+          y2={39}
           stroke="#f59e0b"
-          strokeWidth="1.8"
+          strokeWidth="2.2"
           strokeLinecap="round"
           filter="url(#escapement-glow)"
         />

@@ -110,9 +110,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "Chronicles the experiences of a formerly successful banker as a prisoner in the gloomy jailhouse of Shawshank after being found guilty of a crime he did not commit. The film portrays the man's unique way of dealing with his new, torturous life; along the way he befriends a number of fellow prisoners, most notably a wise long-term inmate named Red.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "The Shawshank Redemption — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg",
+        "caption": "The Shawshank Redemption — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/jFkuJbWsciMwgcpOEkJIlxTElEp.jpg",
+        "caption": "The Shawshank Redemption — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/pNjh59JSxChQktamG3LMp9ZoQzp.jpg",
+        "caption": "The Shawshank Redemption — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/6BRshOK03BnxTedpAhZl2yZBLTY.jpg",
+        "caption": "The Shawshank Redemption — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -130,9 +145,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "The Godfather \"Don\" Vito Corleone is the head of the Corleone mafia family in New York. He is at the event of his daughter's wedding. Michael, Vito's youngest son and a decorated WWII Marine is also present at the wedding. Michael seems to be uninterested in being a part of the family business. Vito is a powerful man, and is kind to all those who give him respect but is ruthless against those who do not. But when a powerful and treacherous rival wants to sell drugs and needs the Don's influence for the same, Vito refuses to do it. What follows is a clash between Vito's fading old values and the new ways which may cause Michael to do the thing he was most reluctant in doing and wage a mob war against all the other mafia families which could tear the Corleone family apart.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "The Godfather — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+        "caption": "The Godfather — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/AbgEQO2mneCSOc8CSnOMa8pBS8I.jpg",
+        "caption": "The Godfather — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/ejdD20cdHNFAYAN2DlqPToXKyzx.jpg",
+        "caption": "The Godfather — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/1yvBkSv4ZLS1GohlmMDmdpSgfYo.jpg",
+        "caption": "The Godfather — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -150,9 +180,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "Set within a year after the events of Batman Begins (2005), Batman, Lieutenant James Gordon, and new District Attorney Harvey Dent successfully begin to round up the criminals that plague Gotham City, until a mysterious and sadistic criminal mastermind known only as \"The Joker\" appears in Gotham, creating a new wave of chaos. Batman's struggle against The Joker becomes deeply personal, forcing him to \"confront everything he believes\" and improve his technology to stop him. A love triangle develops between Bruce Wayne, Dent, and Rachel Dawes.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg",
-        "caption": "The Dark Knight — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+        "caption": "The Dark Knight — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/9FE5eD92WfVCiivM9Pq9GVSrlWk.jpg",
+        "caption": "The Dark Knight — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/cfT29Im5VDvjE0RpyKOSdCKZal7.jpg",
+        "caption": "The Dark Knight — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/qYB7QqwT1NtTW9aCwtopGy80rmA.jpg",
+        "caption": "The Dark Knight — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -170,9 +215,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "The continuing saga of the Corleone crime family tells the story of a young Vito Corleone growing up in Sicily and in 1910s New York; and follows Michael Corleone in the 1950s as he attempts to expand the family business into Las Vegas, Hollywood and Cuba.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BMDIxMzBlZDktZjMxNy00ZGI4LTgxNDEtYWRlNzRjMjJmOGQ1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "The Godfather Part II — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/35RGDgySfINL9V2e6lkDECQ0hRa.jpg",
+        "caption": "The Godfather Part II — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/pGzqRKrYeK4LogoysNro0vG8d8N.jpg",
+        "caption": "The Godfather Part II — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/kGzFbGhp99zva6oZODW5atUtnqi.jpg",
+        "caption": "The Godfather Part II — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/fATmEcLwO3tTiisa8gYxhV3x4sS.jpg",
+        "caption": "The Godfather Part II — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -190,9 +250,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "The final confrontation between the forces of good and evil fighting for control of the future of Middle-earth. Frodo and Sam reach Mordor in their quest to destroy the One Ring, while Aragorn leads the forces of good against Sauron's evil army at the stone city of Minas Tirith.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BMTZkMjBjNWMtZGI5OC00MGU0LTk4ZTItODg2NWM3NTVmNWQ4XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "The Lord of the Rings: The Return of the King — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg",
+        "caption": "The Lord of the Rings: The Return of the King — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/ctiw6FZK4N36LmkjSklWEbuvlq9.jpg",
+        "caption": "The Lord of the Rings: The Return of the King — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/lZWdNk6BsDZrSsZ0unHAsTFfFc4.jpg",
+        "caption": "The Lord of the Rings: The Return of the King — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/75KNIheWdy7eLe4RWsbJmVjvJPU.jpg",
+        "caption": "The Lord of the Rings: The Return of the King — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -210,9 +285,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "The defense and the prosecution have rested, and the jury is filing into the jury room to decide if a young man is guilty or innocent of murdering his father. What begins as an open-and-shut case of murder soon becomes a detective story that presents a succession of clues creating doubt, and a mini-drama of each of the jurors' prejudices and preconceptions about the trial, the accused, AND each other. Based on the play, all of the action takes place on the stage of the jury room.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BYjE4NzdmOTYtYjc5Yi00YzBiLWEzNDEtNTgxZGQ2MWVkN2NiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "12 Angry Men — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/zhG3vKWyDRaZYoaww1UVAi29T9h.jpg",
+        "caption": "12 Angry Men — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/qqHQsStV6exghCM7zbObuYBiYxw.jpg",
+        "caption": "12 Angry Men — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/w4bTBXcqXc2TUyS5Fc4h67uWbPn.jpg",
+        "caption": "12 Angry Men — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/jtu5QaQ9JrbODy65Nlbeufadpsn.jpg",
+        "caption": "12 Angry Men — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -230,9 +320,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "An ancient Ring thought lost for centuries has been found, and through a strange twist of fate has been given to a small Hobbit named Frodo. When Gandalf discovers the Ring is in fact the One Ring of the Dark Lord Sauron, Frodo must make an epic quest to Mount Doom in order to destroy it. However, he does not go alone. He is joined by Gandalf, Legolas the elf, Gimli the Dwarf, Aragorn, Boromir, and his three Hobbit friends Merry, Pippin, and Samwise. Through mountains, snow, darkness, forests, rivers and plains, facing evil and danger at every corner the Fellowship of the Ring must go. Their quest to destroy the One Ring is the only hope for the end of the Dark Lords reign.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BNzIxMDQ2YTctNDY4MC00ZTRhLTk4ODQtMTVlOWY4NTdiYmMwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "The Lord of the Rings: The Fellowship of the Ring — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
+        "caption": "The Lord of the Rings: The Fellowship of the Ring — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/oiwc338EoBgS4sEI2ixAny4KQKg.jpg",
+        "caption": "The Lord of the Rings: The Fellowship of the Ring — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/z51Wzj94hvAIsWfknifKTqKJRwp.jpg",
+        "caption": "The Lord of the Rings: The Fellowship of the Ring — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/k6lw7hhaMDzJ170bfZfBbnipxcW.jpg",
+        "caption": "The Lord of the Rings: The Fellowship of the Ring — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -250,9 +355,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "Jules Winnfield (Samuel L. Jackson) and Vincent Vega (John Travolta) are two hitmen who are out to retrieve a suitcase stolen from their employer, mob boss Marsellus Wallace (Ving Rhames). Wallace has also asked Vincent to take his wife Mia (Uma Thurman) out a few days later when Wallace himself will be out of town. Butch Coolidge (Bruce Willis) is an aging boxer who is paid by Wallace to lose his fight. The lives of these seemingly unrelated people are woven together comprising of a series of funny, bizarre and uncalled-for incidents.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BYTViYTE3ZGQtNDBlMC00ZTAyLTkyODMtZGRiZDg0MjA2YThkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "Pulp Fiction — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg",
+        "caption": "Pulp Fiction — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/96hiUXEuYsu4tcnvlaY8tEMFM0m.jpg",
+        "caption": "Pulp Fiction — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg",
+        "caption": "Pulp Fiction — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/wZbnRMarWnO4DJRisOaK4QEg1tl.jpg",
+        "caption": "Pulp Fiction — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -270,9 +390,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "A nameless first-person narrator attends support groups in an attempt to subdue his emotional state and relieve his insomniac state. When he meets Marla, another fake attendee of support groups, his life seems to become a little more bearable. However, when he associates himself with Tyler he is dragged into an underground fight club and soap-making scheme. Together the two men spiral out of control and engage in competitive rivalry for love and power.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmEyYjBiMjI1Y2M5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "Fight Club — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/nu7FEmC4zBaZ7c3QYmVpDlZa2H0.jpg",
+        "caption": "Fight Club — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/c6OLXfKAk5BKeR6broC8pYiCquX.jpg",
+        "caption": "Fight Club — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/5TiwfWEaPSwD20uwXjCTUqpQX70.jpg",
+        "caption": "Fight Club — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/mCICnh7QBH0gzYaTQChBDDVIKdm.jpg",
+        "caption": "Fight Club — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -290,9 +425,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "Maximus is a powerful Roman general, loved by the people and the aging Emperor, Marcus Aurelius. Before his death, the Emperor chooses Maximus to be his heir over his own son, Commodus, and a power struggle leaves Maximus and his family condemned to death. The powerful general is captured and put into the Gladiator games until he dies. The only desire that fuels him now is the chance to rise to the top so that he will be able to look into the eyes of the man who will feel his revenge.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BYWQ4YmNjYjEtOWE1Zi00Y2U4LWI4NTAtMTU0MjkxNWQ1ZmJiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "Gladiator — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/R1ieKOdGHYL7BRpl0iRgNV1uXw.jpg",
+        "caption": "Gladiator — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/Ar7QuJ7sJEiC0oP3I8fKBKIQD9u.jpg",
+        "caption": "Gladiator — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/hND7xAaxxBgaIspp9iMsaEXOSTz.jpg",
+        "caption": "Gladiator — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/ouJWDKwqtPj8gzeJoO7mHJ53AxZ.jpg",
+        "caption": "Gladiator — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -310,9 +460,24 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "Miles Morales returns for the next chapter of the Oscar®-winning Spider-Verse saga, an epic adventure that will transport Brooklyn's full-time, friendly neighborhood Spider-Man across the Multiverse to join forces with Gwen Stacy and a new team of Spider-People to face off with a villain more powerful than anything they have ever encountered.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BNThiZjA3MjItZGY5Ni00ZmJhLWEwN2EtOTBlYTA4Y2E0M2ZmXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "Spider-Man: Across the Spider-Verse — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+        "caption": "Spider-Man: Across the Spider-Verse — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/kVd3a9YeLGkoeR50jGEXM6EqseS.jpg",
+        "caption": "Spider-Man: Across the Spider-Verse — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/9xfDWXAUbFXQK585JvByT5pEAhe.jpg",
+        "caption": "Spider-Man: Across the Spider-Verse — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/igFOJA8TY1K7l8KwSq75yXK8N6L.jpg",
+        "caption": "Spider-Man: Across the Spider-Verse — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   },
@@ -330,9 +495,59 @@ export const INITIAL_FILMS: CinemaFilm[] = [
     "synopsis": "Nineteen year old Andrew Niemann wants to be the greatest jazz drummer in the world, in a league with Buddy Rich. This goal is despite not coming from a pedigree of greatest, musical or otherwise, with Jim, his high school teacher father, being a failed writer. Andrew is starting his first year at Shaffer Conservatory of Music, the best music school in the United States. At Shaffer, being the best means being accepted to study under Terence Fletcher and being asked to play in his studio band, which represents the school at jazz competitions. Based on their less than positive first meeting, Andrew is surprised that Fletcher asks him to join the band, albeit in the alternate drummer position which he is more than happy to do initially. Andrew quickly learns that Fletcher operates on fear and intimidation, never settling for what he considers less than the best each and every time. Being the best in Fletcher's mind does not only entail playing well, but knowing that you're playing well and if not what you're doing wrong. His modus operandi creates an atmosphere of fear and of every man or woman for him/herself within the band. Regardless, Andrew works hard to be the best. He has to figure out his life priorities and what he is willing to sacrifice to be the best. The other question becomes how much emotional abuse he will endure by Fletcher to reach that greatness, which he may believe he can only achieve with the avenues opened up by Fletcher.",
     "stills": [
       {
-        "url": "https://m.media-amazon.com/images/M/MV5BMDFjOWFkYzktYzhhMC00NmYyLTkwY2EtYjViMDhmNzg0OGFkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "caption": "Whiplash — Official Archival Exhibition Artwork",
+        "url": "https://image.tmdb.org/t/p/w780/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+        "caption": "Whiplash — Theatrical Key Art",
         "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/fRGxZuo7jJUWQsVg9PREb98Aclp.jpg",
+        "caption": "Whiplash — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/wbQa0EnWUyRzQ5d1pHLNRlmsCUP.jpg",
+        "caption": "Whiplash — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/wOBIYg8cJUNumlBGyUk47Sw4olf.jpg",
+        "caption": "Whiplash — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "slug": "heart-of-the-beast",
+    "title": "Heart of the Beast",
+    "image": "https://m.media-amazon.com/images/M/MV5BMDVlMTRhMjgtMjdmZi00NjJhLWExMmYtODExNWJkZGZjNjdhXkEyXkFqcGc@._V1_FMjpg_UX1200_.jpg",
+    "category": "Action, Adventure, Drama",
+    "imdbRating": "7.5",
+    "director": "David Ayer",
+    "year": 2026,
+    "duration": "1h 41m",
+    "tagline": "Starring Brad Pitt, J.K. Simmons. Directed by David Ayer.",
+    "synopsis": "After a harrowing plane crash, a Special Forces officer and his combat dog find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements.",
+    "stills": [
+      {
+        "url": "https://image.tmdb.org/t/p/w780/1ApfSA8JTqeha3GTFEY8syV4auq.jpg",
+        "caption": "Heart of the Beast — Theatrical Key Art",
+        "aspectRatio": "2:3 Theatrical"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/bicMU6xVD5deVyKP2azpyx7xkmH.jpg",
+        "caption": "Heart of the Beast — Archival Frame Capture I",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/nATJytbF2sB8QP4nKQNBUIdZswC.jpg",
+        "caption": "Heart of the Beast — Archival Frame Capture II",
+        "aspectRatio": "16:9 Vista"
+      },
+      {
+        "url": "https://image.tmdb.org/t/p/w780/n4PJa4xVo4SjIsBvTA0yGMKjTBh.jpg",
+        "caption": "Heart of the Beast — Exhibition Master Print",
+        "aspectRatio": "2:3 Archival"
       }
     ]
   }

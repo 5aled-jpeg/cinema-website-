@@ -1152,16 +1152,9 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
               <h3 className="text-lg sm:text-xl font-serif font-semibold text-[var(--color-text-primary)] mb-1.5">
                 No Theatrical Screenings
               </h3>
-              <p className="text-xs sm:text-sm font-sans text-[var(--color-text-secondary)] max-w-sm mb-4">
-                No screenings scheduled for this date. Scrub another date on the timeline or view all films.
+              <p className="text-xs sm:text-sm font-sans text-[var(--color-text-secondary)] max-w-sm">
+                No screenings scheduled for this date. Scrub another date on the timeline.
               </p>
-              <button
-                type="button"
-                onClick={() => onSelectDate?.(null)}
-                className="px-4 py-2 rounded-full text-xs font-mono bg-amber-500 text-black font-semibold hover:bg-amber-400 transition-all cursor-pointer shadow-lg shadow-amber-500/20 active:scale-95"
-              >
-                Reset to All Dates
-              </button>
             </div>
           )}
 
@@ -1220,21 +1213,22 @@ export const WorksWheel = React.forwardRef<WorksWheelHandle, WorksWheelProps>(
                 }}
                 className="relative z-10 flex flex-col w-[92%] sm:w-[90%] lg:w-[920px] max-h-[88vh] mx-auto overflow-hidden rounded-[24px] border border-black/10 dark:border-white/10 bg-[var(--color-bg-base)] text-[var(--color-text-primary)] shadow-2xl"
               >
-                {/* Top Close Button with Esc Hint */}
-                <div className="absolute right-5 top-5 z-30 flex items-center gap-2">
-                  <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[11px] font-medium border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400">
+                {/* Unified Apple HIG / Linear Style Close Button */}
+                <button
+                  type="button"
+                  onClick={() => setActiveModalItem(null)}
+                  data-cursor-interactive="true"
+                  data-cursor-label="Close"
+                  aria-label="Close modal"
+                  className="absolute right-4 top-4 sm:right-6 sm:top-6 z-40 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/15 dark:border-white/15 bg-white/85 dark:bg-neutral-900/85 backdrop-blur-xl text-neutral-800 dark:text-neutral-200 hover:bg-white dark:hover:bg-neutral-800 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-lg group"
+                >
+                  <span className="font-mono text-[11px] font-medium text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors">
                     ESC
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setActiveModalItem(null)}
-                    data-cursor-interactive="true"
-                    data-cursor-label="Close"
-                    className="size-8.5 rounded-full border border-black/10 dark:border-white/15 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl text-neutral-800 dark:text-neutral-200 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer font-bold"
-                  >
+                  <span className="size-4.5 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-neutral-700 dark:text-neutral-200">
                     ✕
-                  </button>
-                </div>
+                  </span>
+                </button>
 
                 {/* Scrollable Container */}
                 <div

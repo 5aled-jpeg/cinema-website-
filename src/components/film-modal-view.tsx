@@ -23,7 +23,7 @@ export function FilmModalView({ film }: FilmModalViewProps) {
   return (
     <div className="w-full flex flex-col">
       {/* Refined Navigation Tab Bar (Apple HIG Segmented Control / Linear Style) */}
-      <div className="px-5 sm:px-8 py-3.5 border-b border-[var(--color-border)] sticky top-0 z-20 bg-[var(--color-bg-base)]/95 backdrop-blur-xl flex items-center justify-between gap-4 transition-colors">
+      <div className="px-5 sm:px-8 pr-24 sm:pr-28 py-3.5 border-b border-[var(--color-border)] sticky top-0 z-20 bg-[var(--color-bg-base)]/95 backdrop-blur-xl flex items-center justify-between gap-4 transition-colors">
         <div className="inline-flex p-1 rounded-xl bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 shadow-xs">
           <button
             type="button"
@@ -62,20 +62,6 @@ export function FilmModalView({ film }: FilmModalViewProps) {
             )}
           </button>
         </div>
-
-        {/* Quick jump to screenings when in overview mode */}
-        {activeTab === 'overview' && screeningsCount > 0 && (
-          <button
-            type="button"
-            onClick={() => setActiveTab('screenings')}
-            data-cursor-interactive="true"
-            data-cursor-label="Showtimes"
-            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-semibold text-amber-500 hover:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 transition-all cursor-pointer"
-          >
-            <span>View Showtimes</span>
-            <ArrowRight className="size-3" />
-          </button>
-        )}
       </div>
 
       {/* Tab Contents */}
@@ -119,65 +105,149 @@ export function FilmModalView({ film }: FilmModalViewProps) {
                 )}
               </div>
 
-              {/* Stills Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pt-2">
-                {film.stills && film.stills.length > 0 ? (
-                  film.stills.map((still, idx) => (
-                    <div
-                      key={idx}
-                      className="group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5 transition-all hover:border-amber-500/40 hover:shadow-lg"
-                    >
-                      <div
-                        className={cn(
-                          "overflow-hidden bg-neutral-900 flex items-center justify-center",
-                          still.aspectRatio?.includes("2:3") || still.aspectRatio?.includes("Theatrical")
-                            ? "aspect-[2/3] max-w-[280px] mx-auto"
-                            : "aspect-[16/10]"
-                        )}
-                      >
-                        <img
-                          src={still.url}
-                          alt={still.caption || `${film.title} Still ${idx + 1}`}
-                          className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
-                      {still.caption && (
-                        <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-bg-base)] flex items-center justify-between gap-2">
-                          <span className="text-xs text-[var(--color-text-secondary)] font-medium line-clamp-1">
-                            {still.caption}
-                          </span>
-                          {still.aspectRatio && (
-                            <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[var(--color-text-tertiary)] shrink-0">
-                              {still.aspectRatio}
+              {/* Asymmetric Bento Stills Gallery (Matching Editorial 3-Column Visual Layout) */}
+              {(() => {
+                const stills = film.stills && film.stills.length > 0
+                  ? film.stills
+                  : [{ url: film.image, caption: `Theatrical Key Visual · ${film.title}`, aspectRatio: "2:3 Theatrical" }];
+
+                if (stills.length >= 4) {
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 pt-2">
+                      {/* Box 1 (Left Column): Theatrical Key Art / Tall Poster */}
+                      <div className="lg:col-span-4 flex flex-col group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5 transition-all hover:border-amber-500/40 hover:shadow-xl">
+                        <div className="relative w-full aspect-[2/3] sm:h-full overflow-hidden bg-neutral-900 flex items-center justify-center">
+                          <img
+                            src={stills[0].url}
+                            alt={stills[0].caption || `${film.title} Poster`}
+                            className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        </div>
+                        {stills[0].caption && (
+                          <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-bg-base)] flex items-center justify-between gap-2 shrink-0">
+                            <span className="text-xs text-[var(--color-text-secondary)] font-medium line-clamp-1">
+                              {stills[0].caption}
                             </span>
+                            <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[var(--color-text-tertiary)] shrink-0">
+                              {stills[0].aspectRatio || "2:3 THEATRICAL"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Box 2 & 3 (Center Column): Two Stacked Widescreen Stills */}
+                      <div className="lg:col-span-4 flex flex-col gap-4 justify-between">
+                        {/* Center Top Still */}
+                        <div className="flex-1 flex flex-col group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5 transition-all hover:border-amber-500/40 hover:shadow-xl">
+                          <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-900 flex items-center justify-center">
+                            <img
+                              src={stills[1].url}
+                              alt={stills[1].caption || `${film.title} Frame 1`}
+                              className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                              loading="lazy"
+                            />
+                          </div>
+                          {stills[1].caption && (
+                            <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-bg-base)] flex items-center justify-between gap-2 shrink-0">
+                              <span className="text-xs text-[var(--color-text-secondary)] font-medium line-clamp-1">
+                                {stills[1].caption}
+                              </span>
+                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[var(--color-text-tertiary)] shrink-0">
+                                {stills[1].aspectRatio || "16:9 VISTA"}
+                              </span>
+                            </div>
                           )}
                         </div>
-                      )}
+
+                        {/* Center Bottom Still */}
+                        <div className="flex-1 flex flex-col group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5 transition-all hover:border-amber-500/40 hover:shadow-xl">
+                          <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-900 flex items-center justify-center">
+                            <img
+                              src={stills[2].url}
+                              alt={stills[2].caption || `${film.title} Frame 2`}
+                              className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                              loading="lazy"
+                            />
+                          </div>
+                          {stills[2].caption && (
+                            <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-bg-base)] flex items-center justify-between gap-2 shrink-0">
+                              <span className="text-xs text-[var(--color-text-secondary)] font-medium line-clamp-1">
+                                {stills[2].caption}
+                              </span>
+                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[var(--color-text-tertiary)] shrink-0">
+                                {stills[2].aspectRatio || "16:9 VISTA"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Box 4 (Right Column): Tall Vertical Master Print */}
+                      <div className="md:col-span-2 lg:col-span-4 flex flex-col group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5 transition-all hover:border-amber-500/40 hover:shadow-xl">
+                        <div className="relative w-full aspect-[2/3] sm:h-full overflow-hidden bg-neutral-900 flex items-center justify-center">
+                          <img
+                            src={stills[3].url}
+                            alt={stills[3].caption || `${film.title} Print 3`}
+                            className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        </div>
+                        {stills[3].caption && (
+                          <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-bg-base)] flex items-center justify-between gap-2 shrink-0">
+                            <span className="text-xs text-[var(--color-text-secondary)] font-medium line-clamp-1">
+                              {stills[3].caption}
+                            </span>
+                            <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[var(--color-text-tertiary)] shrink-0">
+                              {stills[3].aspectRatio || "2:3 ARCHIVAL"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  ))
-                ) : (
-                  /* Fallback to main film artwork still */
-                  <div className="col-span-full group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5">
-                    <div className="aspect-[2/3] max-h-[440px] mx-auto overflow-hidden bg-neutral-900 flex items-center justify-center">
-                      <img
-                        src={film.image}
-                        alt={film.title}
-                        className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-bg-base)] flex items-center justify-between">
-                      <span className="text-xs text-[var(--color-text-secondary)] font-medium">
-                        Theatrical Key Visual · {film.title}
-                      </span>
-                      <span className="text-[10px] font-mono text-[var(--color-text-tertiary)]">
-                        Archival Master
-                      </span>
-                    </div>
+                  );
+                }
+
+                // Fallback for fewer than 4 stills
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pt-2">
+                    {stills.map((still, idx) => (
+                      <div
+                        key={idx}
+                        className="group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5 transition-all hover:border-amber-500/40 hover:shadow-lg"
+                      >
+                        <div
+                          className={cn(
+                            "overflow-hidden bg-neutral-900 flex items-center justify-center",
+                            still.aspectRatio?.includes("2:3") || still.aspectRatio?.includes("Theatrical")
+                              ? "aspect-[2/3] max-w-[280px] mx-auto"
+                              : "aspect-[16/10]"
+                          )}
+                        >
+                          <img
+                            src={still.url}
+                            alt={still.caption || `${film.title} Still ${idx + 1}`}
+                            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        </div>
+                        {still.caption && (
+                          <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-bg-base)] flex items-center justify-between gap-2">
+                            <span className="text-xs text-[var(--color-text-secondary)] font-medium line-clamp-1">
+                              {still.caption}
+                            </span>
+                            {still.aspectRatio && (
+                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[var(--color-text-tertiary)] shrink-0">
+                                {still.aspectRatio}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                )}
-              </div>
+                );
+              })()}
             </div>
 
             {/* Quick Next Screening Invitation Bar */}

@@ -315,17 +315,8 @@ export const Component = ({ onExplore, active: activeProp = true }: ExperienceHe
         ref={revealRef}
         className="relative z-10 w-full flex flex-col justify-between p-8 sm:p-12 md:p-16 lg:p-20 h-full"
       >
-        {/* Top Header Badge */}
-        <div className="flex items-center gap-3">
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-black/10 dark:border-white/15 bg-black/[0.04] dark:bg-white/[0.08] backdrop-blur-xl shadow-xs transition-colors duration-300">
-            <div className="relative size-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)]">
-              <div className="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-35" />
-            </div>
-            <span className="font-mono text-[11px] font-semibold text-neutral-800 dark:text-neutral-200 tracking-[0.18em] uppercase transition-colors duration-300">
-              CINEMA ARCHIVE
-            </span>
-          </div>
-        </div>
+        {/* Top Header Spacing */}
+        <div className="h-6" />
 
         {/* Center Display Typography & Cinema Narrative */}
         <div className="max-w-5xl my-auto py-8">

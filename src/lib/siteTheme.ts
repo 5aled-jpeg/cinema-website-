@@ -3,10 +3,10 @@ export const SITE_THEME_EVENT = 'site-theme-change';
 export type SiteTheme = 'light' | 'dark';
 
 export function getSiteTheme(): SiteTheme {
-  if (typeof window === 'undefined') return 'light';
+  if (typeof window === 'undefined') return 'dark';
   const saved = localStorage.getItem('theme') as SiteTheme | null;
   if (saved === 'dark' || saved === 'light') return saved;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return 'dark';
 }
 
 export function setSiteTheme(theme: SiteTheme) {
