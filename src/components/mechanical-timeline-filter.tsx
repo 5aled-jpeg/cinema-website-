@@ -263,7 +263,8 @@ export function MechanicalTimelineFilter({
     reelRef.current.querySelectorAll('.tl-reel-ghost').forEach((g) => g.remove());
 
     const ghost = document.createElement('span');
-    ghost.className = 'tl-reel-ghost absolute inset-0';
+    ghost.className =
+      'tl-reel-ghost absolute inset-0 flex items-center justify-center leading-none text-neutral-900 dark:text-white font-mono text-sm sm:text-base font-bold';
     ghost.textContent = oldDigit;
     reelRef.current.appendChild(ghost);
 
@@ -540,22 +541,13 @@ export function MechanicalTimelineFilter({
       onPointerCancel={handlePointerUp}
       onWheel={handleWheel}
       className={cn(
-        'relative w-[320px] max-w-[92vw] h-[86px] select-none cursor-grab active:cursor-grabbing flex flex-col items-center justify-end touch-none',
+        'relative w-[320px] max-w-[92vw] h-[72px] select-none cursor-grab active:cursor-grabbing flex flex-col items-center justify-end touch-none',
         className
       )}
     >
-      {/* Subtle Ambient Radial Backing for contrast against 3D drum cards */}
-      <div
-        className="pointer-events-none absolute inset-x-2 bottom-0 top-1 -z-10 rounded-t-full opacity-80"
-        style={{
-          background:
-            'radial-gradient(ellipse at 50% 70%, rgba(6,6,8,0.92) 0%, rgba(6,6,8,0.5) 60%, transparent 85%)',
-        }}
-      />
-
       {/* 3D Cylindrical Odometer Rolling Date (Anchored in Upper Center) */}
-      <div className="absolute top-0 inset-x-0 flex flex-col items-center justify-center pointer-events-none z-30">
-        <div className="flex items-center justify-center text-white tracking-tight drop-shadow-md select-none">
+      <div className="absolute top-0 inset-x-0 flex items-center justify-center pointer-events-none z-30">
+        <div className="flex items-center justify-center text-neutral-900 dark:text-white tracking-tight drop-shadow-sm select-none">
           <span
             ref={prefixRef}
             className="inline-flex items-center text-amber-500 font-mono text-[11px] sm:text-xs uppercase mr-1 tracking-wider font-semibold"
@@ -568,25 +560,18 @@ export function MechanicalTimelineFilter({
           >
             <span
               ref={digitRef}
-              className="absolute inset-0 flex items-center justify-center leading-none origin-center [backface-visibility:hidden] will-change-transform text-white font-mono text-sm sm:text-base font-bold"
+              className="absolute inset-0 flex items-center justify-center leading-none origin-center [backface-visibility:hidden] will-change-transform text-neutral-900 dark:text-white font-mono text-sm sm:text-base font-bold"
             >
               FILMS
             </span>
           </span>
         </div>
-
-        {/* Selected Status / Screening Count */}
-        <span className="text-[8.5px] font-mono tracking-[0.2em] uppercase text-neutral-400 mt-0.5">
-          {activeDateItem?.count !== undefined && activeDateItem.count > 0
-            ? `${activeDateItem.count} Screenings`
-            : 'All Curated Films'}
-        </span>
       </div>
 
       {/* SVG Arched Rotary Timeline Dial (Pure mechanical tick marks, zero clutter) */}
       <svg
         viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-        className="w-full h-full overflow-visible pointer-events-none z-10"
+        className="w-full h-full overflow-visible pointer-events-none z-10 text-neutral-900 dark:text-white"
       >
         <defs>
           <filter id="escapement-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -602,12 +587,13 @@ export function MechanicalTimelineFilter({
         <path
           d={`M ${CX - 130} 66 A ${R} ${R} 0 0 1 ${CX + 130} 66`}
           fill="none"
-          stroke="rgba(255, 255, 255, 0.08)"
+          stroke="currentColor"
+          className="text-neutral-900/10 dark:text-white/10"
           strokeWidth="1"
           strokeDasharray="2 3"
         />
 
-        {/* Rotating Radial Ticks */}
+        {/* Rotating Radial Ticks: Black on light mode, White on dark mode, Amber when centered */}
         {visibleTicks.map((t) => (
           <line
             key={`tick-${t.j}`}
@@ -615,19 +601,20 @@ export function MechanicalTimelineFilter({
             y1={t.y1}
             x2={t.x2}
             y2={t.y2}
-            stroke={
+            stroke="currentColor"
+            className={
               t.isCenter
-                ? '#f59e0b'
+                ? 'text-amber-500'
                 : t.isDate
-                ? 'rgba(255, 255, 255, 0.9)'
-                : 'rgba(255, 255, 255, 0.22)'
+                ? 'text-neutral-900 dark:text-white'
+                : 'text-neutral-900/25 dark:text-white/20'
             }
             strokeWidth={t.isCenter ? 2.2 : t.isDate ? 1.6 : 1}
             strokeLinecap="round"
           />
         ))}
 
-        {/* Clean Day Numbers on Major Ticks (Zero duplicate text, crisp tachymeter numbers) */}
+        {/* Clean Day Numbers on Major Ticks: Dark on light mode, White on dark mode, Amber when centered */}
         {visibleDates.map((d) => (
           <text
             key={`date-lbl-${d.dateIdx}`}
@@ -636,13 +623,16 @@ export function MechanicalTimelineFilter({
             textAnchor="middle"
             dominantBaseline="central"
             transform={`rotate(${d.angleDeg * 0.75}, ${d.lx}, ${d.ly})`}
-            fill={d.isCenter ? '#f59e0b' : 'rgba(255, 255, 255, 0.65)'}
             fontSize="8"
             fontFamily="ui-monospace, SFMono-Regular, monospace"
-            fontWeight={d.isCenter ? 'bold' : 'normal'}
             letterSpacing="0.04em"
             onClick={(e) => handleTickClick(d.dateIdx, e)}
-            className="pointer-events-auto cursor-pointer hover:fill-amber-400 select-none transition-colors"
+            className={cn(
+              'pointer-events-auto cursor-pointer select-none transition-colors',
+              d.isCenter
+                ? 'fill-amber-500 font-bold'
+                : 'fill-neutral-800 dark:fill-neutral-200 hover:fill-amber-500'
+            )}
           >
             {d.item.rimLabel}
           </text>
