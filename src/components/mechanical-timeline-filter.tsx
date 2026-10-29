@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Volume2, VolumeX, Sparkles, Calendar } from 'lucide-react';
+import { useWebHaptics } from 'web-haptics/react';
 import { cn } from '@/lib/utils';
 
 export interface TimelineDateItem {
@@ -52,6 +53,9 @@ export function MechanicalTimelineFilter({
   const [isDialActive, setIsDialActive] = useState<boolean>(false);
   const [hoverPositionPct, setHoverPositionPct] = useState<number>(0);
   const [cursorPositionPct, setCursorPositionPct] = useState<number>(100);
+
+  // Web Haptics for Mobile & Vibrating Devices (iOS / Android)
+  const { trigger } = useWebHaptics();
 
   // Audio Context Ref
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -278,7 +282,11 @@ export function MechanicalTimelineFilter({
       if (tickIdx !== lastHoveredIdxRef.current) {
         const dir = tickIdx > lastHoveredIdxRef.current ? 1 : -1;
         lastHoveredIdxRef.current = tickIdx;
-        playTick('fine');
+        const isMajor = tickIdx % majorInterval === 0;
+        playTick(isMajor ? 'line' : 'fine');
+        try {
+          trigger(isMajor ? 'medium' : 'selection');
+        } catch {}
 
         // Map tick to date item
         const itemIdx = Math.round((tickIdx / (totalTicks - 1)) * (timelineItems.length - 1));
@@ -294,7 +302,7 @@ export function MechanicalTimelineFilter({
         setCursorPositionPct(pct);
       }
     },
-    [totalTicks, timelineItems, playTick, setDateWithOdometer, onSelectDate]
+    [totalTicks, timelineItems, playTick, trigger, setDateWithOdometer, onSelectDate]
   );
 
   // Sync cursor position whenever selectedDate prop changes externally
@@ -319,6 +327,9 @@ export function MechanicalTimelineFilter({
     if (e.button !== 0) return;
     setIsScrubbing(true);
     playTick('line');
+    try {
+      trigger('light');
+    } catch {}
     updateFromPointer(e.clientX, true);
     try {
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -337,6 +348,9 @@ export function MechanicalTimelineFilter({
     if (!isScrubbing) return;
     setIsScrubbing(false);
     playTick('close');
+    try {
+      trigger('rigid');
+    } catch {}
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
@@ -372,6 +386,9 @@ export function MechanicalTimelineFilter({
       const item = timelineItems[nextIdx];
       const dateParam = item.id === 'all' ? null : item.id;
       playTick(delta > 0 ? 'travel' : 'fine');
+      try {
+        trigger('selection');
+      } catch {}
       onSelectDate(dateParam);
     }
   };
